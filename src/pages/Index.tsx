@@ -90,18 +90,18 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="absolute top-0 w-full py-8 z-50">
+      <header className="absolute top-0 w-full py-4 md:py-8 z-50">
         <div className="container flex justify-between items-center">
-          <Link to="/" className="font-heading text-3xl font-bold tracking-wide">
+          <Link to="/" className="font-heading text-2xl md:text-3xl font-bold tracking-wide">
             AETHER<span className="text-primary">.</span>
           </Link>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 md:gap-4">
             <button
               onClick={() => navigate("/order")}
               className="relative p-2 rounded-xl border border-border bg-black/30 text-muted-foreground hover:text-primary hover:border-primary/50 transition-colors"
               aria-label="Cart"
             >
-              <ShoppingCart size={20} />
+              <ShoppingCart size={18} />
               {totalItems > 0 && (
                 <span className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center">
                   {totalItems}
@@ -110,7 +110,7 @@ const Index = () => {
             </button>
             <Link
               to="/order"
-              className="inline-block px-8 py-3 text-lg font-semibold rounded-full bg-primary text-primary-foreground glow-shadow transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_0_30px_hsl(73_100%_50%/0.4)]"
+              className="inline-block px-5 py-2 text-sm md:px-8 md:py-3 md:text-lg font-semibold rounded-full bg-primary text-primary-foreground glow-shadow transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_0_30px_hsl(73_100%_50%/0.4)]"
             >
               Buy Now
             </Link>
