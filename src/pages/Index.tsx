@@ -17,20 +17,6 @@ const features = [
 ];
 
 const Index = () => {
-  const imgRef = useRef<HTMLImageElement>(null);
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!imgRef.current) return;
-    const xAxis = (window.innerWidth / 2 - e.pageX) / 25;
-    const yAxis = (window.innerHeight / 2 - e.pageY) / 25;
-    imgRef.current.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
-  };
-
-  const handleMouseLeave = () => {
-    if (!imgRef.current) return;
-    imgRef.current.style.transform = `rotateY(0deg) rotateX(0deg)`;
-  };
-
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -49,11 +35,7 @@ const Index = () => {
       </header>
 
       {/* Hero */}
-      <section
-        className="min-h-screen flex items-center relative overflow-hidden pt-20"
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
-      >
+      <section className="min-h-screen flex items-center relative overflow-hidden pt-20">
         {/* Background glow */}
         <div className="absolute -top-[20%] -right-[10%] w-[600px] h-[600px] bg-[radial-gradient(circle,hsl(var(--secondary))_0%,transparent_70%)] opacity-50 blur-[80px] -z-10" />
 
