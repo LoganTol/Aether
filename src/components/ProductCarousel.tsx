@@ -1,0 +1,66 @@
+import { useState, useEffect, useCallback } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+
+interface ProductCarouselProps {
+  images: { src: string; alt: string }[];
+}
+
+const ProductCarousel = ({ images }: ProductCarouselProps) => {
+  const [current, setCurrent] = useState(0);
+
+  const next = useCallback(() => setCurrent((c) => (c + 1) % images.length), [images.length]);
+  const prev = useCallback(() => setCurrent((c) => (c - 1 + images.length) % images.length), [images.length]);
+
+  useEffect(() => {
+    const timer = setInterval(next, 4000);
+    return () => clearInterval(timer);
+  }, [next]);
+
+  return (
+    <div className="relative w-full max-w-[600px] mx-auto">
+      <div className="overflow-hidden rounded-2xl aspect-square bg-foreground/5">
+        {images.map((img, i) => (
+          <img
+            key={i}
+            src={img.src}
+            alt={img.alt}
+            width={600}
+            height={600}
+            className={`absolute inset-0 w-full h-full object-contain transition-all duration-500 ${
+              i === current ? "opacity-100 scale-100" : "opacity-0 scale-95"
+            }`}
+          />
+        ))}
+      </div>
+
+      {/* Controls */}
+      <button
+        onClick={prev}
+        className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-background/60 backdrop-blur flex items-center justify-center border border-border transition-colors hover:bg-primary hover:text-primary-foreground"
+      >
+        <ChevronLeft className="w-5 h-5" />
+      </button>
+      <button
+        onClick={next}
+        className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-background/60 backdrop-blur flex items-center justify-center border border-border transition-colors hover:bg-primary hover:text-primary-foreground"
+      >
+        <ChevronRight className="w-5 h-5" />
+      </button>
+
+      {/* Dots */}
+      <div className="flex justify-center gap-2 mt-4">
+        {images.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => setCurrent(i)}
+            className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
+              i === current ? "bg-primary w-6" : "bg-muted-foreground/40"
+            }`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default ProductCarousel;
