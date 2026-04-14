@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
-import productImg from "@/assets/product.png";
+import productImg from "@/assets/product-summary.jpg";
 
 const Order = () => {
   const [status, setStatus] = useState<"idle" | "processing" | "success">("idle");
@@ -17,7 +17,7 @@ const Order = () => {
     }, 2000);
   };
 
-  const btnText = status === "processing" ? "Processing..." : status === "success" ? "✓ Order Confirmed!" : "Complete Order • $14.99";
+  const btnText = status === "processing" ? "Processing..." : status === "success" ? "✓ Order Confirmed!" : "Complete Order • $17.98";
 
   return (
     <div className="min-h-screen bg-background">
@@ -127,13 +127,13 @@ const Order = () => {
               <span>Subtotal</span><span>$14.99</span>
             </div>
             <div className="flex justify-between py-4 border-b border-dashed border-border">
-              <span>Shipping (Express)</span><span>Free</span>
+              <span>Shipping (Express)</span><span>$2.99</span>
             </div>
             <div className="flex justify-between py-4 border-b border-dashed border-border">
               <span>Taxes</span><span className="text-muted-foreground">Calculated at checkout</span>
             </div>
             <div className="flex justify-between py-4 mt-4 text-2xl font-bold text-primary">
-              <span>Total</span><span>$14.99</span>
+              <span>Total</span><span>$17.98</span>
             </div>
             <p className="text-muted-foreground text-sm text-center mt-6">
               🔒 Secure checkout · 256-bit SSL encryption
