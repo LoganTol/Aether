@@ -161,7 +161,7 @@ const Order = () => {
             </button>
 
             <p className="text-muted-foreground text-sm text-center mt-6">
-              🔒 Secure checkout · 256-bit SSL encryption
+              🔒 Demo checkout · No real payment data is collected
             </p>
           </div>
         </div>
