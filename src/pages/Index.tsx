@@ -1,6 +1,14 @@
 import { Link } from "react-router-dom";
-import productImg from "@/assets/product.png";
-import { useRef } from "react";
+import product1 from "@/assets/product-1.jpg";
+import product2 from "@/assets/product-2.jpg";
+import product3 from "@/assets/product-3.jpg";
+import ProductCarousel from "@/components/ProductCarousel";
+
+const productImages = [
+  { src: product1, alt: "Solo Tennis Trainer - Overview" },
+  { src: product2, alt: "Solo Tennis Trainer - Features Detail" },
+  { src: product3, alt: "Solo Tennis Trainer - How To Use" },
+];
 
 const features = [
   { icon: "🌊", title: "Stable Base", desc: "Fill the robust PE material base with water or sand. Anti-slip strips keep it firmly in place during intense practice." },
