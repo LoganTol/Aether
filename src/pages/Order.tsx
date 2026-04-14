@@ -2,26 +2,17 @@ import { Link } from "react-router-dom";
 import { useState } from "react";
 import { Home } from "lucide-react";
 import productImg from "@/assets/product-summary.jpg";
+import { StripeEmbeddedCheckout } from "@/components/StripeEmbeddedCheckout";
+import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 
 const Order = () => {
-  const [status, setStatus] = useState<"idle" | "processing" | "success">("idle");
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setStatus("processing");
-    setTimeout(() => {
-      setStatus("success");
-      setTimeout(() => {
-        alert("Thank you for your order! This was a demo submission.");
-        setStatus("idle");
-      }, 1500);
-    }, 2000);
-  };
-
-  const btnText = status === "processing" ? "Processing..." : status === "success" ? "✓ Order Confirmed!" : "Complete Order • $17.98";
+  const [showCheckout, setShowCheckout] = useState(false);
+  const [email, setEmail] = useState("");
 
   return (
     <div className="min-h-screen bg-background relative">
+      <PaymentTestModeBanner />
+
       {/* Subtle background glow */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[radial-gradient(circle,hsl(var(--primary)/0.06)_0%,transparent_70%)] blur-[60px] -z-10" />
       <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[radial-gradient(circle,hsl(var(--secondary)/0.15)_0%,transparent_70%)] blur-[60px] -z-10" />
@@ -40,83 +31,62 @@ const Order = () => {
       {/* Checkout */}
       <section className="min-h-screen flex items-center justify-center px-8 pb-16">
         <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-12 max-w-[1100px] w-full">
-          {/* Form */}
+          {/* Left side - Form or Stripe Checkout */}
           <div className="glass-card p-12 soft-shadow">
-            <div className="mb-8 border-b border-border pb-4">
-              <h2 className="text-3xl font-bold">Secure Checkout</h2>
-              <p className="text-muted-foreground text-sm mt-1">Complete your purchase below</p>
-            </div>
+            {!showCheckout ? (
+              <>
+                <div className="mb-8 border-b border-border pb-4">
+                  <h2 className="text-3xl font-bold">Checkout</h2>
+                  <p className="text-muted-foreground text-sm mt-1">Enter your email to continue to payment</p>
+                </div>
 
-            <form id="checkout-form" onSubmit={handleSubmit}>
-              <h3 className="text-xl font-bold flex items-center gap-2">
-                <span className="w-6 h-6 rounded-full bg-primary/20 border border-primary/30 text-primary text-xs flex items-center justify-center font-bold">1</span>
-                Contact Information
-              </h3>
-              <div className="mt-4 mb-6">
-                <label className="block mb-2 text-sm font-semibold text-muted-foreground">Email Address</label>
-                <input type="email" required placeholder="player@example.com" className="w-full bg-black/30 border border-border rounded-xl px-5 py-4 text-foreground transition-all focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" />
-              </div>
+                <form onSubmit={(e) => { e.preventDefault(); setShowCheckout(true); }}>
+                  <h3 className="text-xl font-bold flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-full bg-primary/20 border border-primary/30 text-primary text-xs flex items-center justify-center font-bold">1</span>
+                    Contact Information
+                  </h3>
+                  <div className="mt-4 mb-6">
+                    <label className="block mb-2 text-sm font-semibold text-muted-foreground">Email Address</label>
+                    <input
+                      type="email"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="player@example.com"
+                      className="w-full bg-black/30 border border-border rounded-xl px-5 py-4 text-foreground transition-all focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                    />
+                  </div>
 
-              <h3 className="text-xl font-bold mt-8 flex items-center gap-2">
-                <span className="w-6 h-6 rounded-full bg-primary/20 border border-primary/30 text-primary text-xs flex items-center justify-center font-bold">2</span>
-                Shipping Address
-              </h3>
-              <div className="grid grid-cols-2 gap-6 mt-4">
-                <div>
-                  <label className="block mb-2 text-sm font-semibold text-muted-foreground">First Name</label>
-                  <input type="text" required className="w-full bg-black/30 border border-border rounded-xl px-5 py-4 text-foreground transition-all focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" />
+                  <button
+                    type="submit"
+                    className="w-full mt-4 px-8 py-4 text-lg font-semibold rounded-full bg-primary text-primary-foreground glow-shadow hover:-translate-y-0.5 hover:shadow-[0_0_30px_hsl(73_100%_50%/0.4)] transition-all duration-300"
+                  >
+                    Continue to Payment
+                  </button>
+                </form>
+              </>
+            ) : (
+              <>
+                <div className="mb-8 border-b border-border pb-4">
+                  <h2 className="text-3xl font-bold">Payment</h2>
+                  <p className="text-muted-foreground text-sm mt-1">Complete your purchase securely</p>
                 </div>
-                <div>
-                  <label className="block mb-2 text-sm font-semibold text-muted-foreground">Last Name</label>
-                  <input type="text" required className="w-full bg-black/30 border border-border rounded-xl px-5 py-4 text-foreground transition-all focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" />
-                </div>
-              </div>
-              <div className="mt-4 mb-6">
-                <label className="block mb-2 text-sm font-semibold text-muted-foreground">Address</label>
-                <input type="text" required placeholder="123 Court St" className="w-full bg-black/30 border border-border rounded-xl px-5 py-4 text-foreground transition-all focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" />
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div>
-                  <label className="block mb-2 text-sm font-semibold text-muted-foreground">City</label>
-                  <input type="text" required className="w-full bg-black/30 border border-border rounded-xl px-5 py-4 text-foreground transition-all focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" />
-                </div>
-                <div>
-                  <label className="block mb-2 text-sm font-semibold text-muted-foreground">State / Province</label>
-                  <input type="text" required className="w-full bg-black/30 border border-border rounded-xl px-5 py-4 text-foreground transition-all focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" />
-                </div>
-                <div>
-                  <label className="block mb-2 text-sm font-semibold text-muted-foreground">ZIP / Postal Code</label>
-                  <input type="text" required className="w-full bg-black/30 border border-border rounded-xl px-5 py-4 text-foreground transition-all focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" />
-                </div>
-              </div>
 
-              <h3 className="text-xl font-bold mt-8 flex items-center gap-2">
-                <span className="w-6 h-6 rounded-full bg-primary/20 border border-primary/30 text-primary text-xs flex items-center justify-center font-bold">3</span>
-                Payment
-              </h3>
-              <div className="mt-4 mb-6 p-6 rounded-xl border border-dashed border-primary/30 bg-primary/5 text-center">
-                <p className="text-muted-foreground text-sm">
-                  🔒 Payment is handled securely via a PCI-compliant payment provider.
-                </p>
-                <p className="text-muted-foreground text-xs mt-2">
-                  Connect a payment processor (e.g. Stripe, Paddle) to enable live checkout.
-                </p>
-              </div>
+                <StripeEmbeddedCheckout
+                  priceId="solo_trainer_one_time"
+                  quantity={1}
+                  customerEmail={email}
+                  returnUrl={`${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}`}
+                />
 
-              <div className="mt-6 pt-6 border-t border-border">
-                <p className="text-xs text-muted-foreground text-center mb-3 font-semibold tracking-wide uppercase">Accepted Payments</p>
-                <div className="flex items-center justify-center gap-3 flex-wrap">
-                  {["Visa", "Mastercard", "Amex", "PayPal", "Apple Pay"].map((method) => (
-                    <span
-                      key={method}
-                      className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-primary/5 border border-primary/20 text-primary/80"
-                    >
-                      {method}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </form>
+                <button
+                  onClick={() => setShowCheckout(false)}
+                  className="mt-4 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  ← Back to contact info
+                </button>
+              </>
+            )}
           </div>
 
           {/* Summary */}
@@ -147,21 +117,22 @@ const Order = () => {
               <span>Total</span><span>$17.98</span>
             </div>
 
-            <button
-              type="submit"
-              form="checkout-form"
-              disabled={status !== "idle"}
-              className={`w-full mt-6 px-8 py-4 text-lg font-semibold rounded-full transition-all duration-300 ${
-                status === "success"
-                  ? "bg-green-500 text-foreground shadow-[0_0_20px_rgba(76,175,80,0.4)]"
-                  : "bg-primary text-primary-foreground glow-shadow hover:-translate-y-0.5 hover:shadow-[0_0_30px_hsl(73_100%_50%/0.4)]"
-              } ${status === "processing" ? "opacity-70" : ""}`}
-            >
-              {btnText}
-            </button>
+            <div className="mt-6 pt-6 border-t border-border">
+              <p className="text-xs text-muted-foreground text-center mb-3 font-semibold tracking-wide uppercase">Accepted Payments</p>
+              <div className="flex items-center justify-center gap-3 flex-wrap">
+                {["Visa", "Mastercard", "Amex", "PayPal", "Apple Pay"].map((method) => (
+                  <span
+                    key={method}
+                    className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-primary/5 border border-primary/20 text-primary/80"
+                  >
+                    {method}
+                  </span>
+                ))}
+              </div>
+            </div>
 
             <p className="text-muted-foreground text-sm text-center mt-6">
-              🔒 Demo checkout · No real payment data is collected
+              🔒 Secure checkout powered by Stripe
             </p>
           </div>
         </div>
