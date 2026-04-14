@@ -96,7 +96,7 @@ const Index = () => {
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
-                  {products[key].icon} {products[key].label}
+                  {products[key].label}
                 </button>
               ))}
             </div>
