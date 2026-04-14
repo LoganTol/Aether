@@ -60,15 +60,8 @@ const Index = () => {
               </Link>
             </div>
           </div>
-          <div className="relative animate-float">
-            <img
-              ref={imgRef}
-              src={productImg}
-              alt="Solo Tennis Trainer Rebound Base"
-              className="w-full max-w-[600px] mx-auto drop-shadow-[0_20px_40px_rgba(0,0,0,0.5)] transition-transform duration-300"
-              width={800}
-              height={800}
-            />
+          <div className="animate-fade-up-delay-1">
+            <ProductCarousel images={productImages} />
           </div>
         </div>
       </section>
