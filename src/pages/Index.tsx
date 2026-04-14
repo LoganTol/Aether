@@ -11,9 +11,21 @@ const productImages = [
 ];
 
 const features = [
-  { icon: "🌊", title: "Stable Base", desc: "Fill the robust PE material base with water or sand. Anti-slip strips keep it firmly in place during intense practice." },
-  { icon: "🎾", title: "High-Elastic Rope", desc: "Strong, durable elastic rope with an easy-tie hook provides a steady rebound for repetitive stroke training." },
-  { icon: "🎒", title: "Portable Design", desc: "Lightweight and convenient to pack. Take it to the park, driveway, or court. Offers a large 4-7 meter strike range." },
+  {
+    icon: "🌊",
+    title: "Stable Base",
+    desc: "Fill the robust PE material base with water or sand. Anti-slip strips keep it firmly in place during intense practice.",
+  },
+  {
+    icon: "🎾",
+    title: "High-Elastic Rope",
+    desc: "Strong, durable elastic rope with an easy-tie hook provides a steady rebound for repetitive stroke training.",
+  },
+  {
+    icon: "🎒",
+    title: "Portable Design",
+    desc: "Lightweight and convenient to pack. Take it to the park, driveway, or court. Offers a large 4-7 meter strike range.",
+  },
 ];
 
 const Index = () => {
@@ -41,15 +53,14 @@ const Index = () => {
 
         <div className="container grid grid-cols-1 lg:grid-cols-2 items-center gap-16">
           <div className="text-center lg:text-left">
-            <h1 className="text-5xl md:text-7xl font-bold mb-6 animate-fade-up">
-              Master Your Game Solo.
-            </h1>
+            <h1 className="text-5xl md:text-7xl font-bold mb-6 animate-fade-up">Master Your Game Solo.</h1>
             <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-lg mx-auto lg:mx-0 animate-fade-up-delay-1">
-              The ultimate Tennis Trainer Rebound Base. Practice your strokes anywhere, anytime. Simply fill the base with water or sand, and start striking.
+              The ultimate Tennis Trainer Rebound Base. Practice your strokes anywhere, anytime. Simply fill the base
+              with water or sand, and start striking.
             </p>
             <div className="flex items-center gap-4 font-heading text-4xl font-bold mb-8 justify-center lg:justify-start animate-fade-up-delay-2">
               <span>$14.99</span>
-              <span className="text-muted-foreground text-2xl line-through">$29.99</span>
+              <span className="text-muted-foreground text-2xl line-through">$17.99</span>
             </div>
             <div className="animate-fade-up-delay-3">
               <Link
