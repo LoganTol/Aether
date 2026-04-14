@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
+import { Home } from "lucide-react";
 import productImg from "@/assets/product-summary.jpg";
 
 const Order = () => {
@@ -22,10 +23,14 @@ const Order = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="py-8 text-center">
+      <header className="py-8 px-8 flex items-center justify-between max-w-[1100px] mx-auto">
+        <Link to="/" className="p-2 rounded-xl border border-border bg-black/30 text-muted-foreground hover:text-primary hover:border-primary transition-colors" aria-label="Back to home">
+          <Home size={20} />
+        </Link>
         <Link to="/" className="font-heading text-3xl font-bold tracking-wide">
           AETHER<span className="text-primary">.</span>
         </Link>
+        <div className="w-9" />
       </header>
 
       {/* Checkout */}
