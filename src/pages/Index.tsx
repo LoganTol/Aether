@@ -85,7 +85,7 @@ const Index = () => {
         <div className="container grid grid-cols-1 lg:grid-cols-2 items-center gap-16">
           <div className="text-center lg:text-left">
             {/* Sport Toggle */}
-            <div className="inline-flex items-center rounded-full border border-border bg-black/30 p-1 mb-6 animate-fade-up">
+            <div className="inline-flex items-center rounded-full border border-border bg-black/30 p-1 mb-6 animate-fade-up relative z-50">
               {(Object.keys(products) as Sport[]).map((key) => (
                 <button
                   key={key}
