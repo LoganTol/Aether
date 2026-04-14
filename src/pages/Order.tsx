@@ -94,23 +94,13 @@ const Order = () => {
                 <span className="w-6 h-6 rounded-full bg-primary/20 border border-primary/30 text-primary text-xs flex items-center justify-center font-bold">3</span>
                 Payment
               </h3>
-              <div className="mt-4 mb-6">
-                <label className="block mb-2 text-sm font-semibold text-muted-foreground">Name on Card</label>
-                <input type="text" required className="w-full bg-black/30 border border-border rounded-xl px-5 py-4 text-foreground transition-all focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" />
-              </div>
-              <div className="mb-6">
-                <label className="block mb-2 text-sm font-semibold text-muted-foreground">Card Number</label>
-                <input type="text" required placeholder="0000 0000 0000 0000" className="w-full bg-black/30 border border-border rounded-xl px-5 py-4 text-foreground transition-all focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" />
-              </div>
-              <div className="grid grid-cols-2 gap-6">
-                <div>
-                  <label className="block mb-2 text-sm font-semibold text-muted-foreground">Expiration Date (MM/YY)</label>
-                  <input type="text" required placeholder="MM/YY" className="w-full bg-black/30 border border-border rounded-xl px-5 py-4 text-foreground transition-all focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" />
-                </div>
-                <div>
-                  <label className="block mb-2 text-sm font-semibold text-muted-foreground">CVV</label>
-                  <input type="text" required placeholder="123" className="w-full bg-black/30 border border-border rounded-xl px-5 py-4 text-foreground transition-all focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" />
-                </div>
+              <div className="mt-4 mb-6 p-6 rounded-xl border border-dashed border-primary/30 bg-primary/5 text-center">
+                <p className="text-muted-foreground text-sm">
+                  🔒 Payment is handled securely via a PCI-compliant payment provider.
+                </p>
+                <p className="text-muted-foreground text-xs mt-2">
+                  Connect a payment processor (e.g. Stripe, Paddle) to enable live checkout.
+                </p>
               </div>
 
               <div className="mt-6 pt-6 border-t border-border">
@@ -171,7 +161,7 @@ const Order = () => {
             </button>
 
             <p className="text-muted-foreground text-sm text-center mt-6">
-              🔒 Secure checkout · 256-bit SSL encryption
+              🔒 Demo checkout · No real payment data is collected
             </p>
           </div>
         </div>
