@@ -1,6 +1,14 @@
 import { Link } from "react-router-dom";
-import productImg from "@/assets/product.png";
-import { useRef } from "react";
+import product1 from "@/assets/product-1.jpg";
+import product2 from "@/assets/product-2.jpg";
+import product3 from "@/assets/product-3.jpg";
+import ProductCarousel from "@/components/ProductCarousel";
+
+const productImages = [
+  { src: product1, alt: "Solo Tennis Trainer - Overview" },
+  { src: product2, alt: "Solo Tennis Trainer - Features Detail" },
+  { src: product3, alt: "Solo Tennis Trainer - How To Use" },
+];
 
 const features = [
   { icon: "🌊", title: "Stable Base", desc: "Fill the robust PE material base with water or sand. Anti-slip strips keep it firmly in place during intense practice." },
@@ -9,20 +17,6 @@ const features = [
 ];
 
 const Index = () => {
-  const imgRef = useRef<HTMLImageElement>(null);
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!imgRef.current) return;
-    const xAxis = (window.innerWidth / 2 - e.pageX) / 25;
-    const yAxis = (window.innerHeight / 2 - e.pageY) / 25;
-    imgRef.current.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
-  };
-
-  const handleMouseLeave = () => {
-    if (!imgRef.current) return;
-    imgRef.current.style.transform = `rotateY(0deg) rotateX(0deg)`;
-  };
-
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -41,11 +35,7 @@ const Index = () => {
       </header>
 
       {/* Hero */}
-      <section
-        className="min-h-screen flex items-center relative overflow-hidden pt-20"
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
-      >
+      <section className="min-h-screen flex items-center relative overflow-hidden pt-20">
         {/* Background glow */}
         <div className="absolute -top-[20%] -right-[10%] w-[600px] h-[600px] bg-[radial-gradient(circle,hsl(var(--secondary))_0%,transparent_70%)] opacity-50 blur-[80px] -z-10" />
 
@@ -70,15 +60,8 @@ const Index = () => {
               </Link>
             </div>
           </div>
-          <div className="relative animate-float">
-            <img
-              ref={imgRef}
-              src={productImg}
-              alt="Solo Tennis Trainer Rebound Base"
-              className="w-full max-w-[600px] mx-auto drop-shadow-[0_20px_40px_rgba(0,0,0,0.5)] transition-transform duration-300"
-              width={800}
-              height={800}
-            />
+          <div className="animate-fade-up-delay-1">
+            <ProductCarousel images={productImages} />
           </div>
         </div>
       </section>
