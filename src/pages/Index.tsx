@@ -1,14 +1,41 @@
 import { Link } from "react-router-dom";
+import { useState } from "react";
 import product1 from "@/assets/product-1.jpg";
 import product2 from "@/assets/product-2.jpg";
 import product3 from "@/assets/product-3.jpg";
+import pickleball1 from "@/assets/pickleball-1.jpg";
+import pickleball2 from "@/assets/pickleball-2.jpg";
 import ProductCarousel from "@/components/ProductCarousel";
 
-const productImages = [
+const tennisImages = [
   { src: product1, alt: "Solo Tennis Trainer - Overview" },
   { src: product2, alt: "Solo Tennis Trainer - Features Detail" },
   { src: product3, alt: "Solo Tennis Trainer - How To Use" },
 ];
+
+const pickleballImages = [
+  { src: pickleball1, alt: "Solo Pickle Ball Trainer - Overview" },
+  { src: pickleball2, alt: "Solo Pickle Ball Trainer - Features Detail" },
+];
+
+const products = {
+  tennis: {
+    label: "Tennis",
+    name: "Solo Tennis Trainer",
+    tagline: "The ultimate Tennis Trainer Rebound Base. Practice your strokes anywhere, anytime. Simply fill the base with water or sand, and start striking.",
+    images: tennisImages,
+    icon: "🎾",
+  },
+  pickleball: {
+    label: "Pickleball",
+    name: "Solo Pickle Ball Trainer",
+    tagline: "The ultimate Pickleball Trainer Rebound Base. Sharpen your dinks and drives anywhere, anytime. Simply fill the base with water or sand, and start playing.",
+    images: pickleballImages,
+    icon: "🏓",
+  },
+};
+
+type Sport = keyof typeof products;
 
 const features = [
   {
@@ -29,6 +56,9 @@ const features = [
 ];
 
 const Index = () => {
+  const [sport, setSport] = useState<Sport>("tennis");
+  const active = products[sport];
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -54,13 +84,29 @@ const Index = () => {
 
         <div className="container grid grid-cols-1 lg:grid-cols-2 items-center gap-16">
           <div className="text-center lg:text-left">
+            {/* Sport Toggle */}
+            <div className="inline-flex items-center rounded-full border border-border bg-black/30 p-1 mb-6 animate-fade-up">
+              {(Object.keys(products) as Sport[]).map((key) => (
+                <button
+                  key={key}
+                  onClick={() => setSport(key)}
+                  className={`px-5 py-2 text-sm font-semibold rounded-full transition-all duration-300 ${
+                    sport === key
+                      ? "bg-primary text-primary-foreground shadow-md"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {products[key].icon} {products[key].label}
+                </button>
+              ))}
+            </div>
+
             <p className="text-primary font-semibold tracking-widest uppercase text-sm mb-4 animate-fade-up">Train Smarter</p>
             <h1 className="text-5xl md:text-7xl font-bold mb-6 animate-fade-up">
               Master Your <span className="text-primary">Game</span> Solo.
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-lg mx-auto lg:mx-0 animate-fade-up-delay-1">
-              The ultimate Tennis Trainer Rebound Base. Practice your strokes anywhere, anytime. Simply fill the base
-              with water or sand, and start striking.
+              {active.tagline}
             </p>
             <div className="flex items-center gap-4 font-heading text-4xl font-bold mb-8 justify-center lg:justify-start animate-fade-up-delay-2">
               <span className="text-primary">$14.99</span>
@@ -76,8 +122,8 @@ const Index = () => {
               </Link>
             </div>
           </div>
-          <div className="animate-fade-up-delay-1">
-            <ProductCarousel images={productImages} />
+          <div key={sport} className="animate-fade-up-delay-1">
+            <ProductCarousel images={active.images} />
           </div>
         </div>
       </section>
@@ -91,7 +137,7 @@ const Index = () => {
           </h2>
           <p className="text-muted-foreground text-center mb-12 max-w-md mx-auto">Built for serious practice, designed for everyone.</p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {features.map((f, i) => (
+            {features.map((f) => (
               <div
                 key={f.title}
                 className="glass-card p-10 transition-all duration-300 hover:-translate-y-2.5 hover:border-primary/30 hover:glow-shadow group"
