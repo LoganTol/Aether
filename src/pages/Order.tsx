@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
-import { Home } from "lucide-react";
+import { Home, Minus, Plus } from "lucide-react";
 import productImg from "@/assets/product-summary.jpg";
 import { StripeEmbeddedCheckout } from "@/components/StripeEmbeddedCheckout";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
