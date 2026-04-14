@@ -1,11 +1,14 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { ShoppingCart } from "lucide-react";
 import product1 from "@/assets/product-1.jpg";
 import product2 from "@/assets/product-2.jpg";
 import product3 from "@/assets/product-3.jpg";
 import pickleball1 from "@/assets/pickleball-1.jpg";
 import pickleball2 from "@/assets/pickleball-2.jpg";
 import ProductCarousel from "@/components/ProductCarousel";
+import { useCart } from "@/contexts/CartContext";
+import { toast } from "@/hooks/use-toast";
 
 const tennisImages = [
   { src: product1, alt: "Solo Tennis Trainer - Overview" },
@@ -20,18 +23,26 @@ const pickleballImages = [
 
 const products = {
   tennis: {
+    id: "tennis",
     label: "Tennis",
     name: "Solo Tennis Trainer",
+    subtitle: "With Rebound Ball & Rope",
     tagline: "The ultimate Tennis Trainer Rebound Base. Practice your strokes anywhere, anytime. Simply fill the base with water or sand, and start striking.",
     images: tennisImages,
-    icon: "🎾",
+    price: 14.99,
+    priceId: "solo_trainer_one_time",
+    summaryImg: product1,
   },
   pickleball: {
+    id: "pickleball",
     label: "Pickleball",
     name: "Solo Pickle Ball Trainer",
+    subtitle: "With Rebound Ball & Rope",
     tagline: "The ultimate Pickleball Trainer Rebound Base. Sharpen your dinks and drives anywhere, anytime. Simply fill the base with water or sand, and start playing.",
     images: pickleballImages,
-    icon: "🏓",
+    price: 14.99,
+    priceId: "solo_trainer_one_time",
+    summaryImg: pickleball1,
   },
 };
 
@@ -58,6 +69,23 @@ const features = [
 const Index = () => {
   const [sport, setSport] = useState<Sport>("tennis");
   const active = products[sport];
+  const { addItem, totalItems } = useCart();
+  const navigate = useNavigate();
+
+  const handleAddToCart = () => {
+    addItem({
+      id: active.id,
+      name: active.name,
+      subtitle: active.subtitle,
+      price: active.price,
+      image: active.summaryImg,
+      priceId: active.priceId,
+    });
+    toast({
+      title: "Added to cart",
+      description: `${active.name} has been added to your cart.`,
+    });
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -67,12 +95,26 @@ const Index = () => {
           <Link to="/" className="font-heading text-3xl font-bold tracking-wide">
             AETHER<span className="text-primary">.</span>
           </Link>
-          <Link
-            to="/order"
-            className="inline-block px-8 py-3 text-lg font-semibold rounded-full bg-primary text-primary-foreground glow-shadow transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_0_30px_hsl(73_100%_50%/0.4)]"
-          >
-            Buy Now
-          </Link>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => navigate("/order")}
+              className="relative p-2 rounded-xl border border-border bg-black/30 text-muted-foreground hover:text-primary hover:border-primary/50 transition-colors"
+              aria-label="Cart"
+            >
+              <ShoppingCart size={20} />
+              {totalItems > 0 && (
+                <span className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center">
+                  {totalItems}
+                </span>
+              )}
+            </button>
+            <Link
+              to="/order"
+              className="inline-block px-8 py-3 text-lg font-semibold rounded-full bg-primary text-primary-foreground glow-shadow transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_0_30px_hsl(73_100%_50%/0.4)]"
+            >
+              Buy Now
+            </Link>
+          </div>
         </div>
       </header>
 
@@ -113,13 +155,20 @@ const Index = () => {
               <span className="text-muted-foreground text-2xl line-through">$17.99</span>
               <span className="ml-2 px-3 py-1 text-xs font-bold rounded-full bg-primary/20 text-primary border border-primary/30">SAVE 17%</span>
             </div>
-            <div className="animate-fade-up-delay-3">
+            <div className="flex flex-col items-center lg:items-start gap-3 animate-fade-up-delay-3">
               <Link
                 to="/order"
                 className="inline-block px-10 py-4 text-lg font-semibold rounded-full bg-primary text-primary-foreground glow-shadow transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_0_30px_hsl(73_100%_50%/0.4)]"
               >
                 Order Now →
               </Link>
+              <button
+                onClick={handleAddToCart}
+                className="inline-flex items-center gap-2 px-6 py-2.5 text-sm font-semibold rounded-full border border-primary/40 text-primary hover:bg-primary/10 transition-all duration-300"
+              >
+                <ShoppingCart size={16} />
+                Add to Cart
+              </button>
             </div>
           </div>
           <div key={sport} className="animate-fade-up-delay-1">
