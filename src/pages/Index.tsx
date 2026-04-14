@@ -90,7 +90,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="absolute top-0 w-full py-4 md:py-8 z-50">
+      <header className="sticky top-0 w-full py-4 md:py-8 z-50 bg-background/80 backdrop-blur-md">
         <div className="container flex justify-between items-center">
           <Link to="/" className="font-heading text-2xl md:text-3xl font-bold tracking-wide">
             AETHER<span className="text-primary">.</span>
