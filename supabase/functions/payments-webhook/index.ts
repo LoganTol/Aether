@@ -20,9 +20,31 @@ serve(async (req) => {
     console.log("Received event:", event.type, "env:", env);
 
     switch (event.type) {
-      case "checkout.session.completed":
-        console.log("Checkout completed:", event.data.object.id, "mode:", event.data.object.mode);
+      case "checkout.session.completed": {
+        const session = event.data.object;
+        console.log("Checkout completed:", session.id, "mode:", session.mode);
+
+        const lineItem = session.line_items?.data?.[0];
+        const productName = lineItem?.description || "Solo Tennis Trainer";
+
+        const { error: insertError } = await supabase.from("orders").insert({
+          customer_email: session.customer_details?.email || session.customer_email,
+          amount_total: session.amount_total,
+          currency: session.currency || "usd",
+          stripe_session_id: session.id,
+          stripe_payment_intent: typeof session.payment_intent === "string" ? session.payment_intent : session.payment_intent?.id,
+          product_name: productName,
+          status: "completed",
+          environment: env,
+        });
+
+        if (insertError) {
+          console.error("Failed to insert order:", insertError);
+        } else {
+          console.log("Order recorded for:", session.customer_details?.email || session.customer_email);
+        }
         break;
+      }
       case "customer.subscription.created":
       case "customer.subscription.updated":
       case "customer.subscription.deleted":
