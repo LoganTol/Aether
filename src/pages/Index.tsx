@@ -67,7 +67,7 @@ const Index = () => {
                 to="/order"
                 className="inline-block px-10 py-4 text-lg font-semibold rounded-full bg-primary text-primary-foreground glow-shadow transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_0_30px_hsl(73_100%_50%/0.4)]"
               >
-                Purchase
+                Order
               </Link>
             </div>
           </div>
