@@ -81,7 +81,7 @@ const Order = () => {
 
                 <StripeEmbeddedCheckout
                   priceId="solo_trainer_one_time"
-                  quantity={1}
+                  quantity={quantity}
                   customerEmail={email}
                   returnUrl={`${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}`}
                 />
