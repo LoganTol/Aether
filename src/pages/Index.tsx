@@ -1,16 +1,107 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { Link } from "react-router-dom";
+import productImg from "@/assets/product.png";
+import { useRef } from "react";
 
-// IMPORTANT: Fully REPLACE this with your own code
-const PlaceholderIndex = () => {
-  // PLACEHOLDER: Replace this entire return statement with the user's app.
-  // The inline background color is intentionally not part of the design system.
+const features = [
+  { icon: "🌊", title: "Stable Base", desc: "Fill the robust PE material base with water or sand. Anti-slip strips keep it firmly in place during intense practice." },
+  { icon: "🎾", title: "High-Elastic Rope", desc: "Strong, durable elastic rope with an easy-tie hook provides a steady rebound for repetitive stroke training." },
+  { icon: "🎒", title: "Portable Design", desc: "Lightweight and convenient to pack. Take it to the park, driveway, or court. Offers a large 4-7 meter strike range." },
+];
+
+const Index = () => {
+  const imgRef = useRef<HTMLImageElement>(null);
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!imgRef.current) return;
+    const xAxis = (window.innerWidth / 2 - e.pageX) / 25;
+    const yAxis = (window.innerHeight / 2 - e.pageY) / 25;
+    imgRef.current.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
+  };
+
+  const handleMouseLeave = () => {
+    if (!imgRef.current) return;
+    imgRef.current.style.transform = `rotateY(0deg) rotateX(0deg)`;
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: '#fcfbf8' }}>
-      <img data-lovable-blank-page-placeholder="REMOVE_THIS" src="/placeholder.svg" alt="Your app will live here!" />
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="absolute top-0 w-full py-8 z-50">
+        <div className="container flex justify-between items-center">
+          <Link to="/" className="font-heading text-3xl font-bold tracking-wide">
+            AETHER<span className="text-primary">.</span>
+          </Link>
+          <Link
+            to="/order"
+            className="inline-block px-8 py-3 text-lg font-semibold rounded-full bg-primary text-primary-foreground glow-shadow transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_0_30px_hsl(73_100%_50%/0.4)]"
+          >
+            Buy Now
+          </Link>
+        </div>
+      </header>
+
+      {/* Hero */}
+      <section
+        className="min-h-screen flex items-center relative overflow-hidden pt-20"
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+      >
+        {/* Background glow */}
+        <div className="absolute -top-[20%] -right-[10%] w-[600px] h-[600px] bg-[radial-gradient(circle,hsl(var(--secondary))_0%,transparent_70%)] opacity-50 blur-[80px] -z-10" />
+
+        <div className="container grid grid-cols-1 lg:grid-cols-2 items-center gap-16">
+          <div className="text-center lg:text-left">
+            <h1 className="text-5xl md:text-7xl font-bold mb-6 animate-fade-up">
+              Master Your Game Solo.
+            </h1>
+            <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-lg mx-auto lg:mx-0 animate-fade-up-delay-1">
+              The ultimate Tennis Trainer Rebound Base. Practice your strokes anywhere, anytime. Simply fill the base with water or sand, and start striking.
+            </p>
+            <div className="flex items-center gap-4 font-heading text-4xl font-bold mb-8 justify-center lg:justify-start animate-fade-up-delay-2">
+              <span>$14.99</span>
+              <span className="text-muted-foreground text-2xl line-through">$29.99</span>
+            </div>
+            <div className="animate-fade-up-delay-3">
+              <Link
+                to="/order"
+                className="inline-block px-10 py-4 text-lg font-semibold rounded-full bg-primary text-primary-foreground glow-shadow transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_0_30px_hsl(73_100%_50%/0.4)]"
+              >
+                Secure Yours Today
+              </Link>
+            </div>
+          </div>
+          <div className="relative animate-float">
+            <img
+              ref={imgRef}
+              src={productImg}
+              alt="Solo Tennis Trainer Rebound Base"
+              className="w-full max-w-[600px] mx-auto drop-shadow-[0_20px_40px_rgba(0,0,0,0.5)] transition-transform duration-300"
+              width={800}
+              height={800}
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* Features */}
+      <section className="py-20 bg-gradient-to-b from-transparent to-card">
+        <div className="container">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {features.map((f) => (
+              <div
+                key={f.title}
+                className="glass-card p-10 transition-all duration-300 hover:-translate-y-2.5 hover:border-primary/30 hover:glow-shadow"
+              >
+                <div className="text-4xl mb-6">{f.icon}</div>
+                <h3 className="text-2xl font-bold mb-4">{f.title}</h3>
+                <p className="text-muted-foreground">{f.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
     </div>
   );
 };
-
-const Index = PlaceholderIndex;
 
 export default Index;
