@@ -37,7 +37,7 @@ const Order = () => {
               <h2 className="text-3xl font-bold">Secure Checkout</h2>
             </div>
 
-            <form onSubmit={handleSubmit}>
+            <form id="checkout-form" onSubmit={handleSubmit}>
               <h3 className="text-xl font-bold">Contact Information</h3>
               <div className="mt-4 mb-6">
                 <label className="block mb-2 text-sm font-semibold text-muted-foreground">Email Address</label>
