@@ -94,17 +94,19 @@ const Order = () => {
                 </div>
               </div>
 
-              <button
-                type="submit"
-                disabled={status !== "idle"}
-                className={`w-full mt-8 px-8 py-4 text-lg font-semibold rounded-full transition-all duration-300 ${
-                  status === "success"
-                    ? "bg-green-500 text-foreground shadow-[0_0_20px_rgba(76,175,80,0.4)]"
-                    : "bg-primary text-primary-foreground glow-shadow hover:-translate-y-0.5 hover:shadow-[0_0_30px_hsl(73_100%_50%/0.4)]"
-                } ${status === "processing" ? "opacity-70" : ""}`}
-              >
-                {btnText}
-              </button>
+              <div className="mt-6 pt-6 border-t border-border">
+                <p className="text-xs text-muted-foreground text-center mb-3 font-semibold tracking-wide uppercase">Accepted Payments</p>
+                <div className="flex items-center justify-center gap-3 flex-wrap">
+                  {["Visa", "Mastercard", "Amex", "PayPal", "Apple Pay"].map((method) => (
+                    <span
+                      key={method}
+                      className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-black/30 border border-border text-muted-foreground"
+                    >
+                      {method}
+                    </span>
+                  ))}
+                </div>
+              </div>
             </form>
           </div>
 
@@ -135,23 +137,23 @@ const Order = () => {
             <div className="flex justify-between py-4 mt-4 text-2xl font-bold text-primary">
               <span>Total</span><span>$17.98</span>
             </div>
+
+            <button
+              type="submit"
+              form="checkout-form"
+              disabled={status !== "idle"}
+              className={`w-full mt-6 px-8 py-4 text-lg font-semibold rounded-full transition-all duration-300 ${
+                status === "success"
+                  ? "bg-green-500 text-foreground shadow-[0_0_20px_rgba(76,175,80,0.4)]"
+                  : "bg-primary text-primary-foreground glow-shadow hover:-translate-y-0.5 hover:shadow-[0_0_30px_hsl(73_100%_50%/0.4)]"
+              } ${status === "processing" ? "opacity-70" : ""}`}
+            >
+              {btnText}
+            </button>
+
             <p className="text-muted-foreground text-sm text-center mt-6">
               🔒 Secure checkout · 256-bit SSL encryption
             </p>
-
-            <div className="mt-6 pt-6 border-t border-border">
-              <p className="text-xs text-muted-foreground text-center mb-3 font-semibold tracking-wide uppercase">Accepted Payments</p>
-              <div className="flex items-center justify-center gap-3 flex-wrap">
-                {["Visa", "Mastercard", "Amex", "PayPal", "Apple Pay"].map((method) => (
-                  <span
-                    key={method}
-                    className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-black/30 border border-border text-muted-foreground"
-                  >
-                    {method}
-                  </span>
-                ))}
-              </div>
-            </div>
           </div>
         </div>
       </section>
