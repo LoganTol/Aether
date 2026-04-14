@@ -29,7 +29,7 @@ serve(async (req) => {
     const stripePrice = prices.data[0];
     const isRecurring = stripePrice.type === "recurring";
 
-    const sessionParams: Record<string, any> = {
+    const session = await stripe.checkout.sessions.create({
       line_items: [{ price: stripePrice.id, quantity: quantity || 1 }],
       mode: isRecurring ? "subscription" : "payment",
       ui_mode: "embedded",
@@ -39,21 +39,7 @@ serve(async (req) => {
         metadata: { userId },
         ...(isRecurring && { subscription_data: { metadata: { userId } } }),
       }),
-    };
-
-    // Route payments to Aether connected account
-    if (!isRecurring) {
-      sessionParams.payment_intent_data = {
-        transfer_data: { destination: "acct_1TM9sSLWBrliGIzU" },
-      };
-    } else {
-      sessionParams.subscription_data = {
-        ...sessionParams.subscription_data,
-        transfer_data: { destination: "acct_1TM9sSLWBrliGIzU" },
-      };
-    }
-
-    const session = await stripe.checkout.sessions.create(sessionParams);
+    });
 
     return new Response(JSON.stringify({ clientSecret: session.client_secret }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
