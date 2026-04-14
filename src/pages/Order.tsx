@@ -5,9 +5,16 @@ import productImg from "@/assets/product-summary.jpg";
 import { StripeEmbeddedCheckout } from "@/components/StripeEmbeddedCheckout";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 
+const UNIT_PRICE = 14.99;
+const SHIPPING = 2.99;
+
 const Order = () => {
   const [showCheckout, setShowCheckout] = useState(false);
   const [email, setEmail] = useState("");
+  const [quantity, setQuantity] = useState(1);
+
+  const subtotal = (UNIT_PRICE * quantity).toFixed(2);
+  const total = (UNIT_PRICE * quantity + SHIPPING).toFixed(2);
 
   return (
     <div className="min-h-screen bg-background relative">
