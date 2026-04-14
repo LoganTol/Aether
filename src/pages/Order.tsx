@@ -135,9 +135,23 @@ const Order = () => {
             <div className="flex justify-between py-4 mt-4 text-2xl font-bold text-primary">
               <span>Total</span><span>$14.99</span>
             </div>
-            <p className="text-muted-foreground text-sm text-center mt-8">
-              🔒 Secure checkout 256-bit SSL encryption.
+            <p className="text-muted-foreground text-sm text-center mt-6">
+              🔒 Secure checkout · 256-bit SSL encryption
             </p>
+
+            <div className="mt-6 pt-6 border-t border-border">
+              <p className="text-xs text-muted-foreground text-center mb-3 font-semibold tracking-wide uppercase">Accepted Payments</p>
+              <div className="flex items-center justify-center gap-3 flex-wrap">
+                {["Visa", "Mastercard", "Amex", "PayPal", "Apple Pay"].map((method) => (
+                  <span
+                    key={method}
+                    className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-black/30 border border-border text-muted-foreground"
+                  >
+                    {method}
+                  </span>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </section>
