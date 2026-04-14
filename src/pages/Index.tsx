@@ -48,26 +48,31 @@ const Index = () => {
 
       {/* Hero */}
       <section className="min-h-screen flex items-center relative overflow-hidden pt-20">
-        {/* Background glow */}
+        {/* Background glows */}
         <div className="absolute -top-[20%] -right-[10%] w-[600px] h-[600px] bg-[radial-gradient(circle,hsl(var(--secondary))_0%,transparent_70%)] opacity-50 blur-[80px] -z-10" />
+        <div className="absolute bottom-[10%] -left-[5%] w-[400px] h-[400px] bg-[radial-gradient(circle,hsl(var(--primary)/0.15)_0%,transparent_70%)] blur-[60px] -z-10" />
 
         <div className="container grid grid-cols-1 lg:grid-cols-2 items-center gap-16">
           <div className="text-center lg:text-left">
-            <h1 className="text-5xl md:text-7xl font-bold mb-6 animate-fade-up">Master Your Game Solo.</h1>
+            <p className="text-primary font-semibold tracking-widest uppercase text-sm mb-4 animate-fade-up">Train Smarter</p>
+            <h1 className="text-5xl md:text-7xl font-bold mb-6 animate-fade-up">
+              Master Your <span className="text-primary">Game</span> Solo.
+            </h1>
             <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-lg mx-auto lg:mx-0 animate-fade-up-delay-1">
               The ultimate Tennis Trainer Rebound Base. Practice your strokes anywhere, anytime. Simply fill the base
               with water or sand, and start striking.
             </p>
             <div className="flex items-center gap-4 font-heading text-4xl font-bold mb-8 justify-center lg:justify-start animate-fade-up-delay-2">
-              <span>$14.99</span>
+              <span className="text-primary">$14.99</span>
               <span className="text-muted-foreground text-2xl line-through">$17.99</span>
+              <span className="ml-2 px-3 py-1 text-xs font-bold rounded-full bg-primary/20 text-primary border border-primary/30">SAVE 17%</span>
             </div>
             <div className="animate-fade-up-delay-3">
               <Link
                 to="/order"
                 className="inline-block px-10 py-4 text-lg font-semibold rounded-full bg-primary text-primary-foreground glow-shadow transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_0_30px_hsl(73_100%_50%/0.4)]"
               >
-                Order
+                Order Now →
               </Link>
             </div>
           </div>
@@ -78,22 +83,32 @@ const Index = () => {
       </section>
 
       {/* Features */}
-      <section className="py-20 bg-gradient-to-b from-transparent to-card">
+      <section className="py-20 bg-gradient-to-b from-transparent to-card relative">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-1 rounded-full bg-gradient-to-r from-transparent via-primary to-transparent" />
         <div className="container">
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">
+            Why <span className="text-primary">Athletes</span> Love It
+          </h2>
+          <p className="text-muted-foreground text-center mb-12 max-w-md mx-auto">Built for serious practice, designed for everyone.</p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {features.map((f) => (
+            {features.map((f, i) => (
               <div
                 key={f.title}
-                className="glass-card p-10 transition-all duration-300 hover:-translate-y-2.5 hover:border-primary/30 hover:glow-shadow"
+                className="glass-card p-10 transition-all duration-300 hover:-translate-y-2.5 hover:border-primary/30 hover:glow-shadow group"
               >
-                <div className="text-4xl mb-6">{f.icon}</div>
-                <h3 className="text-2xl font-bold mb-4">{f.title}</h3>
+                <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-2xl mb-6 group-hover:bg-primary/20 transition-colors">
+                  {f.icon}
+                </div>
+                <h3 className="text-2xl font-bold mb-4 group-hover:text-primary transition-colors">{f.title}</h3>
                 <p className="text-muted-foreground">{f.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
+
+      {/* Footer accent */}
+      <div className="h-1 bg-gradient-to-r from-secondary via-primary to-secondary" />
     </div>
   );
 };
