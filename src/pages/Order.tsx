@@ -102,26 +102,48 @@ const Order = () => {
               <h2 className="text-3xl font-bold">Order Summary</h2>
             </div>
 
-            <div className="flex items-center gap-6 mb-8 p-4 rounded-xl bg-secondary/20 border border-secondary/30">
+            <div className="flex items-center gap-6 mb-4 p-4 rounded-xl bg-secondary/20 border border-secondary/30">
               <img src={productImg} alt="Solo Tennis Trainer" className="w-20 h-20 object-cover rounded-xl border border-primary/20" loading="lazy" width={80} height={80} />
               <div>
                 <h4 className="text-lg font-bold">Solo Tennis Trainer</h4>
                 <p className="text-muted-foreground text-sm">With Rebound Ball & Rope</p>
               </div>
-              <span className="ml-auto font-semibold text-primary">$14.99</span>
+              <span className="ml-auto font-semibold text-primary">${UNIT_PRICE.toFixed(2)}</span>
+            </div>
+
+            {/* Quantity Selector */}
+            <div className="flex items-center justify-between mb-8 p-4 rounded-xl bg-secondary/10 border border-border">
+              <span className="text-sm font-semibold text-muted-foreground">Quantity</span>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                  disabled={quantity <= 1 || showCheckout}
+                  className="w-9 h-9 rounded-lg border border-border bg-black/30 flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  <Minus size={16} />
+                </button>
+                <span className="w-8 text-center font-bold text-lg">{quantity}</span>
+                <button
+                  onClick={() => setQuantity((q) => Math.min(10, q + 1))}
+                  disabled={showCheckout}
+                  className="w-9 h-9 rounded-lg border border-border bg-black/30 flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  <Plus size={16} />
+                </button>
+              </div>
             </div>
 
             <div className="flex justify-between py-4 border-b border-dashed border-border">
-              <span>Subtotal</span><span>$14.99</span>
+              <span>Subtotal ({quantity}×)</span><span>${subtotal}</span>
             </div>
             <div className="flex justify-between py-4 border-b border-dashed border-border">
-              <span>Shipping (Express)</span><span>$2.99</span>
+              <span>Shipping (Express)</span><span>${SHIPPING.toFixed(2)}</span>
             </div>
             <div className="flex justify-between py-4 border-b border-dashed border-border">
               <span>Taxes</span><span className="text-muted-foreground">Calculated at checkout</span>
             </div>
             <div className="flex justify-between py-4 mt-4 text-2xl font-bold text-primary">
-              <span>Total</span><span>$17.98</span>
+              <span>Total</span><span>${total}</span>
             </div>
 
             <div className="mt-6 pt-6 border-t border-border">
