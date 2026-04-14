@@ -21,10 +21,14 @@ const Order = () => {
   const btnText = status === "processing" ? "Processing..." : status === "success" ? "✓ Order Confirmed!" : "Complete Order • $17.98";
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative">
+      {/* Subtle background glow */}
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[radial-gradient(circle,hsl(var(--primary)/0.06)_0%,transparent_70%)] blur-[60px] -z-10" />
+      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[radial-gradient(circle,hsl(var(--secondary)/0.15)_0%,transparent_70%)] blur-[60px] -z-10" />
+
       {/* Header */}
       <header className="py-8 px-8 flex items-center justify-between max-w-[1100px] mx-auto">
-        <Link to="/" className="p-2 rounded-xl border border-border bg-black/30 text-muted-foreground hover:text-primary hover:border-primary transition-colors" aria-label="Back to home">
+        <Link to="/" className="p-2 rounded-xl border border-border bg-black/30 text-muted-foreground hover:text-primary hover:border-primary/50 transition-colors" aria-label="Back to home">
           <Home size={20} />
         </Link>
         <Link to="/" className="font-heading text-3xl font-bold tracking-wide">
@@ -40,16 +44,23 @@ const Order = () => {
           <div className="glass-card p-12 soft-shadow">
             <div className="mb-8 border-b border-border pb-4">
               <h2 className="text-3xl font-bold">Secure Checkout</h2>
+              <p className="text-muted-foreground text-sm mt-1">Complete your purchase below</p>
             </div>
 
             <form id="checkout-form" onSubmit={handleSubmit}>
-              <h3 className="text-xl font-bold">Contact Information</h3>
+              <h3 className="text-xl font-bold flex items-center gap-2">
+                <span className="w-6 h-6 rounded-full bg-primary/20 border border-primary/30 text-primary text-xs flex items-center justify-center font-bold">1</span>
+                Contact Information
+              </h3>
               <div className="mt-4 mb-6">
                 <label className="block mb-2 text-sm font-semibold text-muted-foreground">Email Address</label>
                 <input type="email" required placeholder="player@example.com" className="w-full bg-black/30 border border-border rounded-xl px-5 py-4 text-foreground transition-all focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" />
               </div>
 
-              <h3 className="text-xl font-bold mt-8">Shipping Address</h3>
+              <h3 className="text-xl font-bold mt-8 flex items-center gap-2">
+                <span className="w-6 h-6 rounded-full bg-primary/20 border border-primary/30 text-primary text-xs flex items-center justify-center font-bold">2</span>
+                Shipping Address
+              </h3>
               <div className="grid grid-cols-2 gap-6 mt-4">
                 <div>
                   <label className="block mb-2 text-sm font-semibold text-muted-foreground">First Name</label>
@@ -79,7 +90,10 @@ const Order = () => {
                 </div>
               </div>
 
-              <h3 className="text-xl font-bold mt-8">Payment</h3>
+              <h3 className="text-xl font-bold mt-8 flex items-center gap-2">
+                <span className="w-6 h-6 rounded-full bg-primary/20 border border-primary/30 text-primary text-xs flex items-center justify-center font-bold">3</span>
+                Payment
+              </h3>
               <div className="mt-4 mb-6">
                 <label className="block mb-2 text-sm font-semibold text-muted-foreground">Name on Card</label>
                 <input type="text" required className="w-full bg-black/30 border border-border rounded-xl px-5 py-4 text-foreground transition-all focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20" />
@@ -105,7 +119,7 @@ const Order = () => {
                   {["Visa", "Mastercard", "Amex", "PayPal", "Apple Pay"].map((method) => (
                     <span
                       key={method}
-                      className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-black/30 border border-border text-muted-foreground"
+                      className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-primary/5 border border-primary/20 text-primary/80"
                     >
                       {method}
                     </span>
@@ -116,18 +130,18 @@ const Order = () => {
           </div>
 
           {/* Summary */}
-          <div className="glass-card p-12 soft-shadow h-fit">
+          <div className="glass-card p-12 soft-shadow h-fit border-t-2 border-t-primary/30">
             <div className="mb-8 border-b border-border pb-4">
               <h2 className="text-3xl font-bold">Order Summary</h2>
             </div>
 
-            <div className="flex items-center gap-6 mb-8">
-              <img src={productImg} alt="Solo Tennis Trainer" className="w-20 h-20 object-cover rounded-xl border border-border" loading="lazy" width={80} height={80} />
+            <div className="flex items-center gap-6 mb-8 p-4 rounded-xl bg-secondary/20 border border-secondary/30">
+              <img src={productImg} alt="Solo Tennis Trainer" className="w-20 h-20 object-cover rounded-xl border border-primary/20" loading="lazy" width={80} height={80} />
               <div>
                 <h4 className="text-lg font-bold">Solo Tennis Trainer</h4>
                 <p className="text-muted-foreground text-sm">With Rebound Ball & Rope</p>
               </div>
-              <span className="ml-auto font-semibold">$14.99</span>
+              <span className="ml-auto font-semibold text-primary">$14.99</span>
             </div>
 
             <div className="flex justify-between py-4 border-b border-dashed border-border">
