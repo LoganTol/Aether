@@ -8,6 +8,8 @@ import Index from "./pages/Index.tsx";
 import Order from "./pages/Order.tsx";
 import CheckoutReturn from "./pages/CheckoutReturn.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import TermsAndConditions from "./pages/TermsAndConditions.tsx";
+import PrivacyPolicy from "./pages/PrivacyPolicy.tsx";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -21,6 +23,8 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/order" element={<Order />} />
             <Route path="/checkout/return" element={<CheckoutReturn />} />
+            <Route path="/terms" element={<TermsAndConditions />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

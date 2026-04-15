@@ -202,7 +202,16 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Footer accent */}
+      {/* Footer */}
+      <footer className="border-t border-border bg-card/50">
+        <div className="container py-8 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
+          <p>© 2026 Aether Tennis. All Rights Reserved.</p>
+          <div className="flex items-center gap-6">
+            <Link to="/terms" className="hover:text-primary transition-colors">Terms & Conditions</Link>
+            <Link to="/privacy" className="hover:text-primary transition-colors">Privacy Policy</Link>
+          </div>
+        </div>
+      </footer>
       <div className="h-1 bg-gradient-to-r from-secondary via-primary to-secondary" />
     </div>
   );
