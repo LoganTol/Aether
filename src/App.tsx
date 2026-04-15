@@ -8,6 +8,8 @@ import Index from "./pages/Index.tsx";
 import Order from "./pages/Order.tsx";
 import CheckoutReturn from "./pages/CheckoutReturn.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import TermsAndConditions from "./pages/TermsAndConditions.tsx";
+import PrivacyPolicy from "./pages/PrivacyPolicy.tsx";
 const queryClient = new QueryClient();
 
 const App = () => (
