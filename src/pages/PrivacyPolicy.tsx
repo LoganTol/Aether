@@ -1,12 +1,20 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 
-const PrivacyPolicy = () => (
+const PrivacyPolicy = () => {
+  const navigate = useNavigate();
+  return (
   <div className="min-h-screen bg-background text-foreground">
     <header className="sticky top-0 w-full py-4 md:py-8 z-50 bg-background/80 backdrop-blur-md">
       <div className="container flex justify-between items-center">
-        <Link to="/" className="font-heading text-2xl md:text-3xl font-bold tracking-wide">
-          AETHER<span className="text-primary">.</span>
-        </Link>
+        <div className="flex items-center gap-3">
+          <button onClick={() => navigate(-1)} className="p-2 rounded-xl border border-border bg-black/30 text-muted-foreground hover:text-primary hover:border-primary/50 transition-colors" aria-label="Go back">
+            <ArrowLeft size={18} />
+          </button>
+          <Link to="/" className="font-heading text-2xl md:text-3xl font-bold tracking-wide">
+            AETHER<span className="text-primary">.</span>
+          </Link>
+        </div>
       </div>
     </header>
 
@@ -60,5 +68,6 @@ const PrivacyPolicy = () => (
     </main>
   </div>
 );
+};
 
 export default PrivacyPolicy;
