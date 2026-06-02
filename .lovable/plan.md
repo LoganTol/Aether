@@ -1,113 +1,138 @@
-## Goal
+# Season Operations — Build Plan
 
-Replace single-page `CreateSeason.tsx` with a 7-step Season Setup Wizard. Support draft/ready/active lifecycle, season visibility, and a richer Command Center post-launch.
+Transform the existing Season Detail page into a six-tab operational dashboard, add a public scorecard route, and back standings with a SQL view so they're always correct.
 
-## Wizard Step Order (revised)
+## What already exists (keep & extend)
 
-1. **Basics** — name, format, start/end date, captain window days, match deadline days.
-2. **Participants** — add by email, shareable invite link, live list with checkmarks, Round-Robin Impact card (matches, rounds, estimated weeks).
-3. **Format Review** — read-only summary, rounds & match count.
-4. **Doubles Teams** — only when format = doubles. Pair into fixed teams; validate every player assigned once.
-5. **Rules & Captain Rotation** — score format, dispute resolution, forfeit handling, **season visibility**, **captain rotation mode** (Random / Invite Order / Alphabetical / Manual — manual reorders the now-known participant list).
-6. **Notifications** — captain reminders, deadline reminders, weekly digest + frequency.
-7. **Review & Launch** — full summary card + **Preview Schedule** (first 3 matchups grouped by week) + "Launch Season" CTA.
+- `SeasonDetail.tsx` has Schedule / Standings / Members / Admin tabs and a captain banner. We will **add Overview and Match History**, and split Schedule into round groups with status badges.
+- `MatchDetail.tsx` already covers time proposals + score entry. We will extend it to write `completed_at`, `scheduled_by`, and `result_confirmed_at`, and add a **separate read-only scorecard** at `/app/matches/:id/results`.
+- `standings` table is read directly today and may drift. We replace it with a `season_standings` SQL view computed from `match_results` + `match_scores`.
+- `season_settings.score_format` already exists (best_of_3 / pro_set_8 / single_set_6) — score entry will respect it.
 
-## Component Structure
+## Tab structure
 
-`src/components/season-wizard/`
-- `SeasonWizard.tsx` — orchestrator (state, validation, nav, submit).
-- `WizardShell.tsx` — stepper header, mobile-collapsed "Step X of 7" + dots, sticky bottom Back/Next/Launch bar.
-- `steps/Step1Basics.tsx`
-- `steps/Step2Participants.tsx` — list with checkmarks + `RoundRobinImpact` card.
-- `steps/Step3FormatReview.tsx`
-- `steps/Step4DoublesTeams.tsx`
-- `steps/Step5RulesAndRotation.tsx` — includes `CaptainRotationConfig` (radio + up/down reorder for manual) and `VisibilityPicker`.
-- `steps/Step6Notifications.tsx`
-- `steps/Step7ReviewLaunch.tsx` — includes `SchedulePreview` (computes first 3 round-robin pairings client-side from ordered participants/teams).
-- `hooks/useWizardState.ts` — typed `useReducer` for all wizard fields.
-- `lib/wizardEstimates.ts` — `matchCount`, `roundCount`, `estimatedWeeks`, `recommendedSeasonLength(players, cadence)`, `previewSchedule(participants|teams, n)`.
-
-New page: `src/pages/SeasonCommandCenter.tsx` at `/app/seasons/:id/launched`.
-
-Hero: "Season Ready" + season name, player count, matches generated, current captain, season start date. Quick actions: View Schedule, Invite More Players, Season Settings, Manage Participants.
-
-## State Shape
-
-```ts
-type WizardState = {
-  step: 1|2|3|4|5|6|7;
-  basics: { name; format; startDate; endDate; captainWindowDays; matchDeadlineDays };
-  participants: ParticipantInput[];
-  doublesTeams: { name; playerAIdx; playerBIdx }[];
-  rules: {
-    scoreFormat: 'best_of_3'|'pro_set_8'|'single_set_6';
-    disputeResolution: 'creator_decides'|'majority_vote';
-    forfeitHandling: 'auto_loss'|'manual_review';
-    visibility: 'private'|'invite_only';
-    rotationMode: 'random'|'invite_order'|'alphabetical'|'manual';
-    manualOrder: number[]; // indexes into participants
-  };
-  notifications: { captainReminders; deadlineReminders; weeklyDigest; digestFrequencyDays };
-};
+```text
+Season Dashboard
+├── Overview      ← NEW (default tab)
+├── Schedule      ← refactored: grouped by round + status badges
+├── Standings     ← reuses existing table, sourced from the new view, top 3 podium
+├── Match History ← NEW
+├── Members       ← unchanged
+└── Admin         ← unchanged (creator-only)
 ```
 
-## Route Updates
+### Overview tab content
 
-`src/App.tsx`:
-- `/app/seasons/new` → `CreateSeason` (renders `SeasonWizard`).
-- `/app/seasons/:id/launched` → `SeasonCommandCenter`.
+1. **Hero card** — season name, player/match counts, current captain, progress %.
+2. **Action Required** — captain variant ("You're the captain · N matches need scheduling · deadline") vs non-captain variant (who the captain is + window end).
+3. **Upcoming matches** — next 3 scheduled or awaiting-time matches.
+4. **Progress bar** — completed / total matches.
 
-## Database Changes (single migration)
+### Schedule tab
 
-Add lifecycle + visibility to `seasons`, plus rules/notifications/rotation to `season_settings`.
+- Group by `round` (Round 1, Round 2, …).
+- Status badges with semantic colors: `pending` (muted), `proposed` (amber), `scheduled` (primary/lime), `completed` (green-ish), `disputed` (destructive), `overdue` (destructive — derived when `deadline_at < now()` and not completed).
+- Card links to `/app/matches/:id`.
+
+### Match History tab
+
+- Completed matches only, newest first (by `completed_at` desc, fallback `updated_at`).
+- "Sarah def. Mike" headline + per-set scores inline.
+- Card links to `/app/matches/:id/results` (read-only scorecard).
+
+### Standings tab
+
+- Same table, sorted by the new view.
+- Add a **podium row** (top 3) above the table with gold/silver/bronze treatment using existing tokens.
+
+## New route: Match Scorecard
+
+`/app/matches/:id/results` — read-only:
+- Players/teams, winner, set-by-set table, submitted by, confirmed by, completed date.
+- Back link to Season → Match History.
+
+## Match Detail enhancements
+
+- On schedule confirmation: also set `matches.scheduled_by = <participant who proposed>`.
+- On score submit: set `matches.completed_at = now()`.
+- Add **Confirm / Dispute** controls visible to the opponent (non-entering side) when `match_results` exists but `confirmed_by` is null:
+  - Confirm → set `result_confirmed_at = now()`, `confirmed_by = my participant id`.
+  - Dispute → set `disputed = true`, status stays `completed` but row badged "Disputed".
+- Score form already supports N sets; we'll constrain default rows per `score_format`.
+
+## Database changes
+
+### Migration
 
 ```sql
--- seasons
-ALTER TABLE public.seasons
-  ADD COLUMN visibility text NOT NULL DEFAULT 'invite_only'
-    CHECK (visibility IN ('private','invite_only')),
-  ADD COLUMN lifecycle_status text NOT NULL DEFAULT 'draft'
-    CHECK (lifecycle_status IN ('draft','ready','active','completed','archived'));
+ALTER TABLE public.matches
+  ADD COLUMN IF NOT EXISTS completed_at timestamptz,
+  ADD COLUMN IF NOT EXISTS scheduled_by uuid,
+  ADD COLUMN IF NOT EXISTS result_confirmed_at timestamptz;
 
--- season_settings
-CREATE TYPE score_format AS ENUM ('best_of_3','pro_set_8','single_set_6');
-CREATE TYPE dispute_resolution AS ENUM ('creator_decides','majority_vote');
-CREATE TYPE forfeit_handling AS ENUM ('auto_loss','manual_review');
-CREATE TYPE captain_rotation_mode AS ENUM ('random','invite_order','alphabetical','manual');
+CREATE OR REPLACE VIEW public.season_standings AS
+WITH sides AS (
+  SELECT m.season_id, m.side_kind, m.side_a_id AS side_id,
+         r.winner_side = 'a' AS won,
+         s.side_a_games AS games_for, s.side_b_games AS games_against
+  FROM matches m
+  JOIN match_results r ON r.match_id = m.id
+  JOIN match_scores  s ON s.match_id = m.id
+  WHERE m.status = 'completed'
+  UNION ALL
+  SELECT m.season_id, m.side_kind, m.side_b_id,
+         r.winner_side = 'b',
+         s.side_b_games, s.side_a_games
+  FROM matches m
+  JOIN match_results r ON r.match_id = m.id
+  JOIN match_scores  s ON s.match_id = m.id
+  WHERE m.status = 'completed'
+),
+sets AS (
+  SELECT season_id, side_kind, side_id,
+         SUM(CASE WHEN games_for > games_against THEN 1 ELSE 0 END) AS sets_won,
+         SUM(CASE WHEN games_for < games_against THEN 1 ELSE 0 END) AS sets_lost,
+         SUM(games_for) AS games_won,
+         SUM(games_against) AS games_lost
+  FROM sides GROUP BY season_id, side_kind, side_id
+),
+wl AS (
+  SELECT season_id, side_kind, side_id,
+         COUNT(*) FILTER (WHERE won) AS wins,
+         COUNT(*) FILTER (WHERE NOT won) AS losses
+  FROM (SELECT DISTINCT ON (m.id, side_id) * FROM sides
+        JOIN matches m USING (season_id)) x
+  GROUP BY season_id, side_kind, side_id
+)
+SELECT s.season_id, s.side_kind, s.side_id,
+       COALESCE(w.wins,0) AS wins, COALESCE(w.losses,0) AS losses,
+       s.sets_won, s.sets_lost, s.games_won, s.games_lost
+FROM sets s LEFT JOIN wl w USING (season_id, side_kind, side_id);
 
-ALTER TABLE public.season_settings
-  ADD COLUMN score_format score_format NOT NULL DEFAULT 'best_of_3',
-  ADD COLUMN dispute_resolution dispute_resolution NOT NULL DEFAULT 'creator_decides',
-  ADD COLUMN forfeit_handling forfeit_handling NOT NULL DEFAULT 'manual_review',
-  ADD COLUMN captain_rotation_mode captain_rotation_mode NOT NULL DEFAULT 'invite_order',
-  ADD COLUMN captain_reminders boolean NOT NULL DEFAULT true,
-  ADD COLUMN deadline_reminders boolean NOT NULL DEFAULT true,
-  ADD COLUMN weekly_digest boolean NOT NULL DEFAULT true,
-  ADD COLUMN digest_frequency_days integer NOT NULL DEFAULT 7;
+GRANT SELECT ON public.season_standings TO authenticated;
 ```
 
-Existing RLS/GRANTs cover both tables — no policy changes needed.
+(Views inherit RLS from underlying tables via `is_season_member`, so no extra policy needed; the `standings` table will be kept for backwards-compat but the UI reads from `season_standings`.)
 
-`doubles_teams` already exists — Step 4 inserts after participants return IDs.
+## Files
 
-## Submit Sequence (Launch)
+**New**
+- `src/pages/MatchScorecard.tsx` — `/app/matches/:id/results`
+- `src/components/season/OverviewTab.tsx`
+- `src/components/season/ScheduleTab.tsx` (round-grouped, status badges)
+- `src/components/season/MatchHistoryTab.tsx`
+- `src/components/season/StandingsTab.tsx` (with podium)
+- `src/components/season/MatchStatusBadge.tsx`
 
-1. Insert `seasons` (`lifecycle_status='active'`, `status='active'`, visibility from wizard).
-2. Insert `season_settings` with all new fields.
-3. Insert `season_participants` (creator + invitees) → capture IDs.
-4. If doubles → insert `doubles_teams` rows using returned participant IDs.
-5. Invoke `generate-fixtures` edge function.
-6. Navigate to `/app/seasons/:id/launched`.
+**Edited**
+- `src/pages/SeasonDetail.tsx` — add Overview + History tabs, default to Overview, delegate to new components.
+- `src/pages/MatchDetail.tsx` — write `completed_at` / `scheduled_by` / confirm/dispute flow.
+- `src/App.tsx` — register `/app/matches/:id/results`.
+- `src/integrations/supabase/types.ts` — regenerated by migration.
 
-Save-as-draft is not built in this pass but the `lifecycle_status` column is in place for the follow-up.
+## Out of scope (deferred)
 
-## Design
-
-Glass cards, Outfit headings, Inter body, lime-yellow primary CTAs. Mobile-first single-column with sticky bottom action bar. Step 2 Round-Robin Impact and Step 7 Schedule Preview use accent typography to create the "this is real" moment.
-
-## Out of Scope (deferred, columns/flags in place)
-
-- Save as Draft button + draft resume flow (lifecycle column ready).
-- Edge function honoring rotation mode, score format, forfeit handling (settings stored; logic follow-up).
-- Real email delivery for invites (link copy only).
-- Drag-and-drop manual rotation polish (use up/down arrows for MVP).
+- Real email/push notifications for "result pending confirmation".
+- Auto-overdue cron — `overdue` is derived client-side only.
+- Editing a submitted score after confirmation (admin override only).
+- Doubles team head-to-head tiebreak; we keep the existing wins → set diff → game diff order.

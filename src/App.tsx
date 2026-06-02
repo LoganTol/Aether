@@ -12,6 +12,7 @@ import CreateSeason from "./pages/CreateSeason.tsx";
 import SeasonDetail from "./pages/SeasonDetail.tsx";
 import SeasonCommandCenter from "./pages/SeasonCommandCenter.tsx";
 import MatchDetail from "./pages/MatchDetail.tsx";
+import MatchScorecard from "./pages/MatchScorecard.tsx";
 import JoinSeason from "./pages/JoinSeason.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import TermsAndConditions from "./pages/TermsAndConditions.tsx";
@@ -34,6 +35,7 @@ const App = () => (
             <Route path="/app/seasons/:id/launched" element={<ProtectedRoute><SeasonCommandCenter /></ProtectedRoute>} />
             <Route path="/app/seasons/:id" element={<ProtectedRoute><SeasonDetail /></ProtectedRoute>} />
             <Route path="/app/matches/:matchId" element={<ProtectedRoute><MatchDetail /></ProtectedRoute>} />
+            <Route path="/app/matches/:matchId/results" element={<ProtectedRoute><MatchScorecard /></ProtectedRoute>} />
             <Route path="/terms" element={<TermsAndConditions />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />
             <Route path="*" element={<NotFound />} />

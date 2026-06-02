@@ -1,71 +1,23 @@
 import { useEffect, useState, useCallback } from "react";
-import { Link, useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Calendar, Trophy, Users, Crown, Copy, Settings, Loader2, AlertCircle } from "lucide-react";
+import { useParams, useNavigate } from "react-router-dom";
+import { ArrowLeft, Calendar, Users, Copy, Settings, AlertCircle, LayoutDashboard, CalendarDays, Trophy, History, UserCircle } from "lucide-react";
 import AppHeader from "@/components/AppHeader";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
+import OverviewTab from "@/components/season/OverviewTab";
+import ScheduleTab from "@/components/season/ScheduleTab";
+import StandingsTab from "@/components/season/StandingsTab";
+import MatchHistoryTab from "@/components/season/MatchHistoryTab";
+import type { Season, Participant, Team, Match, CaptainSlot, StandingRow } from "@/components/season/types";
 
-interface Season {
-  id: string;
-  name: string;
-  format: "singles" | "doubles";
-  status: string;
-  start_date: string;
-  end_date: string;
-  creator_id: string;
-}
-interface Participant {
-  id: string;
-  display_name: string;
-  invited_email: string | null;
-  user_id: string | null;
-  status: string;
-  join_token: string | null;
-}
-interface Team {
-  id: string;
-  name: string;
-  player_a_id: string;
-  player_b_id: string;
-}
-interface Match {
-  id: string;
-  round: number;
-  side_kind: "player" | "team";
-  side_a_id: string;
-  side_b_id: string;
-  scheduled_at: string | null;
-  deadline_at: string;
-  status: string;
-  scheduling_captain_id: string | null;
-}
-interface CaptainSlot {
-  id: string;
-  participant_id: string;
-  position: number;
-  is_current: boolean;
-  window_start: string | null;
-  window_end: string | null;
-}
-interface StandingRow {
-  side_id: string;
-  side_kind: string;
-  wins: number;
-  losses: number;
-  sets_won: number;
-  sets_lost: number;
-  games_won: number;
-  games_lost: number;
-}
-
-type Tab = "schedule" | "standings" | "members" | "admin";
+type Tab = "overview" | "schedule" | "standings" | "history" | "members" | "admin";
 
 export default function SeasonDetail() {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [tab, setTab] = useState<Tab>("schedule");
+  const [tab, setTab] = useState<Tab>("overview");
   const [loading, setLoading] = useState(true);
   const [season, setSeason] = useState<Season | null>(null);
   const [participants, setParticipants] = useState<Participant[]>([]);
@@ -83,14 +35,14 @@ export default function SeasonDetail() {
       supabase.from("doubles_teams").select("*").eq("season_id", id),
       supabase.from("matches").select("*").eq("season_id", id).order("round").order("created_at"),
       supabase.from("captain_rotation").select("*").eq("season_id", id).order("position"),
-      supabase.from("standings").select("*").eq("season_id", id),
+      supabase.from("season_standings" as never).select("*").eq("season_id", id),
     ]);
     if (s.data) setSeason(s.data as Season);
     setParticipants((p.data as Participant[]) || []);
     setTeams((t.data as Team[]) || []);
     setMatches((m.data as Match[]) || []);
     setRotation((r.data as CaptainSlot[]) || []);
-    setStandings((st.data as StandingRow[]) || []);
+    setStandings(((st.data as StandingRow[] | null) || []));
     setLoading(false);
   }, [id]);
 
@@ -118,20 +70,11 @@ export default function SeasonDetail() {
 
   const isCreator = user?.id === season.creator_id;
   const myParticipant = participants.find((p) => p.user_id === user?.id);
-  const currentCaptain = rotation.find((r) => r.is_current);
-  const currentCaptainPid = currentCaptain?.participant_id;
-  const iAmCaptain = currentCaptainPid && currentCaptainPid === myParticipant?.id;
 
   const sideLabel = (kind: string, sideId: string): string => {
     if (kind === "team") return teams.find((t) => t.id === sideId)?.name || "Team";
     return participants.find((p) => p.id === sideId)?.display_name || "Player";
   };
-
-  const pendingMatches = matches.filter((m) => ["pending", "proposed"].includes(m.status));
-  const upcomingMatches = matches.filter((m) => m.status === "scheduled").sort((a, b) =>
-    (a.scheduled_at || "").localeCompare(b.scheduled_at || "")
-  );
-  const completedMatches = matches.filter((m) => ["completed", "forfeited"].includes(m.status));
 
   const copyInvite = (token: string | null) => {
     if (!token) return;
@@ -146,6 +89,15 @@ export default function SeasonDetail() {
     if (error) toast({ title: "Could not rotate", description: error.message, variant: "destructive" });
     else { toast({ title: "Captain rotated" }); refresh(); }
   };
+
+  const tabs: { id: Tab; label: string; icon: typeof LayoutDashboard }[] = [
+    { id: "overview", label: "Overview", icon: LayoutDashboard },
+    { id: "schedule", label: "Schedule", icon: CalendarDays },
+    { id: "standings", label: "Standings", icon: Trophy },
+    { id: "history", label: "History", icon: History },
+    { id: "members", label: "Members", icon: UserCircle },
+    ...(isCreator ? [{ id: "admin" as Tab, label: "Admin", icon: Settings }] : []),
+  ];
 
   return (
     <div className="min-h-screen bg-background">
@@ -170,113 +122,38 @@ export default function SeasonDetail() {
           </div>
         </div>
 
-        {/* Captain banner */}
-        {currentCaptain && (
-          <div className={`glass-card p-5 md:p-6 mb-6 border ${iAmCaptain ? "border-primary/50 glow-shadow" : "border-border"}`}>
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-primary/10 border border-primary/30 flex items-center justify-center shrink-0">
-                <Crown className="text-primary" size={22} />
-              </div>
-              <div className="flex-1">
-                <p className="text-xs uppercase tracking-wider text-muted-foreground">Scheduling Captain</p>
-                <p className="text-lg font-bold">
-                  {iAmCaptain ? "You're the captain this window" : participants.find((p) => p.id === currentCaptainPid)?.display_name}
-                </p>
-                {currentCaptain.window_end && (
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Window ends {new Date(currentCaptain.window_end).toLocaleDateString()} ·{" "}
-                    {pendingMatches.length} match{pendingMatches.length === 1 ? "" : "es"} need a time
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* Tabs */}
         <div className="flex gap-1 border-b border-border mb-6 overflow-x-auto">
-          {(["schedule", "standings", "members", ...(isCreator ? ["admin" as Tab] : [])] as Tab[]).map((t) => (
-            <button
-              key={t}
-              onClick={() => setTab(t)}
-              className={`px-4 py-2.5 text-sm font-medium capitalize whitespace-nowrap border-b-2 transition-colors ${
-                tab === t ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {t === "admin" ? <span className="inline-flex items-center gap-1.5"><Settings size={14} /> Admin</span> : t}
-            </button>
-          ))}
+          {tabs.map((t) => {
+            const Icon = t.icon;
+            return (
+              <button
+                key={t.id}
+                onClick={() => setTab(t.id)}
+                className={`px-4 py-2.5 text-sm font-medium whitespace-nowrap border-b-2 transition-colors inline-flex items-center gap-1.5 ${
+                  tab === t.id ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <Icon size={14} /> {t.label}
+              </button>
+            );
+          })}
         </div>
 
-        {tab === "schedule" && (
-          <div className="space-y-6">
-            {upcomingMatches.length > 0 && (
-              <div>
-                <h3 className="text-sm uppercase tracking-wider text-muted-foreground mb-3">Upcoming</h3>
-                <div className="space-y-2">
-                  {upcomingMatches.map((m) => (
-                    <MatchRow key={m.id} m={m} sideLabel={sideLabel} />
-                  ))}
-                </div>
-              </div>
-            )}
-            {pendingMatches.length > 0 && (
-              <div>
-                <h3 className="text-sm uppercase tracking-wider text-muted-foreground mb-3">Needs scheduling</h3>
-                <div className="space-y-2">
-                  {pendingMatches.map((m) => (
-                    <MatchRow key={m.id} m={m} sideLabel={sideLabel} />
-                  ))}
-                </div>
-              </div>
-            )}
-            {completedMatches.length > 0 && (
-              <div>
-                <h3 className="text-sm uppercase tracking-wider text-muted-foreground mb-3">Played</h3>
-                <div className="space-y-2">
-                  {completedMatches.map((m) => (
-                    <MatchRow key={m.id} m={m} sideLabel={sideLabel} />
-                  ))}
-                </div>
-              </div>
-            )}
-            {matches.length === 0 && (
-              <p className="text-muted-foreground">No matches yet.</p>
-            )}
-          </div>
+        {tab === "overview" && (
+          <OverviewTab
+            season={season}
+            participants={participants}
+            matches={matches}
+            rotation={rotation}
+            myParticipantId={myParticipant?.id}
+            sideLabel={sideLabel}
+            onGoToSchedule={() => setTab("schedule")}
+          />
         )}
-
-        {tab === "standings" && (
-          <div className="glass-card overflow-hidden">
-            <table className="w-full text-sm">
-              <thead className="text-xs uppercase tracking-wider text-muted-foreground bg-black/30">
-                <tr>
-                  <th className="text-left px-4 py-3">#</th>
-                  <th className="text-left px-4 py-3">{season.format === "doubles" ? "Team" : "Player"}</th>
-                  <th className="text-right px-2 py-3">W</th>
-                  <th className="text-right px-2 py-3">L</th>
-                  <th className="text-right px-2 py-3 hidden sm:table-cell">Sets</th>
-                  <th className="text-right px-4 py-3 hidden sm:table-cell">Games</th>
-                </tr>
-              </thead>
-              <tbody>
-                {sortStandings(standings, season.format).map((s, i) => (
-                  <tr key={s.side_id} className="border-t border-border">
-                    <td className="px-4 py-3 font-bold">{i + 1}</td>
-                    <td className="px-4 py-3">{sideLabel(s.side_kind, s.side_id)}</td>
-                    <td className="px-2 py-3 text-right text-primary font-semibold">{s.wins}</td>
-                    <td className="px-2 py-3 text-right">{s.losses}</td>
-                    <td className="px-2 py-3 text-right hidden sm:table-cell">{s.sets_won}-{s.sets_lost}</td>
-                    <td className="px-4 py-3 text-right hidden sm:table-cell">{s.games_won}-{s.games_lost}</td>
-                  </tr>
-                ))}
-                {standings.length === 0 && (
-                  <tr><td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">No matches played yet.</td></tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        )}
+        {tab === "schedule" && <ScheduleTab matches={matches} sideLabel={sideLabel} />}
+        {tab === "standings" && <StandingsTab season={season} standings={standings} sideLabel={sideLabel} />}
+        {tab === "history" && <MatchHistoryTab matches={matches} sideLabel={sideLabel} />}
 
         {tab === "members" && (
           <div className="space-y-2">
@@ -334,43 +211,4 @@ export default function SeasonDetail() {
       </main>
     </div>
   );
-}
-
-function MatchRow({ m, sideLabel }: { m: Match; sideLabel: (k: string, id: string) => string }) {
-  return (
-    <Link
-      to={`/app/matches/${m.id}`}
-      className="glass-card p-4 flex items-center justify-between gap-3 hover:border-primary/40 transition-colors"
-    >
-      <div className="flex-1">
-        <p className="text-xs text-muted-foreground uppercase tracking-wider">Round {m.round}</p>
-        <p className="font-medium">
-          {sideLabel(m.side_kind, m.side_a_id)} <span className="text-muted-foreground">vs</span> {sideLabel(m.side_kind, m.side_b_id)}
-        </p>
-      </div>
-      <div className="text-right text-xs">
-        {m.status === "scheduled" && m.scheduled_at ? (
-          <span className="text-primary font-semibold">{new Date(m.scheduled_at).toLocaleString()}</span>
-        ) : m.status === "completed" ? (
-          <span className="text-muted-foreground">Played</span>
-        ) : m.status === "forfeited" ? (
-          <span className="text-muted-foreground">Forfeit</span>
-        ) : (
-          <span className="text-muted-foreground">Due {new Date(m.deadline_at).toLocaleDateString()}</span>
-        )}
-      </div>
-    </Link>
-  );
-}
-
-function sortStandings(rows: StandingRow[], _format: string): StandingRow[] {
-  return [...rows].sort((a, b) => {
-    if (b.wins !== a.wins) return b.wins - a.wins;
-    const sa = a.sets_won - a.sets_lost;
-    const sb = b.sets_won - b.sets_lost;
-    if (sb !== sa) return sb - sa;
-    const ga = a.games_won - a.games_lost;
-    const gb = b.games_won - b.games_lost;
-    return gb - ga;
-  });
 }
