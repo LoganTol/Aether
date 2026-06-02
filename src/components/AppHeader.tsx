@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { LogOut, LayoutDashboard } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import AetherLogo from "@/components/AetherLogo";
 
 export default function AppHeader() {
   const { user, signOut } = useAuth();
@@ -8,9 +9,7 @@ export default function AppHeader() {
   return (
     <header className="sticky top-0 w-full py-4 z-50 bg-background/80 backdrop-blur-md border-b border-border">
       <div className="container flex justify-between items-center">
-        <Link to={user ? "/app" : "/"} className="font-heading text-2xl font-bold tracking-wide">
-          AETHER<span className="text-primary">.</span>
-        </Link>
+        <AetherLogo to={user ? "/app" : "/"} className="text-2xl" />
         <div className="flex items-center gap-2">
           {user && (
             <>
