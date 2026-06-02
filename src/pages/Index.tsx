@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, Trophy, Users, Repeat, CalendarCheck, Award } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import AetherLogo from "@/components/AetherLogo";
 
 const features = [
   {
