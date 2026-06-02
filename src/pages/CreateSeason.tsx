@@ -32,7 +32,7 @@ export default function CreateSeason() {
   ]);
   const [busy, setBusy] = useState(false);
 
-  const minParticipants = format === "singles" ? 3 : 4;
+  const minParticipants = 1;
 
   const addRow = () => setParticipants((p) => [...p, { display_name: "", email: "" }]);
   const removeRow = (i: number) =>
