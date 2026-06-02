@@ -10,6 +10,7 @@ import Auth from "./pages/Auth.tsx";
 import Dashboard from "./pages/Dashboard.tsx";
 import CreateSeason from "./pages/CreateSeason.tsx";
 import SeasonDetail from "./pages/SeasonDetail.tsx";
+import SeasonCommandCenter from "./pages/SeasonCommandCenter.tsx";
 import MatchDetail from "./pages/MatchDetail.tsx";
 import JoinSeason from "./pages/JoinSeason.tsx";
 import NotFound from "./pages/NotFound.tsx";
@@ -30,6 +31,7 @@ const App = () => (
             <Route path="/join/:token" element={<JoinSeason />} />
             <Route path="/app" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/app/seasons/new" element={<ProtectedRoute><CreateSeason /></ProtectedRoute>} />
+            <Route path="/app/seasons/:id/launched" element={<ProtectedRoute><SeasonCommandCenter /></ProtectedRoute>} />
             <Route path="/app/seasons/:id" element={<ProtectedRoute><SeasonDetail /></ProtectedRoute>} />
             <Route path="/app/matches/:matchId" element={<ProtectedRoute><MatchDetail /></ProtectedRoute>} />
             <Route path="/terms" element={<TermsAndConditions />} />
