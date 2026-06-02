@@ -1,114 +1,113 @@
+## Goal
 
-# Aether Tennis — Social Season Platform (Revised MVP)
+Replace single-page `CreateSeason.tsx` with a 7-step Season Setup Wizard. Support draft/ready/active lifecycle, season visibility, and a richer Command Center post-launch.
 
-## Positioning
+## Wizard Step Order (revised)
 
-**Aether Tennis: Social Tennis Seasons** — for neighborhoods, couples, friend groups, HOAs, and clubs. Not "league software." The product is an **Accountability Engine**: Create Season → Assign Responsibility → Keep Season Moving → Finish Season. Standings are a byproduct.
+1. **Basics** — name, format, start/end date, captain window days, match deadline days.
+2. **Participants** — add by email, shareable invite link, live list with checkmarks, Round-Robin Impact card (matches, rounds, estimated weeks).
+3. **Format Review** — read-only summary, rounds & match count.
+4. **Doubles Teams** — only when format = doubles. Pair into fixed teams; validate every player assigned once.
+5. **Rules & Captain Rotation** — score format, dispute resolution, forfeit handling, **season visibility**, **captain rotation mode** (Random / Invite Order / Alphabetical / Manual — manual reorders the now-known participant list).
+6. **Notifications** — captain reminders, deadline reminders, weekly digest + frequency.
+7. **Review & Launch** — full summary card + **Preview Schedule** (first 3 matchups grouped by week) + "Launch Season" CTA.
 
-Every screen answers three questions: **Who owes what? By when? What happens next?**
+## Component Structure
 
-## Locked Decisions
+`src/components/season-wizard/`
+- `SeasonWizard.tsx` — orchestrator (state, validation, nav, submit).
+- `WizardShell.tsx` — stepper header, mobile-collapsed "Step X of 7" + dots, sticky bottom Back/Next/Launch bar.
+- `steps/Step1Basics.tsx`
+- `steps/Step2Participants.tsx` — list with checkmarks + `RoundRobinImpact` card.
+- `steps/Step3FormatReview.tsx`
+- `steps/Step4DoublesTeams.tsx`
+- `steps/Step5RulesAndRotation.tsx` — includes `CaptainRotationConfig` (radio + up/down reorder for manual) and `VisibilityPicker`.
+- `steps/Step6Notifications.tsx`
+- `steps/Step7ReviewLaunch.tsx` — includes `SchedulePreview` (computes first 3 round-robin pairings client-side from ordered participants/teams).
+- `hooks/useWizardState.ts` — typed `useReducer` for all wizard fields.
+- `lib/wizardEstimates.ts` — `matchCount`, `roundCount`, `estimatedWeeks`, `recommendedSeasonLength(players, cadence)`, `previewSchedule(participants|teams, n)`.
 
-1. **Round-robin only** (singles + doubles, with auto BYE for odd counts). Playoffs/ladders = Phase 2.
-2. **Fixed doubles pairs** declared at season start.
-3. **Creator = Commissioner Lite** with override powers (edit scores, reassign captain, extend deadlines, remove/forfeit, pause/end season). Hidden behind **Season Settings → Admin Actions**, invisible to participants.
-4. **Captain rotation = time window** (weekly default), configurable.
-5. **In-app scheduling proposals are MVP**, not v2. Captain proposes up to 3 times → opponent one-taps to confirm. Scheduling friction is the core problem; it cannot live outside the app.
+New page: `src/pages/SeasonCommandCenter.tsx` at `/app/seasons/:id/launched`.
 
-## Database (revised)
+Hero: "Season Ready" + season name, player count, matches generated, current captain, season start date. Quick actions: View Schedule, Invite More Players, Season Settings, Manage Participants.
 
-```text
-profiles               (id=auth.uid, display_name, avatar_url, timezone)
+## State Shape
 
-seasons                (id, creator_id, name, format[singles|doubles],
-                        start_date, end_date, status[draft|active|paused|completed])
-
-season_settings        (season_id PK, creator_can_override bool,
-                        auto_rotate_captain bool, captain_window_days int,
-                        reminder_frequency_hours int, match_deadline_days int,
-                        tiebreaker_order text[])
-
-season_participants    (id, season_id, user_id NULL, invited_email,
-                        display_name, status[invited|active|withdrawn],
-                        join_token, joined_at)
-
-doubles_teams          (id, season_id, name, player_a_id, player_b_id)
-
-matches                (id, season_id, round, side_a_id, side_b_id,
-                        side_kind[player|team], scheduled_at NULL,
-                        deadline_at, status[pending|proposed|scheduled|
-                        completed|forfeited|disputed],
-                        scheduling_captain_id)
-
-match_time_proposals   (id, match_id, proposed_by, slot_1, slot_2, slot_3,
-                        accepted_slot NULL, responded_at NULL, expires_at)
-
-match_scores           (id, match_id, set_number, side_a_games, side_b_games)
-
-match_results          (id, match_id, winner_side, entered_by,
-                        confirmed_by NULL, disputed bool, resolved_by_admin NULL)
-
-captain_rotation       (id, season_id, user_id, position, current bool,
-                        window_start, window_end)
-
-admin_actions_log      (id, season_id, actor_id, action_type, target_id,
-                        reason, created_at)            -- audit trail for overrides
-
-notifications_log      (id, user_id, type, payload, sent_at)
+```ts
+type WizardState = {
+  step: 1|2|3|4|5|6|7;
+  basics: { name; format; startDate; endDate; captainWindowDays; matchDeadlineDays };
+  participants: ParticipantInput[];
+  doublesTeams: { name; playerAIdx; playerBIdx }[];
+  rules: {
+    scoreFormat: 'best_of_3'|'pro_set_8'|'single_set_6';
+    disputeResolution: 'creator_decides'|'majority_vote';
+    forfeitHandling: 'auto_loss'|'manual_review';
+    visibility: 'private'|'invite_only';
+    rotationMode: 'random'|'invite_order'|'alphabetical'|'manual';
+    manualOrder: number[]; // indexes into participants
+  };
+  notifications: { captainReminders; deadlineReminders; weeklyDigest; digestFrequencyDays };
+};
 ```
 
-Standings = SQL view over `match_results` + `match_scores`, ordered by configurable `tiebreaker_order` (default: wins → set diff → game diff → head-to-head).
+## Route Updates
 
-RLS: `is_season_member(season_id)` security-definer fn for participants; `is_season_creator(season_id)` for admin actions. All overrides write to `admin_actions_log`.
+`src/App.tsx`:
+- `/app/seasons/new` → `CreateSeason` (renders `SeasonWizard`).
+- `/app/seasons/:id/launched` → `SeasonCommandCenter`.
 
-## Core Flows
+## Database Changes (single migration)
 
-**Create season** → name, dates, format, captain window (default 7d), match deadline (default 14d) → add participants by email → fixed doubles teams if applicable → app generates round-robin fixtures with rolling deadlines → first captain assigned → Resend invites.
+Add lifecycle + visibility to `seasons`, plus rules/notifications/rotation to `season_settings`.
 
-**Captain's week** → dashboard banner: "You're Scheduling Captain until Sun. 2 matches need times." → for each match, captain picks up to 3 time slots → opponent receives proposal email + in-app card → one-tap accept → match `scheduled`.
+```sql
+-- seasons
+ALTER TABLE public.seasons
+  ADD COLUMN visibility text NOT NULL DEFAULT 'invite_only'
+    CHECK (visibility IN ('private','invite_only')),
+  ADD COLUMN lifecycle_status text NOT NULL DEFAULT 'draft'
+    CHECK (lifecycle_status IN ('draft','ready','active','completed','archived'));
 
-**Play & report** → either side enters score → opponent confirms or disputes → on confirm, standings update; on dispute, creator pinged and can resolve via admin action.
+-- season_settings
+CREATE TYPE score_format AS ENUM ('best_of_3','pro_set_8','single_set_6');
+CREATE TYPE dispute_resolution AS ENUM ('creator_decides','majority_vote');
+CREATE TYPE forfeit_handling AS ENUM ('auto_loss','manual_review');
+CREATE TYPE captain_rotation_mode AS ENUM ('random','invite_order','alphabetical','manual');
 
-**Rotation** → daily cron edge function: when window ends OR all owed matches scheduled, advance `current` flag to next position; notify new captain.
+ALTER TABLE public.season_settings
+  ADD COLUMN score_format score_format NOT NULL DEFAULT 'best_of_3',
+  ADD COLUMN dispute_resolution dispute_resolution NOT NULL DEFAULT 'creator_decides',
+  ADD COLUMN forfeit_handling forfeit_handling NOT NULL DEFAULT 'manual_review',
+  ADD COLUMN captain_rotation_mode captain_rotation_mode NOT NULL DEFAULT 'invite_order',
+  ADD COLUMN captain_reminders boolean NOT NULL DEFAULT true,
+  ADD COLUMN deadline_reminders boolean NOT NULL DEFAULT true,
+  ADD COLUMN weekly_digest boolean NOT NULL DEFAULT true,
+  ADD COLUMN digest_frequency_days integer NOT NULL DEFAULT 7;
+```
 
-**Creator overrides** → Admin panel: reassign captain, edit any score, force-schedule, extend deadline, forfeit, remove participant, pause/end. Every action logged.
+Existing RLS/GRANTs cover both tables — no policy changes needed.
 
-## Notifications (Resend)
+`doubles_teams` already exists — Step 4 inserts after participants return IDs.
 
-- Invite received / accepted
-- "You're now Scheduling Captain" (week start)
-- Time proposal received → awaiting your tap
-- Match scheduled / rescheduled
-- Match deadline 48h / overdue
-- Score awaiting your confirmation
-- Captain window ending in 24h with unfinished obligations
-- Weekly standings + "what's next" digest
+## Submit Sequence (Launch)
 
-## MVP Scope
+1. Insert `seasons` (`lifecycle_status='active'`, `status='active'`, visibility from wizard).
+2. Insert `season_settings` with all new fields.
+3. Insert `season_participants` (creator + invitees) → capture IDs.
+4. If doubles → insert `doubles_teams` rows using returned participant IDs.
+5. Invoke `generate-fixtures` edge function.
+6. Navigate to `/app/seasons/:id/launched`.
 
-**In:** Auth (email + Google), profiles with timezone, season CRUD, fixed-pair doubles, email + link invites, auto-fixtures, **time-window captain rotation**, **3-slot scheduling proposals with one-tap accept**, score entry + confirm/dispute, standings view, season dashboard, **creator admin panel + audit log**, Resend transactional emails, daily cron for rotation/reminders, mobile-first responsive UI in current Aether brand.
+Save-as-draft is not built in this pass but the `lifecycle_status` column is in place for the follow-up.
 
-**Out (Phase 2):** playoffs, consolation brackets, ladders, partner shuffle, King of the Court, court/venue booking, payments, in-app chat, push/SMS, photos, public spectator pages, ICS export, badges/streaks, captain leaderboard.
+## Design
 
-**Removed from current app:** cart, Order page, Stripe checkout, product carousel, "Buy Now", price fetching, ProductCarousel, StripeEmbeddedCheckout, PaymentTestModeBanner, related edge functions. Keep: branding tokens, header/footer shell, T&C/Privacy (rewritten for platform).
+Glass cards, Outfit headings, Inter body, lime-yellow primary CTAs. Mobile-first single-column with sticky bottom action bar. Step 2 Round-Robin Impact and Step 7 Schedule Preview use accent typography to create the "this is real" moment.
 
-## Visual / Brand
+## Out of Scope (deferred, columns/flags in place)
 
-Reuse existing color tokens, typography, and premium aesthetic from `index.css` and `tailwind.config.ts`. New surfaces: Dashboard, Season detail, Match card, Captain banner, Standings table, Admin panel — all in the same premium dark palette already in use.
-
-## Build Order
-
-1. Tear out ecommerce; keep brand shell, T&C, Privacy (rewritten).
-2. Auth + profiles + timezone.
-3. Season + participants + fixed-pair doubles + invite flow (Resend).
-4. Fixture generator + deadlines + captain rotation cron.
-5. Scheduling proposals + one-tap accept.
-6. Score entry + confirm/dispute + standings view.
-7. Dashboard (captain banner, upcoming, standings, progress).
-8. Creator admin panel + audit log.
-9. Notification suite + weekly digest.
-10. Polish, empty states, mobile QA.
-
----
-
-Ready to build when you approve.
+- Save as Draft button + draft resume flow (lifecycle column ready).
+- Edge function honoring rotation mode, score format, forfeit handling (settings stored; logic follow-up).
+- Real email delivery for invites (link copy only).
+- Drag-and-drop manual rotation polish (use up/down arrows for MVP).
