@@ -19,58 +19,53 @@ const TermsAndConditions = () => {
     </header>
 
     <main className="container max-w-3xl py-12 space-y-8">
-      <h1 className="text-4xl font-bold">Terms and Conditions</h1>
-      <p className="text-muted-foreground text-sm">Last Updated: April 2026</p>
-      <p>Welcome to Aether Tennis. These Terms and Conditions ("Terms") govern your use of our website and the purchase of any products from us. By accessing the Site, you agree to be bound by these Terms.</p>
+      <h1 className="text-4xl font-bold">Terms of Service</h1>
+      <p className="text-muted-foreground text-sm">Last Updated: June 2026</p>
+      <p>Welcome to Aether Tennis. These Terms of Service ("Terms") govern your access to and use of the Aether Tennis platform for organizing social tennis seasons. By creating an account or joining a season, you agree to these Terms.</p>
 
       <section className="space-y-3">
-        <h2 className="text-2xl font-semibold">1. General Conditions</h2>
-        <p className="text-muted-foreground">We reserve the right to refuse service to anyone for any reason at any time. You understand that your content (not including credit card information) may be transferred unencrypted and involve transmissions over various networks and changes to conform to technical requirements.</p>
+        <h2 className="text-2xl font-semibold">1. The Service</h2>
+        <p className="text-muted-foreground">Aether Tennis is a software platform that helps groups of players run their own round-robin tennis seasons, including scheduling, score tracking, and rotating scheduling-captain responsibilities. We do not organize matches, provide courts, or guarantee any particular outcome.</p>
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-2xl font-semibold">2. Eligibility</h2>
-        <p className="text-muted-foreground">By using this Site, you represent that you are at least the age of majority in your state or province of residence, or that you have given us your consent to allow any of your minor dependents to use this site.</p>
+        <h2 className="text-2xl font-semibold">2. Eligibility & Accounts</h2>
+        <p className="text-muted-foreground">You must be at least 13 years old to use the Service. You are responsible for keeping your login credentials secure and for all activity under your account.</p>
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-2xl font-semibold">3. Product Information and Pricing</h2>
-        <p className="text-muted-foreground">We make every effort to display as accurately as possible the colors and images of our products. We cannot guarantee that your monitor's display of any color will be accurate.</p>
-        <ul className="list-disc list-inside text-muted-foreground space-y-1">
-          <li>Prices for our products are subject to change without notice.</li>
-          <li>We reserve the right to modify or discontinue the Service without notice.</li>
-          <li>We shall not be liable for any modification, price change, suspension or discontinuance of the Service.</li>
-        </ul>
+        <h2 className="text-2xl font-semibold">3. Seasons, Captains, and Conduct</h2>
+        <p className="text-muted-foreground">Season creators are responsible for the participants they invite and for resolving disputes within their own group. All users agree to use the Service in good faith — entering accurate scores, honoring scheduled matches, and treating other players respectfully.</p>
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-2xl font-semibold">4. Accuracy of Billing and Account Information</h2>
-        <p className="text-muted-foreground">We reserve the right to refuse any order you place with us. We may limit or cancel quantities purchased per person, per household, or per order.</p>
+        <h2 className="text-2xl font-semibold">4. Assumption of Risk</h2>
+        <p className="text-muted-foreground">Tennis is a physical activity. You play matches at your own risk. Aether Tennis is not responsible for any injury, property damage, or other loss that occurs during a match scheduled through the platform.</p>
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-2xl font-semibold">5. Shipping and Delivery</h2>
-        <p className="text-muted-foreground">Shipping costs and delivery timelines are estimated and not guaranteed. Aether Tennis is not responsible for delays caused by shipping carriers, customs clearances, or other external factors. Risk of loss passes to you upon delivery to the carrier.</p>
+        <h2 className="text-2xl font-semibold">5. Acceptable Use</h2>
+        <p className="text-muted-foreground">You may not use the Service to harass other users, submit false scores, spam invites, attempt to access another account, or interfere with the platform's operation.</p>
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-2xl font-semibold">6. Returns and Refunds Policy</h2>
-        <p className="text-muted-foreground">Our return policy lasts 30 days. To be eligible for a return, your item must be unused, in the same condition you received it, and in the original packaging. A receipt or proof of purchase is required.</p>
+        <h2 className="text-2xl font-semibold">6. Service Changes & Termination</h2>
+        <p className="text-muted-foreground">We may modify, suspend, or discontinue any part of the Service at any time. We may suspend or terminate accounts that violate these Terms.</p>
       </section>
 
       <section className="space-y-3">
         <h2 className="text-2xl font-semibold">7. Intellectual Property</h2>
-        <p className="text-muted-foreground">All content on this site is the property of Aether Tennis or its content suppliers and protected by international copyright laws.</p>
+        <p className="text-muted-foreground">The Aether Tennis name, brand, and software are owned by Aether Tennis. Content you submit (season names, scores, comments) remains yours, but you grant us a non-exclusive license to display it within the Service.</p>
       </section>
 
       <section className="space-y-3">
         <h2 className="text-2xl font-semibold">8. Limitation of Liability</h2>
-        <p className="text-muted-foreground">In no case shall Aether Tennis, our directors, officers, employees, affiliates, agents, or contractors be liable for any injury, loss, claim, or any direct, indirect, incidental, punitive, special, or consequential damages of any kind.</p>
+        <p className="text-muted-foreground">To the maximum extent permitted by law, Aether Tennis is not liable for any indirect, incidental, punitive, special, or consequential damages arising from your use of the Service.</p>
       </section>
 
       <section className="space-y-3">
         <h2 className="text-2xl font-semibold">9. Governing Law</h2>
-        <p className="text-muted-foreground">These Terms shall be governed by and construed in accordance with applicable law.</p>
+        <p className="text-muted-foreground">These Terms are governed by applicable law in the jurisdiction of the platform operator. Disputes will be resolved through binding arbitration where permitted by law.</p>
       </section>
 
       <p className="text-muted-foreground text-sm pt-4 border-t border-border">© 2026 Aether Tennis. All Rights Reserved.</p>
