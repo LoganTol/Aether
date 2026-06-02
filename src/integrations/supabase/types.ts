@@ -477,36 +477,60 @@ export type Database = {
       season_settings: {
         Row: {
           auto_rotate_captain: boolean
+          captain_reminders: boolean
+          captain_rotation_mode: Database["public"]["Enums"]["captain_rotation_mode"]
           captain_window_days: number
           created_at: string
           creator_can_override: boolean
+          deadline_reminders: boolean
+          digest_frequency_days: number
+          dispute_resolution: Database["public"]["Enums"]["dispute_resolution"]
+          forfeit_handling: Database["public"]["Enums"]["forfeit_handling"]
           match_deadline_days: number
           reminder_frequency_hours: number
+          score_format: Database["public"]["Enums"]["score_format"]
           season_id: string
           tiebreaker_order: string[]
           updated_at: string
+          weekly_digest: boolean
         }
         Insert: {
           auto_rotate_captain?: boolean
+          captain_reminders?: boolean
+          captain_rotation_mode?: Database["public"]["Enums"]["captain_rotation_mode"]
           captain_window_days?: number
           created_at?: string
           creator_can_override?: boolean
+          deadline_reminders?: boolean
+          digest_frequency_days?: number
+          dispute_resolution?: Database["public"]["Enums"]["dispute_resolution"]
+          forfeit_handling?: Database["public"]["Enums"]["forfeit_handling"]
           match_deadline_days?: number
           reminder_frequency_hours?: number
+          score_format?: Database["public"]["Enums"]["score_format"]
           season_id: string
           tiebreaker_order?: string[]
           updated_at?: string
+          weekly_digest?: boolean
         }
         Update: {
           auto_rotate_captain?: boolean
+          captain_reminders?: boolean
+          captain_rotation_mode?: Database["public"]["Enums"]["captain_rotation_mode"]
           captain_window_days?: number
           created_at?: string
           creator_can_override?: boolean
+          deadline_reminders?: boolean
+          digest_frequency_days?: number
+          dispute_resolution?: Database["public"]["Enums"]["dispute_resolution"]
+          forfeit_handling?: Database["public"]["Enums"]["forfeit_handling"]
           match_deadline_days?: number
           reminder_frequency_hours?: number
+          score_format?: Database["public"]["Enums"]["score_format"]
           season_id?: string
           tiebreaker_order?: string[]
           updated_at?: string
+          weekly_digest?: boolean
         }
         Relationships: [
           {
@@ -525,10 +549,12 @@ export type Database = {
           end_date: string
           format: Database["public"]["Enums"]["season_format"]
           id: string
+          lifecycle_status: string
           name: string
           start_date: string
           status: Database["public"]["Enums"]["season_status"]
           updated_at: string
+          visibility: string
         }
         Insert: {
           created_at?: string
@@ -536,10 +562,12 @@ export type Database = {
           end_date: string
           format: Database["public"]["Enums"]["season_format"]
           id?: string
+          lifecycle_status?: string
           name: string
           start_date: string
           status?: Database["public"]["Enums"]["season_status"]
           updated_at?: string
+          visibility?: string
         }
         Update: {
           created_at?: string
@@ -547,10 +575,12 @@ export type Database = {
           end_date?: string
           format?: Database["public"]["Enums"]["season_format"]
           id?: string
+          lifecycle_status?: string
           name?: string
           start_date?: string
           status?: Database["public"]["Enums"]["season_status"]
           updated_at?: string
+          visibility?: string
         }
         Relationships: []
       }
@@ -582,6 +612,13 @@ export type Database = {
       }
     }
     Enums: {
+      captain_rotation_mode:
+        | "random"
+        | "invite_order"
+        | "alphabetical"
+        | "manual"
+      dispute_resolution: "creator_decides" | "majority_vote"
+      forfeit_handling: "auto_loss" | "manual_review"
       match_side_kind: "player" | "team"
       match_status:
         | "pending"
@@ -591,6 +628,7 @@ export type Database = {
         | "forfeited"
         | "disputed"
       participant_status: "invited" | "active" | "withdrawn"
+      score_format: "best_of_3" | "pro_set_8" | "single_set_6"
       season_format: "singles" | "doubles"
       season_status: "draft" | "active" | "paused" | "completed"
       winner_side: "a" | "b"
@@ -721,6 +759,14 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      captain_rotation_mode: [
+        "random",
+        "invite_order",
+        "alphabetical",
+        "manual",
+      ],
+      dispute_resolution: ["creator_decides", "majority_vote"],
+      forfeit_handling: ["auto_loss", "manual_review"],
       match_side_kind: ["player", "team"],
       match_status: [
         "pending",
@@ -731,6 +777,7 @@ export const Constants = {
         "disputed",
       ],
       participant_status: ["invited", "active", "withdrawn"],
+      score_format: ["best_of_3", "pro_set_8", "single_set_6"],
       season_format: ["singles", "doubles"],
       season_status: ["draft", "active", "paused", "completed"],
       winner_side: ["a", "b"],
