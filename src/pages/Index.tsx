@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, Trophy, Users, Repeat, CalendarCheck, Award } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import AetherLogo from "@/components/AetherLogo";
 
 const features = [
   {
@@ -27,9 +28,7 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 w-full py-4 md:py-6 z-50 bg-background/80 backdrop-blur-md">
         <div className="container flex justify-between items-center">
-          <Link to="/" className="font-heading text-2xl md:text-3xl font-bold tracking-wide">
-            AETHER<span className="text-primary">.</span>
-          </Link>
+          <AetherLogo to="/" className="text-2xl md:text-3xl" />
           <div className="flex items-center gap-2 md:gap-3">
             <Link
               to={target}
