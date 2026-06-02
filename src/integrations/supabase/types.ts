@@ -400,48 +400,6 @@ export type Database = {
           },
         ]
       }
-      orders: {
-        Row: {
-          amount_total: number | null
-          created_at: string
-          currency: string | null
-          customer_email: string | null
-          environment: string
-          id: string
-          product_name: string | null
-          status: string
-          stripe_payment_intent: string | null
-          stripe_session_id: string
-          updated_at: string
-        }
-        Insert: {
-          amount_total?: number | null
-          created_at?: string
-          currency?: string | null
-          customer_email?: string | null
-          environment?: string
-          id?: string
-          product_name?: string | null
-          status?: string
-          stripe_payment_intent?: string | null
-          stripe_session_id: string
-          updated_at?: string
-        }
-        Update: {
-          amount_total?: number | null
-          created_at?: string
-          currency?: string | null
-          customer_email?: string | null
-          environment?: string
-          id?: string
-          product_name?: string | null
-          status?: string
-          stripe_payment_intent?: string | null
-          stripe_session_id?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
       profiles: {
         Row: {
           avatar_url: string | null
