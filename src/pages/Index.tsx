@@ -1,200 +1,103 @@
-import { Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
-import { ShoppingCart } from "lucide-react";
-import product1 from "@/assets/product-1.jpg";
-import product2 from "@/assets/product-2.jpg";
-import product3 from "@/assets/product-3.jpg";
-import pickleball1 from "@/assets/pickleball-1.jpg";
-import pickleball2 from "@/assets/pickleball-2.jpg";
-import ProductCarousel from "@/components/ProductCarousel";
-import { useCart } from "@/contexts/CartContext";
-import { toast } from "@/hooks/use-toast";
-
-const tennisImages = [
-  { src: product1, alt: "Solo Tennis Trainer - Overview" },
-  { src: product2, alt: "Solo Tennis Trainer - Features Detail" },
-  { src: product3, alt: "Solo Tennis Trainer - How To Use" },
-];
-
-const pickleballImages = [
-  { src: pickleball1, alt: "Solo Pickle Ball Trainer - Overview" },
-  { src: pickleball2, alt: "Solo Pickle Ball Trainer - Features Detail" },
-];
-
-const products = {
-  tennis: {
-    id: "tennis",
-    label: "Tennis",
-    name: "Solo Tennis Trainer",
-    subtitle: "With Rebound Ball & Rope",
-    tagline: "The ultimate Tennis Trainer Rebound Base. Practice your strokes anywhere, anytime. Simply fill the base with water or sand, and start striking.",
-    images: tennisImages,
-    price: 14.99,
-    priceId: "solo_trainer_one_time",
-    summaryImg: product1,
-  },
-  pickleball: {
-    id: "pickleball",
-    label: "Pickleball",
-    name: "Solo Pickle Ball Trainer",
-    subtitle: "With Rebound Ball & Rope",
-    tagline: "The ultimate Pickleball Trainer Rebound Base. Sharpen your dinks and drives anywhere, anytime. Simply fill the base with water or sand, and start playing.",
-    images: pickleballImages,
-    price: 14.99,
-    priceId: "solo_trainer_one_time",
-    summaryImg: pickleball1,
-  },
-};
-
-type Sport = keyof typeof products;
+import { Link } from "react-router-dom";
+import { ArrowRight, Trophy, Users, Repeat, CalendarCheck, Award } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const features = [
   {
-    icon: "🌊",
-    title: "Stable Base",
-    desc: "Fill the robust PE material base with water or sand. Anti-slip strips keep it firmly in place during intense practice.",
+    icon: Repeat,
+    title: "Rotating Captains",
+    desc: "Scheduling responsibility passes between players each week. No single organizer burns out — the season keeps moving.",
   },
   {
-    icon: "🎾",
-    title: "High-Elastic Rope",
-    desc: "Strong, durable elastic rope with an easy-tie hook provides a steady rebound for repetitive stroke training.",
+    icon: CalendarCheck,
+    title: "One-Tap Scheduling",
+    desc: "Captains propose three times. Opponents tap to confirm. Matches get booked without endless group chats.",
   },
   {
-    icon: "🎒",
-    title: "Portable Design",
-    desc: "Lightweight and convenient to pack. Take it to the park, driveway, or court. Offers a large 4-7 meter strike range.",
+    icon: Trophy,
+    title: "Auto Standings",
+    desc: "Singles and doubles round-robins with live wins, sets, and games. No spreadsheets.",
   },
 ];
 
 const Index = () => {
-  const [sport, setSport] = useState<Sport>("tennis");
-  const active = products[sport];
-  const { addItem, totalItems } = useCart();
-  const navigate = useNavigate();
-
-  const handleAddToCart = () => {
-    addItem({
-      id: active.id,
-      name: active.name,
-      subtitle: active.subtitle,
-      price: active.price,
-      image: active.summaryImg,
-      priceId: active.priceId,
-    });
-    toast({
-      title: "Added to cart",
-      description: `${active.name} has been added to your cart.`,
-    });
-  };
-
+  const { user } = useAuth();
+  const target = user ? "/app" : "/auth";
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="sticky top-0 w-full py-4 md:py-8 z-50 bg-background/80 backdrop-blur-md">
+      <header className="sticky top-0 w-full py-4 md:py-6 z-50 bg-background/80 backdrop-blur-md">
         <div className="container flex justify-between items-center">
           <Link to="/" className="font-heading text-2xl md:text-3xl font-bold tracking-wide">
             AETHER<span className="text-primary">.</span>
           </Link>
-          <div className="flex items-center gap-2 md:gap-4">
-            <button
-              onClick={() => navigate("/order")}
-              className="relative p-2 rounded-xl border border-border bg-black/30 text-muted-foreground hover:text-primary hover:border-primary/50 transition-colors"
-              aria-label="Cart"
-            >
-              <ShoppingCart size={18} />
-              {totalItems > 0 && (
-                <span className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center">
-                  {totalItems}
-                </span>
-              )}
-            </button>
+          <div className="flex items-center gap-2 md:gap-3">
             <Link
-              to="/order"
-              className="inline-block px-5 py-2 text-sm md:px-8 md:py-3 md:text-lg font-semibold rounded-full bg-primary text-primary-foreground glow-shadow transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_0_30px_hsl(73_100%_50%/0.4)]"
+              to={target}
+              className="px-3 py-2 text-sm text-muted-foreground hover:text-primary transition-colors"
             >
-              Buy Now
+              {user ? "Dashboard" : "Sign in"}
+            </Link>
+            <Link
+              to={target}
+              className="inline-flex items-center gap-2 px-5 py-2 text-sm md:px-7 md:py-3 md:text-base font-semibold rounded-full bg-primary text-primary-foreground glow-shadow transition-all duration-300 hover:-translate-y-0.5"
+            >
+              {user ? "Open app" : "Start a season"} <ArrowRight size={16} />
             </Link>
           </div>
         </div>
       </header>
 
       {/* Hero */}
-      <section className="min-h-screen flex items-center relative overflow-hidden pt-20">
-        {/* Background glows */}
+      <section className="min-h-[88vh] flex items-center relative overflow-hidden pt-10">
         <div className="absolute -top-[20%] -right-[10%] w-[600px] h-[600px] bg-[radial-gradient(circle,hsl(var(--secondary))_0%,transparent_70%)] opacity-50 blur-[80px] -z-10" />
         <div className="absolute bottom-[10%] -left-[5%] w-[400px] h-[400px] bg-[radial-gradient(circle,hsl(var(--primary)/0.15)_0%,transparent_70%)] blur-[60px] -z-10" />
 
-        <div className="container grid grid-cols-1 lg:grid-cols-2 items-center gap-16">
-          <div className="text-center lg:text-left">
-            {/* Sport Toggle */}
-            <div className="inline-flex items-center rounded-full border border-border bg-black/30 p-1 mb-6 animate-fade-up relative z-50">
-              {(Object.keys(products) as Sport[]).map((key) => (
-                <button
-                  key={key}
-                  onClick={() => setSport(key)}
-                  className={`px-5 py-2 text-sm font-semibold rounded-full transition-all duration-300 ${
-                    sport === key
-                      ? "bg-primary text-primary-foreground shadow-md"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  {products[key].label}
-                </button>
-              ))}
-            </div>
-
-            <p className="text-primary font-semibold tracking-widest uppercase text-sm mb-4 animate-fade-up">Train Smarter</p>
-            <h1 className="text-5xl md:text-7xl font-bold mb-6 animate-fade-up">
-              Master Your <span className="text-primary">Game</span> Solo.
-            </h1>
-            <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-lg mx-auto lg:mx-0 animate-fade-up-delay-1">
-              {active.tagline}
-            </p>
-            <div className="flex items-center gap-4 font-heading text-4xl font-bold mb-8 justify-center lg:justify-start animate-fade-up-delay-2">
-              <span className="text-primary">$14.99</span>
-              <span className="text-muted-foreground text-2xl line-through">$17.99</span>
-              <span className="ml-2 px-3 py-1 text-xs font-bold rounded-full bg-primary/20 text-primary border border-primary/30">SAVE 17%</span>
-            </div>
-            <div className="flex flex-col items-center lg:items-start gap-3 animate-fade-up-delay-3">
-              <Link
-                to="/order"
-                className="inline-block px-10 py-4 text-lg font-semibold rounded-full bg-primary text-primary-foreground glow-shadow transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_0_30px_hsl(73_100%_50%/0.4)]"
-              >
-                Order Now →
-              </Link>
-              <button
-                onClick={handleAddToCart}
-                className="inline-flex items-center gap-2 px-6 py-2.5 text-sm font-semibold rounded-full border border-primary/40 text-primary hover:bg-primary/10 transition-all duration-300"
-              >
-                <ShoppingCart size={16} />
-                Add to Cart
-              </button>
-            </div>
-          </div>
-          <div key={sport} className="animate-fade-up-delay-1">
-            <ProductCarousel images={active.images} />
+        <div className="container text-center max-w-4xl mx-auto">
+          <p className="text-primary font-semibold tracking-widest uppercase text-xs md:text-sm mb-5 animate-fade-up">
+            Social Tennis Seasons
+          </p>
+          <h1 className="text-5xl md:text-7xl font-bold mb-6 animate-fade-up leading-[1.05]">
+            Run a tennis season <span className="text-primary">without</span> running yourself ragged.
+          </h1>
+          <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto animate-fade-up-delay-1">
+            Aether Tennis helps neighborhoods, couples, friend groups, HOAs, and clubs organize their own round-robin season — with rotating scheduling captains so nobody gets stuck managing everything.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 animate-fade-up-delay-2">
+            <Link
+              to={target}
+              className="inline-flex items-center gap-2 px-10 py-4 text-lg font-semibold rounded-full bg-primary text-primary-foreground glow-shadow transition-all duration-300 hover:-translate-y-0.5"
+            >
+              {user ? "Open dashboard" : "Create your season"} <ArrowRight size={18} />
+            </Link>
+            <a href="#how" className="px-6 py-3 text-sm text-muted-foreground hover:text-foreground transition-colors">
+              See how it works
+            </a>
           </div>
         </div>
       </section>
 
       {/* Features */}
-      <section className="py-20 bg-gradient-to-b from-transparent to-card relative">
+      <section id="how" className="py-24 bg-gradient-to-b from-transparent to-card relative">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-1 rounded-full bg-gradient-to-r from-transparent via-primary to-transparent" />
         <div className="container">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">
-            Why <span className="text-primary">Athletes</span> Love It
+          <h2 className="text-3xl md:text-5xl font-bold text-center mb-4">
+            The <span className="text-primary">accountability</span> engine
           </h2>
-          <p className="text-muted-foreground text-center mb-12 max-w-md mx-auto">Built for serious practice, designed for everyone.</p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <p className="text-muted-foreground text-center mb-14 max-w-xl mx-auto">
+            Every screen answers three questions: who owes what, by when, and what happens next.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {features.map((f) => (
               <div
                 key={f.title}
-                className="glass-card p-10 transition-all duration-300 hover:-translate-y-2.5 hover:border-primary/30 hover:glow-shadow group"
+                className="glass-card p-8 md:p-10 transition-all duration-300 hover:-translate-y-2 hover:border-primary/30 hover:glow-shadow group"
               >
-                <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-2xl mb-6 group-hover:bg-primary/20 transition-colors">
-                  {f.icon}
+                <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-6 group-hover:bg-primary/20 transition-colors">
+                  <f.icon className="text-primary" size={24} />
                 </div>
-                <h3 className="text-2xl font-bold mb-4 group-hover:text-primary transition-colors">{f.title}</h3>
+                <h3 className="text-2xl font-bold mb-3 group-hover:text-primary transition-colors">
+                  {f.title}
+                </h3>
                 <p className="text-muted-foreground">{f.desc}</p>
               </div>
             ))}
@@ -202,7 +105,42 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Footer */}
+      {/* Who it's for */}
+      <section className="py-20">
+        <div className="container max-w-4xl">
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
+            Built for groups that <span className="text-primary">actually finish</span> their seasons
+          </h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {["Couples", "Neighborhoods", "HOAs", "Friend Groups", "Local Clubs", "Office Leagues", "Mixed Doubles", "Coaching Groups"].map((g) => (
+              <div key={g} className="glass-card px-4 py-5 text-center text-sm md:text-base font-medium">
+                <Users className="text-primary mx-auto mb-2" size={20} />
+                {g}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="py-24">
+        <div className="container max-w-3xl text-center">
+          <Award className="text-primary mx-auto mb-6" size={40} />
+          <h2 className="text-3xl md:text-5xl font-bold mb-6">
+            Your next season starts in <span className="text-primary">under a minute</span>.
+          </h2>
+          <p className="text-muted-foreground mb-10 text-lg">
+            Name it, pick singles or doubles, invite your players. We handle the schedule and rotate the captain so the season actually finishes.
+          </p>
+          <Link
+            to={target}
+            className="inline-flex items-center gap-2 px-10 py-4 text-lg font-semibold rounded-full bg-primary text-primary-foreground glow-shadow transition-all duration-300 hover:-translate-y-0.5"
+          >
+            {user ? "Open dashboard" : "Get started free"} <ArrowRight size={18} />
+          </Link>
+        </div>
+      </section>
+
       <footer className="border-t border-border bg-card/50">
         <div className="container py-8 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
           <p>© 2026 Aether Tennis. All Rights Reserved.</p>
