@@ -1,10 +1,7 @@
 project_id = "rxgewhprxpkxkesrnxyd"
 
-[functions.create-checkout]
+[functions.generate-fixtures]
 verify_jwt = false
 
-[functions.get-stripe-price]
-verify_jwt = false
-
-[functions.payments-webhook]
+[functions.rotate-captain]
 verify_jwt = false
