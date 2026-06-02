@@ -298,11 +298,14 @@ export type Database = {
       }
       matches: {
         Row: {
+          completed_at: string | null
           created_at: string
           deadline_at: string
           id: string
+          result_confirmed_at: string | null
           round: number
           scheduled_at: string | null
+          scheduled_by: string | null
           scheduling_captain_id: string | null
           season_id: string
           side_a_id: string
@@ -312,11 +315,14 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          completed_at?: string | null
           created_at?: string
           deadline_at: string
           id?: string
+          result_confirmed_at?: string | null
           round?: number
           scheduled_at?: string | null
+          scheduled_by?: string | null
           scheduling_captain_id?: string | null
           season_id: string
           side_a_id: string
@@ -326,11 +332,14 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          completed_at?: string | null
           created_at?: string
           deadline_at?: string
           id?: string
+          result_confirmed_at?: string | null
           round?: number
           scheduled_at?: string | null
+          scheduled_by?: string | null
           scheduling_captain_id?: string | null
           season_id?: string
           side_a_id?: string
@@ -586,6 +595,20 @@ export type Database = {
       }
     }
     Views: {
+      season_standings: {
+        Row: {
+          games_lost: number | null
+          games_won: number | null
+          losses: number | null
+          season_id: string | null
+          sets_lost: number | null
+          sets_won: number | null
+          side_id: string | null
+          side_kind: Database["public"]["Enums"]["match_side_kind"] | null
+          wins: number | null
+        }
+        Relationships: []
+      }
       standings: {
         Row: {
           games_lost: number | null
