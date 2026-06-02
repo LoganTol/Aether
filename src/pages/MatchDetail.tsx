@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Calendar, Clock, Check, Trophy, Loader2 } from "lucide-react";
+import { ArrowLeft, Calendar, Clock, Check, Trophy, Loader2, AlertTriangle } from "lucide-react";
 import AppHeader from "@/components/AppHeader";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -171,7 +171,11 @@ function SchedulingSection({ match, proposal, myParticipantId, myInvolved, onCha
     if (!proposal) return;
     setBusy(true);
     await supabase.from("match_time_proposals").update({ accepted_slot: slot, responded_at: new Date().toISOString() }).eq("id", proposal.id);
-    await supabase.from("matches").update({ status: "scheduled", scheduled_at: slot }).eq("id", match.id);
+    await supabase.from("matches").update({
+      status: "scheduled",
+      scheduled_at: slot,
+      scheduled_by: proposal.proposed_by,
+    }).eq("id", match.id);
     toast({ title: "Match scheduled" });
     setBusy(false);
     onChange();
@@ -262,7 +266,10 @@ function ScoreEntrySection({ match, sideLabel, myParticipantId, myInvolved, scor
       await supabase.from("match_results").upsert({
         match_id: match.id, winner_side: winner, entered_by: myParticipantId, disputed: false,
       }, { onConflict: "match_id" });
-      await supabase.from("matches").update({ status: "completed" }).eq("id", match.id);
+      await supabase.from("matches").update({
+        status: "completed",
+        completed_at: new Date().toISOString(),
+      }).eq("id", match.id);
       toast({ title: "Score recorded" });
       onChange();
     } catch (e: unknown) {
@@ -274,10 +281,52 @@ function ScoreEntrySection({ match, sideLabel, myParticipantId, myInvolved, scor
   };
 
   if (result) {
+    const isOpponent = myParticipantId && result.entered_by && myParticipantId !== result.entered_by && myInvolved;
+    const awaitingConfirm = !result.confirmed_by && !result.disputed;
+
+    const confirm = async () => {
+      await supabase.from("match_results").update({
+        confirmed_by: myParticipantId,
+      }).eq("id", result.id);
+      await supabase.from("matches").update({
+        result_confirmed_at: new Date().toISOString(),
+      }).eq("id", match.id);
+      toast({ title: "Result confirmed" });
+      onChange();
+    };
+    const dispute = async () => {
+      await supabase.from("match_results").update({ disputed: true }).eq("id", result.id);
+      toast({ title: "Result disputed", description: "A creator can resolve from the admin tab." });
+      onChange();
+    };
+
     return (
       <div className="glass-card p-6">
         <h3 className="font-bold mb-2 inline-flex items-center gap-2"><Trophy className="text-primary" size={18} /> Result entered</h3>
         <p className="text-muted-foreground text-sm">Winner: {sideLabel(result.winner_side === "a" ? match.side_a_id : match.side_b_id)}</p>
+        {result.disputed && (
+          <p className="mt-3 inline-flex items-center gap-1.5 text-destructive text-sm font-semibold">
+            <AlertTriangle size={14} /> Disputed — awaiting admin review
+          </p>
+        )}
+        {result.confirmed_by && !result.disputed && (
+          <p className="mt-3 inline-flex items-center gap-1.5 text-primary text-sm font-semibold">
+            <Check size={14} /> Confirmed by opponent
+          </p>
+        )}
+        {isOpponent && awaitingConfirm && (
+          <div className="mt-4 flex gap-2">
+            <button onClick={confirm} className="px-4 py-2 rounded-full bg-primary text-primary-foreground font-semibold text-sm inline-flex items-center gap-1.5">
+              <Check size={14} /> Confirm result
+            </button>
+            <button onClick={dispute} className="px-4 py-2 rounded-full border border-destructive/40 text-destructive font-semibold text-sm inline-flex items-center gap-1.5">
+              <AlertTriangle size={14} /> Dispute
+            </button>
+          </div>
+        )}
+        {!isOpponent && awaitingConfirm && (
+          <p className="text-xs text-muted-foreground mt-3">Waiting for opponent to confirm…</p>
+        )}
       </div>
     );
   }
