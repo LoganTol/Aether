@@ -274,42 +274,53 @@ export default function SeasonDetail() {
 
 function AddMemberDialog({ seasonId, onAdded }: { seasonId: string; onAdded: () => void }) {
   const [open, setOpen] = useState(false);
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  const [rows, setRows] = useState<{ name: string; email: string }[]>([
+    { name: "", email: "" },
+    { name: "", email: "" },
+  ]);
   const [busy, setBusy] = useState(false);
 
+  const updateRow = (idx: number, patch: Partial<{ name: string; email: string }>) =>
+    setRows((rs) => rs.map((r, i) => (i === idx ? { ...r, ...patch } : r)));
+  const addRow = () => setRows((rs) => [...rs, { name: "", email: "" }]);
+  const removeRow = (idx: number) =>
+    setRows((rs) => (rs.length > 1 ? rs.filter((_, i) => i !== idx) : rs));
+
   const submit = async () => {
-    const trimmed = name.trim();
-    if (!trimmed) {
-      toast({ title: "Name is required", variant: "destructive" });
+    const cleaned = rows
+      .map((r) => ({ name: r.name.trim(), email: r.email.trim() }))
+      .filter((r) => r.name);
+    if (cleaned.length === 0) {
+      toast({ title: "Add at least one name", variant: "destructive" });
       return;
     }
     setBusy(true);
     const { data, error } = await supabase
       .from("season_participants")
-      .insert({
-        season_id: seasonId,
-        display_name: trimmed,
-        invited_email: email.trim() || null,
-        user_id: null,
-        status: "invited" as const,
-        joined_at: null,
-      })
-      .select("join_token")
-      .single();
+      .insert(
+        cleaned.map((r) => ({
+          season_id: seasonId,
+          display_name: r.name,
+          invited_email: r.email || null,
+          user_id: null,
+          status: "invited" as const,
+          joined_at: null,
+        }))
+      )
+      .select("display_name,join_token");
     setBusy(false);
     if (error) {
-      toast({ title: "Could not add member", description: error.message, variant: "destructive" });
+      toast({ title: "Could not add members", description: error.message, variant: "destructive" });
       return;
     }
-    if (data?.join_token) {
-      const url = `${window.location.origin}/join/${data.join_token}`;
+    if (data?.length === 1 && data[0].join_token) {
+      const url = `${window.location.origin}/join/${data[0].join_token}`;
       navigator.clipboard.writeText(url).catch(() => {});
       toast({ title: "Member added", description: "Invite link copied to clipboard." });
-    } else {
-      toast({ title: "Member added" });
+    } else if (data?.length) {
+      toast({ title: `Added ${data.length} members`, description: "Copy each invite link from the list." });
     }
-    setName(""); setEmail("");
+    setRows([{ name: "", email: "" }, { name: "", email: "" }]);
     setOpen(false);
     onAdded();
   };
@@ -321,40 +332,59 @@ function AddMemberDialog({ seasonId, onAdded }: { seasonId: string; onAdded: () 
           <UserPlus size={14} /> Add member
         </button>
       </DialogTrigger>
-      <DialogContent className="glass-card border-border max-w-md">
+      <DialogContent className="glass-card border-border max-w-lg">
         <DialogHeader>
-          <DialogTitle>Add a member</DialogTitle>
+          <DialogTitle>Add members</DialogTitle>
         </DialogHeader>
         <div className="space-y-3">
-          <div>
-            <label className="text-xs uppercase tracking-wider text-muted-foreground">Display name</label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. Alex Rivera"
-              className="w-full mt-1 px-3 py-2.5 rounded-xl bg-black/30 border border-border focus:border-primary outline-none"
-            />
+          <div className="grid grid-cols-[1fr_1fr_auto] gap-2 text-xs uppercase tracking-wider text-muted-foreground px-1">
+            <span>Display name</span>
+            <span>Email (optional)</span>
+            <span className="sr-only">Remove</span>
           </div>
-          <div>
-            <label className="text-xs uppercase tracking-wider text-muted-foreground">Email (optional)</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="player@example.com"
-              className="w-full mt-1 px-3 py-2.5 rounded-xl bg-black/30 border border-border focus:border-primary outline-none"
-            />
-            <p className="text-xs text-muted-foreground mt-1.5">
-              An invite link is generated either way — copied to your clipboard on save.
-            </p>
+          <div className="space-y-2 max-h-[40vh] overflow-y-auto scrollbar-dark pr-1">
+            {rows.map((r, i) => (
+              <div key={i} className="grid grid-cols-[1fr_1fr_auto] gap-2 items-center">
+                <input
+                  type="text"
+                  value={r.name}
+                  onChange={(e) => updateRow(i, { name: e.target.value })}
+                  placeholder="Alex Rivera"
+                  className="px-3 py-2.5 rounded-xl bg-black/30 border border-border focus:border-primary outline-none"
+                />
+                <input
+                  type="email"
+                  value={r.email}
+                  onChange={(e) => updateRow(i, { email: e.target.value })}
+                  placeholder="player@example.com"
+                  className="px-3 py-2.5 rounded-xl bg-black/30 border border-border focus:border-primary outline-none"
+                />
+                <button
+                  onClick={() => removeRow(i)}
+                  disabled={rows.length === 1}
+                  aria-label="Remove row"
+                  className="p-2 rounded-lg border border-border text-muted-foreground hover:text-destructive hover:border-destructive/40 disabled:opacity-30"
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
+            ))}
           </div>
+          <button
+            onClick={addRow}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-xs text-muted-foreground hover:text-primary hover:border-primary/50"
+          >
+            <Plus size={12} /> Add another
+          </button>
+          <p className="text-xs text-muted-foreground">
+            An invite link is generated for each member — copy it from the members list.
+          </p>
           <button
             onClick={submit}
             disabled={busy}
-            className="w-full mt-2 px-5 py-2.5 rounded-full bg-primary text-primary-foreground font-semibold glow-shadow disabled:opacity-50 inline-flex items-center justify-center gap-2"
+            className="w-full mt-1 px-5 py-2.5 rounded-full bg-primary text-primary-foreground font-semibold glow-shadow disabled:opacity-50 inline-flex items-center justify-center gap-2"
           >
-            {busy && <Loader2 className="animate-spin" size={14} />} Add member
+            {busy && <Loader2 className="animate-spin" size={14} />} Save members
           </button>
         </div>
       </DialogContent>
