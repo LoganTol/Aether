@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
-import { Crown, Calendar, ArrowRight, Clock, Plus, Loader2 } from "lucide-react";
+import { Crown, Calendar, ArrowRight, Clock, Plus, Loader2, UserPlus, CalendarCheck } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
@@ -189,7 +189,14 @@ function CreateMatchDialog({
       toast({ title: "Pick two different sides", variant: "destructive" });
       return;
     }
-    const deadline = deadlineAt || scheduledAt || new Date(Date.now() + 14 * 86400000).toISOString();
+    const scheduledIso = scheduledAt ? new Date(scheduledAt).toISOString() : null;
+    const deadlineIso = deadlineAt
+      ? new Date(deadlineAt + "T23:59").toISOString()
+      : scheduledIso || new Date(Date.now() + 14 * 86400000).toISOString();
+    if (scheduledIso && new Date(scheduledIso).getTime() < Date.now() - 60_000) {
+      toast({ title: "Scheduled time must be in the future", variant: "destructive" });
+      return;
+    }
     const nextRound = matches.length ? Math.max(...matches.map((m) => m.round)) + 1 : 1;
     setBusy(true);
     const { error } = await supabase.from("matches").insert({
@@ -198,21 +205,29 @@ function CreateMatchDialog({
       side_kind: season.format === "doubles" ? "team" : "player",
       side_a_id: sideA,
       side_b_id: sideB,
-      scheduled_at: scheduledAt ? new Date(scheduledAt).toISOString() : null,
-      deadline_at: new Date(deadline).toISOString(),
-      status: scheduledAt ? "scheduled" : "pending",
+      scheduled_at: scheduledIso,
+      deadline_at: deadlineIso,
+      status: scheduledIso ? "scheduled" : "pending",
       scheduling_captain_id: captainParticipantId,
+      scheduled_by: scheduledIso ? captainParticipantId : null,
     });
     setBusy(false);
     if (error) {
       toast({ title: "Could not create match", description: error.message, variant: "destructive" });
       return;
     }
-    toast({ title: "Match created", description: "Added to the Schedule tab." });
+    const aLabel = sides.find((s) => s.id === sideA)?.label;
+    const bLabel = sides.find((s) => s.id === sideB)?.label;
+    toast({
+      title: scheduledIso ? "Match scheduled" : "Match added",
+      description: `${aLabel} vs ${bLabel}${scheduledIso ? ` · ${new Date(scheduledIso).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}` : " — set a time later"}`,
+    });
     setOpen(false);
     setSideA(""); setSideB(""); setScheduledAt(""); setDeadlineAt("");
     onCreated();
   };
+
+  const hasSides = sides.length >= 2;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -223,8 +238,28 @@ function CreateMatchDialog({
       </DialogTrigger>
       <DialogContent className="glass-card border-border max-w-md">
         <DialogHeader>
-          <DialogTitle>Schedule a match</DialogTitle>
+          <DialogTitle className="inline-flex items-center gap-2">
+            <CalendarCheck className="text-primary" size={18} /> Schedule a match
+          </DialogTitle>
         </DialogHeader>
+        {!hasSides ? (
+          <div className="space-y-3 pt-1">
+            <div className="rounded-2xl border border-border bg-black/30 p-4">
+              <p className="font-semibold text-sm">
+                You need at least two {season.format === "doubles" ? "teams" : "players"} first.
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Add members from the Members tab, then come back here to schedule a match.
+              </p>
+            </div>
+            <button
+              onClick={() => setOpen(false)}
+              className="w-full px-5 py-2.5 rounded-full border border-border text-sm font-medium hover:border-primary/50 inline-flex items-center justify-center gap-2"
+            >
+              <UserPlus size={14} /> Go add members
+            </button>
+          </div>
+        ) : (
         <div className="space-y-3">
           <div>
             <label className="text-xs uppercase tracking-wider text-muted-foreground">Side A</label>
@@ -250,16 +285,17 @@ function CreateMatchDialog({
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs uppercase tracking-wider text-muted-foreground">Scheduled (optional)</label>
+              <label className="text-xs uppercase tracking-wider text-muted-foreground">Date & time</label>
               <input
                 type="datetime-local"
                 value={scheduledAt}
                 onChange={(e) => setScheduledAt(e.target.value)}
+                min={new Date(Date.now() - new Date().getTimezoneOffset() * 60_000).toISOString().slice(0, 16)}
                 className="w-full mt-1 px-3 py-2.5 rounded-xl bg-black/30 border border-border focus:border-primary outline-none"
               />
             </div>
             <div>
-              <label className="text-xs uppercase tracking-wider text-muted-foreground">Deadline</label>
+              <label className="text-xs uppercase tracking-wider text-muted-foreground">Deadline (optional)</label>
               <input
                 type="date"
                 value={deadlineAt}
@@ -268,14 +304,18 @@ function CreateMatchDialog({
               />
             </div>
           </div>
+          <p className="text-xs text-muted-foreground">
+            Skip the time to add a "to be scheduled" placeholder — players can propose times from the match page.
+          </p>
           <button
             onClick={create}
-            disabled={busy}
+            disabled={busy || !sideA || !sideB}
             className="w-full mt-2 px-5 py-2.5 rounded-full bg-primary text-primary-foreground font-semibold glow-shadow disabled:opacity-50 inline-flex items-center justify-center gap-2"
           >
-            {busy && <Loader2 className="animate-spin" size={14} />} Create match
+            {busy && <Loader2 className="animate-spin" size={14} />} {scheduledAt ? "Schedule match" : "Add match"}
           </button>
         </div>
+        )}
       </DialogContent>
     </Dialog>
   );
