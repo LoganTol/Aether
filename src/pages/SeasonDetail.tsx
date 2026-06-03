@@ -49,6 +49,8 @@ export default function SeasonDetail() {
 
   useEffect(() => { refresh(); }, [refresh]);
 
+  const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
@@ -100,7 +102,6 @@ export default function SeasonDetail() {
     ...(isCreator ? [{ id: "admin" as Tab, label: "Admin", icon: Settings }] : []),
   ];
 
-  const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const selectTab = (id: Tab) => {
     setTab(id);
     const el = tabRefs.current[id];
