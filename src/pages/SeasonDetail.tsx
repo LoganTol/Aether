@@ -234,3 +234,93 @@ export default function SeasonDetail() {
     </div>
   );
 }
+
+function AddMemberDialog({ seasonId, onAdded }: { seasonId: string; onAdded: () => void }) {
+  const [open, setOpen] = useState(false);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const submit = async () => {
+    const trimmed = name.trim();
+    if (!trimmed) {
+      toast({ title: "Name is required", variant: "destructive" });
+      return;
+    }
+    setBusy(true);
+    const { data, error } = await supabase
+      .from("season_participants")
+      .insert({
+        season_id: seasonId,
+        display_name: trimmed,
+        invited_email: email.trim() || null,
+        user_id: null,
+        status: "invited" as const,
+        joined_at: null,
+      })
+      .select("join_token")
+      .single();
+    setBusy(false);
+    if (error) {
+      toast({ title: "Could not add member", description: error.message, variant: "destructive" });
+      return;
+    }
+    if (data?.join_token) {
+      const url = `${window.location.origin}/join/${data.join_token}`;
+      navigator.clipboard.writeText(url).catch(() => {});
+      toast({ title: "Member added", description: "Invite link copied to clipboard." });
+    } else {
+      toast({ title: "Member added" });
+    }
+    setName(""); setEmail("");
+    setOpen(false);
+    onAdded();
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <button className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-primary text-primary-foreground text-sm font-semibold glow-shadow">
+          <UserPlus size={14} /> Add member
+        </button>
+      </DialogTrigger>
+      <DialogContent className="glass-card border-border max-w-md">
+        <DialogHeader>
+          <DialogTitle>Add a member</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-3">
+          <div>
+            <label className="text-xs uppercase tracking-wider text-muted-foreground">Display name</label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g. Alex Rivera"
+              className="w-full mt-1 px-3 py-2.5 rounded-xl bg-black/30 border border-border focus:border-primary outline-none"
+            />
+          </div>
+          <div>
+            <label className="text-xs uppercase tracking-wider text-muted-foreground">Email (optional)</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="player@example.com"
+              className="w-full mt-1 px-3 py-2.5 rounded-xl bg-black/30 border border-border focus:border-primary outline-none"
+            />
+            <p className="text-xs text-muted-foreground mt-1.5">
+              An invite link is generated either way — copied to your clipboard on save.
+            </p>
+          </div>
+          <button
+            onClick={submit}
+            disabled={busy}
+            className="w-full mt-2 px-5 py-2.5 rounded-full bg-primary text-primary-foreground font-semibold glow-shadow disabled:opacity-50 inline-flex items-center justify-center gap-2"
+          >
+            {busy && <Loader2 className="animate-spin" size={14} />} Add member
+          </button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
