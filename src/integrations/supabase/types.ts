@@ -302,6 +302,7 @@ export type Database = {
           created_at: string
           deadline_at: string
           id: string
+          location: string | null
           result_confirmed_at: string | null
           round: number
           scheduled_at: string | null
@@ -319,6 +320,7 @@ export type Database = {
           created_at?: string
           deadline_at: string
           id?: string
+          location?: string | null
           result_confirmed_at?: string | null
           round?: number
           scheduled_at?: string | null
@@ -336,6 +338,7 @@ export type Database = {
           created_at?: string
           deadline_at?: string
           id?: string
+          location?: string | null
           result_confirmed_at?: string | null
           round?: number
           scheduled_at?: string | null
