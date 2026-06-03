@@ -1,10 +1,11 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Calendar, Clock, Check, Trophy, Loader2, AlertTriangle, MapPin, Plus } from "lucide-react";
+import { ArrowLeft, Calendar, Clock, Check, Trophy, Loader2, AlertTriangle, MapPin, Plus, Trash2 } from "lucide-react";
 import AppHeader from "@/components/AppHeader";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
+import type { Season } from "@/components/season/types";
 
 interface Match {
   id: string;
