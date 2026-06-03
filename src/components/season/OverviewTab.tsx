@@ -199,7 +199,7 @@ function CreateMatchDialog({
     }
     const nextRound = matches.length ? Math.max(...matches.map((m) => m.round)) + 1 : 1;
     setBusy(true);
-    const { data: inserted, error } = await supabase.from("matches").insert({
+    const { error } = await supabase.from("matches").insert({
       season_id: season.id,
       round: nextRound,
       side_kind: season.format === "doubles" ? "team" : "player",
@@ -210,7 +210,7 @@ function CreateMatchDialog({
       status: scheduledIso ? "scheduled" : "pending",
       scheduling_captain_id: captainParticipantId,
       scheduled_by: scheduledIso ? captainParticipantId : null,
-    }).select("id").single();
+    });
     setBusy(false);
     if (error) {
       toast({ title: "Could not create match", description: error.message, variant: "destructive" });
