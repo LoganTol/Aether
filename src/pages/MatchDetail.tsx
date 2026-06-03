@@ -272,9 +272,34 @@ function ScoreEntrySection({ match, sideLabel, myParticipantId, myInvolved, scor
     );
   }
 
+  if (!open) {
+    return (
+      <button
+        onClick={() => setOpen(true)}
+        disabled={!myInvolved}
+        className="w-full glass-card p-5 flex items-center justify-between gap-3 hover:border-primary/50 transition-colors disabled:opacity-60 disabled:cursor-not-allowed group"
+      >
+        <div className="flex items-center gap-3 text-left">
+          <div className="w-11 h-11 rounded-2xl bg-primary/15 border border-primary/40 flex items-center justify-center shrink-0 group-hover:bg-primary/25 transition-colors">
+            <Plus className="text-primary" size={20} />
+          </div>
+          <div>
+            <p className="font-bold">Add score</p>
+            <p className="text-xs text-muted-foreground">
+              {myInvolved ? "Enter the final games for each set." : "Only players in this match can submit a score."}
+            </p>
+          </div>
+        </div>
+        <Trophy className="text-muted-foreground group-hover:text-primary transition-colors" size={18} />
+      </button>
+    );
+  }
+
   return (
     <div className="glass-card p-6">
-      <h3 className="font-bold mb-3">Enter score</h3>
+      <h3 className="font-bold mb-3 inline-flex items-center gap-2">
+        <Trophy className="text-primary" size={18} /> Box score
+      </h3>
       <div className="grid grid-cols-[1fr_auto_1fr] gap-3 mb-2 text-xs text-muted-foreground">
         <span>{sideLabel(match.side_a_id)}</span>
         <span></span>
@@ -302,6 +327,9 @@ function ScoreEntrySection({ match, sideLabel, myParticipantId, myInvolved, scor
       <div className="flex gap-2">
         <button onClick={() => setSets((s) => [...s, { a: "", b: "" }])} className="px-3 py-2 rounded-lg border border-border text-sm hover:border-primary/50">
           + Add set
+        </button>
+        <button onClick={() => setOpen(false)} className="px-3 py-2 rounded-lg border border-border text-sm hover:border-primary/50">
+          Cancel
         </button>
         <button
           onClick={submit}
