@@ -8,6 +8,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import Index from "./pages/Index.tsx";
 import Auth from "./pages/Auth.tsx";
 import Dashboard from "./pages/Dashboard.tsx";
+import HomeLanding from "./pages/HomeLanding.tsx";
 import CreateSeason from "./pages/CreateSeason.tsx";
 import SeasonDetail from "./pages/SeasonDetail.tsx";
 import SeasonCommandCenter from "./pages/SeasonCommandCenter.tsx";
@@ -31,6 +32,7 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/join/:token" element={<JoinSeason />} />
             <Route path="/app" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/app/home" element={<ProtectedRoute><HomeLanding /></ProtectedRoute>} />
             <Route path="/app/seasons/new" element={<ProtectedRoute><CreateSeason /></ProtectedRoute>} />
             <Route path="/app/seasons/:id/launched" element={<ProtectedRoute><SeasonCommandCenter /></ProtectedRoute>} />
             <Route path="/app/seasons/:id" element={<ProtectedRoute><SeasonDetail /></ProtectedRoute>} />
