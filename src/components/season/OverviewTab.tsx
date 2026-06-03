@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
-import { Crown, Calendar, ArrowRight, Clock, Home, Plus, Loader2 } from "lucide-react";
+import { Crown, Calendar, ArrowRight, Clock, Plus, Loader2 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
@@ -41,14 +41,8 @@ export default function OverviewTab({ season, participants, teams, matches, rota
   return (
     <div className="space-y-6">
       {/* Quick actions */}
-      <div className="flex flex-wrap items-center gap-2">
-        <Link
-          to="/app"
-          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full border border-border bg-black/30 text-sm text-muted-foreground hover:text-primary hover:border-primary/50 transition-colors"
-        >
-          <Home size={14} /> Home
-        </Link>
-        {(isCreator || iAmCaptain) && (
+      {isCreator && (
+        <div className="flex flex-wrap items-center gap-2">
           <CreateMatchDialog
             season={season}
             participants={participants}
@@ -57,8 +51,8 @@ export default function OverviewTab({ season, participants, teams, matches, rota
             captainParticipantId={current?.participant_id || null}
             onCreated={onChange}
           />
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Hero */}
       <div className="glass-card p-6">
