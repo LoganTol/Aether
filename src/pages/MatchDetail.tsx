@@ -276,8 +276,7 @@ function ScoreEntrySection({ match, sideLabel, myParticipantId, myInvolved, scor
     return (
       <button
         onClick={() => setOpen(true)}
-        disabled={!myInvolved}
-        className="w-full glass-card p-5 flex items-center justify-between gap-3 hover:border-primary/50 transition-colors disabled:opacity-60 disabled:cursor-not-allowed group"
+        className="w-full glass-card p-5 flex items-center justify-between gap-3 hover:border-primary/50 transition-colors group"
       >
         <div className="flex items-center gap-3 text-left">
           <div className="w-11 h-11 rounded-2xl bg-primary/15 border border-primary/40 flex items-center justify-center shrink-0 group-hover:bg-primary/25 transition-colors">
@@ -285,9 +284,7 @@ function ScoreEntrySection({ match, sideLabel, myParticipantId, myInvolved, scor
           </div>
           <div>
             <p className="font-bold">Add score</p>
-            <p className="text-xs text-muted-foreground">
-              {myInvolved ? "Enter the final games for each set." : "Only players in this match can submit a score."}
-            </p>
+            <p className="text-xs text-muted-foreground">Enter the final games for each set.</p>
           </div>
         </div>
         <Trophy className="text-muted-foreground group-hover:text-primary transition-colors" size={18} />
@@ -333,7 +330,7 @@ function ScoreEntrySection({ match, sideLabel, myParticipantId, myInvolved, scor
         </button>
         <button
           onClick={submit}
-          disabled={busy || !myInvolved}
+          disabled={busy}
           className="ml-auto px-5 py-2.5 rounded-full bg-primary text-primary-foreground font-semibold disabled:opacity-50 flex items-center gap-2"
         >
           {busy && <Loader2 className="animate-spin" size={14} />} Save score
