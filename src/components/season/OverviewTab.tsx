@@ -178,7 +178,6 @@ function CreateMatchDialog({
   const [sideA, setSideA] = useState("");
   const [sideB, setSideB] = useState("");
   const [scheduledAt, setScheduledAt] = useState("");
-  const [deadlineAt, setDeadlineAt] = useState("");
   const [location, setLocation] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -193,9 +192,7 @@ function CreateMatchDialog({
       return;
     }
     const scheduledIso = scheduledAt ? new Date(scheduledAt).toISOString() : null;
-    const deadlineIso = deadlineAt
-      ? new Date(deadlineAt + "T23:59").toISOString()
-      : scheduledIso || new Date(Date.now() + 14 * 86400000).toISOString();
+    const deadlineIso = scheduledIso || new Date(Date.now() + 14 * 86400000).toISOString();
     if (scheduledIso && new Date(scheduledIso).getTime() < Date.now() - 60_000) {
       toast({ title: "Scheduled time must be in the future", variant: "destructive" });
       return;
@@ -227,7 +224,7 @@ function CreateMatchDialog({
       description: `${aLabel} vs ${bLabel}${scheduledIso ? ` · ${new Date(scheduledIso).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}` : " — set a time later"}`,
     });
     setOpen(false);
-    setSideA(""); setSideB(""); setScheduledAt(""); setDeadlineAt(""); setLocation("");
+    setSideA(""); setSideB(""); setScheduledAt(""); setLocation("");
     onCreated();
   };
 
@@ -287,26 +284,15 @@ function CreateMatchDialog({
               {sides.filter((s) => s.id !== sideA).map((s) => <option key={s.id} value={s.id}>{s.label}</option>)}
             </select>
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="text-xs uppercase tracking-wider text-muted-foreground">Date & time</label>
-              <input
-                type="datetime-local"
-                value={scheduledAt}
-                onChange={(e) => setScheduledAt(e.target.value)}
-                min={new Date(Date.now() - new Date().getTimezoneOffset() * 60_000).toISOString().slice(0, 16)}
-                className="w-full mt-1 px-3 py-2.5 rounded-xl bg-black/30 border border-border focus:border-primary outline-none"
-              />
-            </div>
-            <div>
-              <label className="text-xs uppercase tracking-wider text-muted-foreground">Deadline (optional)</label>
-              <input
-                type="date"
-                value={deadlineAt}
-                onChange={(e) => setDeadlineAt(e.target.value)}
-                className="w-full mt-1 px-3 py-2.5 rounded-xl bg-black/30 border border-border focus:border-primary outline-none"
-              />
-            </div>
+          <div>
+            <label className="text-xs uppercase tracking-wider text-muted-foreground">Date & time</label>
+            <input
+              type="datetime-local"
+              value={scheduledAt}
+              onChange={(e) => setScheduledAt(e.target.value)}
+              min={new Date(Date.now() - new Date().getTimezoneOffset() * 60_000).toISOString().slice(0, 16)}
+              className="w-full mt-1 px-3 py-2.5 rounded-xl bg-black/30 border border-border focus:border-primary outline-none"
+            />
           </div>
           <div>
             <label className="text-xs uppercase tracking-wider text-muted-foreground inline-flex items-center gap-1">
