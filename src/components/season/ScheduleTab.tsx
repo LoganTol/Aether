@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { MapPin } from "lucide-react";
 import MatchStatusBadge from "./MatchStatusBadge";
 import type { Match, SideLabel } from "./types";
 
@@ -31,6 +32,11 @@ export default function ScheduleTab({ matches, sideLabel }: { matches: Match[]; 
                         ? new Date(m.scheduled_at).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })
                         : `Due ${new Date(m.deadline_at).toLocaleDateString()}`}
                     </p>
+                    {m.location && (
+                      <p className="text-xs text-muted-foreground mt-0.5 inline-flex items-center gap-1 truncate">
+                        <MapPin size={11} /> {m.location}
+                      </p>
+                    )}
                   </div>
                   <MatchStatusBadge status={m.status} deadline_at={m.deadline_at} />
                 </Link>
