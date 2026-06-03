@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Calendar, Clock, Check, Trophy, Loader2, AlertTriangle } from "lucide-react";
+import { ArrowLeft, Calendar, Clock, Check, Trophy, Loader2, AlertTriangle, MapPin, Plus } from "lucide-react";
 import AppHeader from "@/components/AppHeader";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -17,17 +17,10 @@ interface Match {
   deadline_at: string;
   status: string;
   scheduling_captain_id: string | null;
+  location: string | null;
 }
 interface Participant { id: string; display_name: string; user_id: string | null }
 interface Team { id: string; name: string; player_a_id: string; player_b_id: string }
-interface Proposal {
-  id: string;
-  match_id: string;
-  proposed_by: string;
-  slot_1: string; slot_2: string | null; slot_3: string | null;
-  accepted_slot: string | null;
-  expires_at: string;
-}
 interface ScoreRow { id: string; set_number: number; side_a_games: number; side_b_games: number }
 interface Result { id: string; winner_side: "a" | "b"; entered_by: string | null; confirmed_by: string | null; disputed: boolean }
 
@@ -39,7 +32,6 @@ export default function MatchDetail() {
   const [match, setMatch] = useState<Match | null>(null);
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
-  const [proposal, setProposal] = useState<Proposal | null>(null);
   const [scores, setScores] = useState<ScoreRow[]>([]);
   const [result, setResult] = useState<Result | null>(null);
 
@@ -49,16 +41,14 @@ export default function MatchDetail() {
     const { data: m } = await supabase.from("matches").select("*").eq("id", matchId).maybeSingle();
     if (!m) { setLoading(false); return; }
     setMatch(m as Match);
-    const [p, t, pr, sc, res] = await Promise.all([
+    const [p, t, sc, res] = await Promise.all([
       supabase.from("season_participants").select("id,display_name,user_id").eq("season_id", m.season_id),
       supabase.from("doubles_teams").select("*").eq("season_id", m.season_id),
-      supabase.from("match_time_proposals").select("*").eq("match_id", matchId).order("created_at", { ascending: false }).limit(1),
       supabase.from("match_scores").select("*").eq("match_id", matchId).order("set_number"),
       supabase.from("match_results").select("*").eq("match_id", matchId).maybeSingle(),
     ]);
     setParticipants((p.data as Participant[]) || []);
     setTeams((t.data as Team[]) || []);
-    setProposal((pr.data?.[0] as Proposal) || null);
     setScores((sc.data as ScoreRow[]) || []);
     setResult((res.data as Result) || null);
     setLoading(false);
@@ -98,21 +88,14 @@ export default function MatchDetail() {
             {match.scheduled_at && (
               <span className="inline-flex items-center gap-1 text-primary"><Clock size={14} /> {new Date(match.scheduled_at).toLocaleString()}</span>
             )}
+            {match.location && (
+              <span className="inline-flex items-center gap-1"><MapPin size={14} /> {match.location}</span>
+            )}
             <span className="capitalize">{match.status}</span>
           </div>
         </div>
 
-        {match.status !== "completed" && match.status !== "forfeited" && (
-          <SchedulingSection
-            match={match}
-            proposal={proposal}
-            myParticipantId={myId}
-            myInvolved={!!myInvolved}
-            onChange={refresh}
-          />
-        )}
-
-        {match.status === "scheduled" && (
+        {(match.status === "scheduled" || match.status === "pending" || match.status === "proposed") && (
           <ScoreEntrySection match={match} sideLabel={sideLabel} myParticipantId={myId} myInvolved={!!myInvolved} scores={scores} result={result} onChange={refresh} />
         )}
 
@@ -193,106 +176,11 @@ function BoxScore({ match, scores, result, sideLabel }: {
   );
 }
 
-function SchedulingSection({ match, proposal, myParticipantId, myInvolved, onChange }: {
-  match: Match; proposal: Proposal | null; myParticipantId?: string; myInvolved: boolean; onChange: () => void;
-}) {
-  const [busy, setBusy] = useState(false);
-  const [slots, setSlots] = useState<[string, string, string]>(["", "", ""]);
-
-  const propose = async () => {
-    if (!myParticipantId) return;
-    const valid = slots.filter(Boolean);
-    if (valid.length < 1) return;
-    setBusy(true);
-    const { error } = await supabase.from("match_time_proposals").insert({
-      match_id: match.id,
-      proposed_by: myParticipantId,
-      slot_1: slots[0],
-      slot_2: slots[1] || null,
-      slot_3: slots[2] || null,
-      expires_at: new Date(Date.now() + 7 * 86400000).toISOString(),
-    });
-    if (!error) {
-      await supabase.from("matches").update({ status: "proposed" }).eq("id", match.id);
-      toast({ title: "Times proposed" });
-      onChange();
-    } else toast({ title: "Error", description: error.message, variant: "destructive" });
-    setBusy(false);
-  };
-
-  const accept = async (slot: string) => {
-    if (!proposal) return;
-    setBusy(true);
-    await supabase.from("match_time_proposals").update({ accepted_slot: slot, responded_at: new Date().toISOString() }).eq("id", proposal.id);
-    await supabase.from("matches").update({
-      status: "scheduled",
-      scheduled_at: slot,
-      scheduled_by: proposal.proposed_by,
-    }).eq("id", match.id);
-    toast({ title: "Match scheduled" });
-    setBusy(false);
-    onChange();
-  };
-
-  if (proposal && !proposal.accepted_slot) {
-    const proposedByMe = proposal.proposed_by === myParticipantId;
-    return (
-      <div className="glass-card p-6 mb-4">
-        <h3 className="font-bold mb-3">Proposed times</h3>
-        <div className="space-y-2">
-          {[proposal.slot_1, proposal.slot_2, proposal.slot_3].filter(Boolean).map((s) => (
-            <div key={s!} className="flex items-center justify-between p-3 rounded-xl border border-border">
-              <span>{new Date(s!).toLocaleString()}</span>
-              {!proposedByMe && myInvolved ? (
-                <button onClick={() => accept(s!)} disabled={busy} className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-sm font-semibold">
-                  <Check size={14} /> Pick this
-                </button>
-              ) : (
-                <span className="text-xs text-muted-foreground">{proposedByMe ? "Waiting for opponent" : "View only"}</span>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="glass-card p-6 mb-4">
-      <h3 className="font-bold mb-2">Propose up to 3 times</h3>
-      <p className="text-sm text-muted-foreground mb-4">
-        {myInvolved ? "Pick 1–3 options. Your opponent will one-tap to confirm." : "Only players in this match (or the captain) can propose times."}
-      </p>
-      <div className="space-y-2 mb-4">
-        {[0, 1, 2].map((i) => (
-          <input
-            key={i}
-            type="datetime-local"
-            value={slots[i]}
-            onChange={(e) => setSlots(([a, b, c]) => {
-              const v: [string, string, string] = [a, b, c];
-              v[i] = e.target.value;
-              return v;
-            })}
-            className="w-full px-4 py-2.5 rounded-xl bg-black/30 border border-border focus:border-primary outline-none"
-          />
-        ))}
-      </div>
-      <button
-        onClick={propose}
-        disabled={busy || !myInvolved || !slots[0]}
-        className="px-5 py-2.5 rounded-full bg-primary text-primary-foreground font-semibold glow-shadow disabled:opacity-50 flex items-center gap-2"
-      >
-        {busy && <Loader2 className="animate-spin" size={14} />} Send proposal
-      </button>
-    </div>
-  );
-}
-
 function ScoreEntrySection({ match, sideLabel, myParticipantId, myInvolved, scores, result, onChange }: {
   match: Match; sideLabel: (id: string) => string; myParticipantId?: string; myInvolved: boolean;
   scores: ScoreRow[]; result: Result | null; onChange: () => void;
 }) {
+  const [open, setOpen] = useState(false);
   const [sets, setSets] = useState<{ a: string; b: string }[]>(
     scores.length > 0
       ? scores.map((s) => ({ a: String(s.side_a_games), b: String(s.side_b_games) }))
@@ -384,9 +272,34 @@ function ScoreEntrySection({ match, sideLabel, myParticipantId, myInvolved, scor
     );
   }
 
+  if (!open) {
+    return (
+      <button
+        onClick={() => setOpen(true)}
+        disabled={!myInvolved}
+        className="w-full glass-card p-5 flex items-center justify-between gap-3 hover:border-primary/50 transition-colors disabled:opacity-60 disabled:cursor-not-allowed group"
+      >
+        <div className="flex items-center gap-3 text-left">
+          <div className="w-11 h-11 rounded-2xl bg-primary/15 border border-primary/40 flex items-center justify-center shrink-0 group-hover:bg-primary/25 transition-colors">
+            <Plus className="text-primary" size={20} />
+          </div>
+          <div>
+            <p className="font-bold">Add score</p>
+            <p className="text-xs text-muted-foreground">
+              {myInvolved ? "Enter the final games for each set." : "Only players in this match can submit a score."}
+            </p>
+          </div>
+        </div>
+        <Trophy className="text-muted-foreground group-hover:text-primary transition-colors" size={18} />
+      </button>
+    );
+  }
+
   return (
     <div className="glass-card p-6">
-      <h3 className="font-bold mb-3">Enter score</h3>
+      <h3 className="font-bold mb-3 inline-flex items-center gap-2">
+        <Trophy className="text-primary" size={18} /> Box score
+      </h3>
       <div className="grid grid-cols-[1fr_auto_1fr] gap-3 mb-2 text-xs text-muted-foreground">
         <span>{sideLabel(match.side_a_id)}</span>
         <span></span>
@@ -414,6 +327,9 @@ function ScoreEntrySection({ match, sideLabel, myParticipantId, myInvolved, scor
       <div className="flex gap-2">
         <button onClick={() => setSets((s) => [...s, { a: "", b: "" }])} className="px-3 py-2 rounded-lg border border-border text-sm hover:border-primary/50">
           + Add set
+        </button>
+        <button onClick={() => setOpen(false)} className="px-3 py-2 rounded-lg border border-border text-sm hover:border-primary/50">
+          Cancel
         </button>
         <button
           onClick={submit}

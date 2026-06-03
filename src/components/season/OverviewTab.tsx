@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
-import { Crown, Calendar, ArrowRight, Clock, Plus, Loader2, UserPlus, CalendarCheck } from "lucide-react";
+import { Crown, Calendar, ArrowRight, Clock, Plus, Loader2, UserPlus, CalendarCheck, MapPin } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
@@ -126,7 +126,9 @@ export default function OverviewTab({ season, participants, teams, matches, rota
                   <p className="font-medium truncate">
                     {sideLabel(m.side_kind, m.side_a_id)} <span className="text-muted-foreground">vs</span> {sideLabel(m.side_kind, m.side_b_id)}
                   </p>
-                  <p className="text-xs text-muted-foreground">Round {m.round}</p>
+                  <p className="text-xs text-muted-foreground truncate">
+                    Round {m.round}{m.location ? ` · ${m.location}` : ""}
+                  </p>
                 </div>
                 <div className="text-right text-xs shrink-0">
                   {m.scheduled_at ? (
@@ -177,6 +179,7 @@ function CreateMatchDialog({
   const [sideB, setSideB] = useState("");
   const [scheduledAt, setScheduledAt] = useState("");
   const [deadlineAt, setDeadlineAt] = useState("");
+  const [location, setLocation] = useState("");
   const [busy, setBusy] = useState(false);
 
   const sides: { id: string; label: string }[] =
@@ -210,6 +213,7 @@ function CreateMatchDialog({
       status: scheduledIso ? "scheduled" : "pending",
       scheduling_captain_id: captainParticipantId,
       scheduled_by: scheduledIso ? captainParticipantId : null,
+      location: location.trim() || null,
     });
     setBusy(false);
     if (error) {
@@ -223,7 +227,7 @@ function CreateMatchDialog({
       description: `${aLabel} vs ${bLabel}${scheduledIso ? ` · ${new Date(scheduledIso).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}` : " — set a time later"}`,
     });
     setOpen(false);
-    setSideA(""); setSideB(""); setScheduledAt(""); setDeadlineAt("");
+    setSideA(""); setSideB(""); setScheduledAt(""); setDeadlineAt(""); setLocation("");
     onCreated();
   };
 
@@ -303,6 +307,18 @@ function CreateMatchDialog({
                 className="w-full mt-1 px-3 py-2.5 rounded-xl bg-black/30 border border-border focus:border-primary outline-none"
               />
             </div>
+          </div>
+          <div>
+            <label className="text-xs uppercase tracking-wider text-muted-foreground inline-flex items-center gap-1">
+              <MapPin size={12} /> Location
+            </label>
+            <input
+              type="text"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              placeholder="e.g. Riverside Park · Court 3"
+              className="w-full mt-1 px-3 py-2.5 rounded-xl bg-black/30 border border-border focus:border-primary outline-none"
+            />
           </div>
           <p className="text-xs text-muted-foreground">
             Skip the time to add a "to be scheduled" placeholder — players can propose times from the match page.
