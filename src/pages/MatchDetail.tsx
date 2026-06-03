@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Calendar, Clock, Check, Trophy, Loader2, AlertTriangle } from "lucide-react";
+import { ArrowLeft, Calendar, Clock, Check, Trophy, Loader2, AlertTriangle, MapPin, Plus } from "lucide-react";
 import AppHeader from "@/components/AppHeader";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -17,17 +17,10 @@ interface Match {
   deadline_at: string;
   status: string;
   scheduling_captain_id: string | null;
+  location: string | null;
 }
 interface Participant { id: string; display_name: string; user_id: string | null }
 interface Team { id: string; name: string; player_a_id: string; player_b_id: string }
-interface Proposal {
-  id: string;
-  match_id: string;
-  proposed_by: string;
-  slot_1: string; slot_2: string | null; slot_3: string | null;
-  accepted_slot: string | null;
-  expires_at: string;
-}
 interface ScoreRow { id: string; set_number: number; side_a_games: number; side_b_games: number }
 interface Result { id: string; winner_side: "a" | "b"; entered_by: string | null; confirmed_by: string | null; disputed: boolean }
 
@@ -39,7 +32,6 @@ export default function MatchDetail() {
   const [match, setMatch] = useState<Match | null>(null);
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
-  const [proposal, setProposal] = useState<Proposal | null>(null);
   const [scores, setScores] = useState<ScoreRow[]>([]);
   const [result, setResult] = useState<Result | null>(null);
 
@@ -49,16 +41,14 @@ export default function MatchDetail() {
     const { data: m } = await supabase.from("matches").select("*").eq("id", matchId).maybeSingle();
     if (!m) { setLoading(false); return; }
     setMatch(m as Match);
-    const [p, t, pr, sc, res] = await Promise.all([
+    const [p, t, sc, res] = await Promise.all([
       supabase.from("season_participants").select("id,display_name,user_id").eq("season_id", m.season_id),
       supabase.from("doubles_teams").select("*").eq("season_id", m.season_id),
-      supabase.from("match_time_proposals").select("*").eq("match_id", matchId).order("created_at", { ascending: false }).limit(1),
       supabase.from("match_scores").select("*").eq("match_id", matchId).order("set_number"),
       supabase.from("match_results").select("*").eq("match_id", matchId).maybeSingle(),
     ]);
     setParticipants((p.data as Participant[]) || []);
     setTeams((t.data as Team[]) || []);
-    setProposal((pr.data?.[0] as Proposal) || null);
     setScores((sc.data as ScoreRow[]) || []);
     setResult((res.data as Result) || null);
     setLoading(false);
@@ -98,21 +88,14 @@ export default function MatchDetail() {
             {match.scheduled_at && (
               <span className="inline-flex items-center gap-1 text-primary"><Clock size={14} /> {new Date(match.scheduled_at).toLocaleString()}</span>
             )}
+            {match.location && (
+              <span className="inline-flex items-center gap-1"><MapPin size={14} /> {match.location}</span>
+            )}
             <span className="capitalize">{match.status}</span>
           </div>
         </div>
 
-        {match.status !== "completed" && match.status !== "forfeited" && (
-          <SchedulingSection
-            match={match}
-            proposal={proposal}
-            myParticipantId={myId}
-            myInvolved={!!myInvolved}
-            onChange={refresh}
-          />
-        )}
-
-        {match.status === "scheduled" && (
+        {(match.status === "scheduled" || match.status === "pending" || match.status === "proposed") && (
           <ScoreEntrySection match={match} sideLabel={sideLabel} myParticipantId={myId} myInvolved={!!myInvolved} scores={scores} result={result} onChange={refresh} />
         )}
 
