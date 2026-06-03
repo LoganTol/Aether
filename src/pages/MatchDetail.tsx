@@ -230,29 +230,35 @@ function ScoreEntrySection({ match, sideLabel, myParticipantId, myInvolved, scor
   const [busy, setBusy] = useState(false);
 
   const submit = async () => {
-    if (!myParticipantId) return;
     const valid = sets
       .map((s) => ({ a: parseInt(s.a), b: parseInt(s.b) }))
       .filter((s) => !isNaN(s.a) && !isNaN(s.b));
-    if (valid.length === 0) return;
+    if (valid.length === 0) {
+      toast({ title: "Enter at least one set", variant: "destructive" });
+      return;
+    }
     setBusy(true);
     try {
       // wipe & re-insert scores
       await supabase.from("match_scores").delete().eq("match_id", match.id);
-      await supabase.from("match_scores").insert(valid.map((v, i) => ({
+      const { error: scoresErr } = await supabase.from("match_scores").insert(valid.map((v, i) => ({
         match_id: match.id, set_number: i + 1, side_a_games: v.a, side_b_games: v.b,
       })));
+      if (scoresErr) throw scoresErr;
       const setsA = valid.filter((s) => s.a > s.b).length;
       const setsB = valid.filter((s) => s.b > s.a).length;
       const winner: "a" | "b" = setsA > setsB ? "a" : "b";
-      await supabase.from("match_results").upsert({
-        match_id: match.id, winner_side: winner, entered_by: myParticipantId, disputed: false,
+      const { error: resErr } = await supabase.from("match_results").upsert({
+        match_id: match.id, winner_side: winner, entered_by: myParticipantId ?? null, disputed: false,
       }, { onConflict: "match_id" });
-      await supabase.from("matches").update({
+      if (resErr) throw resErr;
+      const { error: matchErr } = await supabase.from("matches").update({
         status: "completed",
         completed_at: new Date().toISOString(),
       }).eq("id", match.id);
+      if (matchErr) throw matchErr;
       toast({ title: "Score recorded" });
+      setOpen(false);
       onChange();
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : "Could not save score";
