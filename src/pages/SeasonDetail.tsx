@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Calendar, Users, Copy, Settings, AlertCircle, LayoutDashboard, CalendarDays, Trophy, History, UserCircle } from "lucide-react";
 import AppHeader from "@/components/AppHeader";
@@ -99,6 +99,13 @@ export default function SeasonDetail() {
     ...(isCreator ? [{ id: "admin" as Tab, label: "Admin", icon: Settings }] : []),
   ];
 
+  const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const selectTab = (id: Tab) => {
+    setTab(id);
+    const el = tabRefs.current[id];
+    if (el) el.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <AppHeader />
@@ -124,15 +131,16 @@ export default function SeasonDetail() {
 
         {/* Tabs */}
         <div className="mb-6 -mx-4 px-4 md:mx-0 md:px-0">
-          <div className="glass-card p-1.5 flex gap-1 overflow-x-auto hide-scrollbar snap-x">
+          <div className="glass-card p-1.5 flex gap-1 overflow-x-auto hide-scrollbar">
             {tabs.map((t) => {
               const Icon = t.icon;
               const active = tab === t.id;
               return (
                 <button
                   key={t.id}
-                  onClick={() => setTab(t.id)}
-                  className={`snap-start shrink-0 px-3.5 py-2 rounded-full text-sm font-medium whitespace-nowrap inline-flex items-center gap-1.5 transition-colors ${
+                  ref={(el) => { tabRefs.current[t.id] = el; }}
+                  onClick={() => selectTab(t.id)}
+                  className={`shrink-0 px-3.5 py-2 rounded-full text-sm font-medium whitespace-nowrap inline-flex items-center gap-1.5 transition-colors ${
                     active
                       ? "bg-primary text-primary-foreground glow-shadow"
                       : "text-muted-foreground hover:text-foreground hover:bg-white/5"
