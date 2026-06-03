@@ -1,10 +1,11 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Calendar, Clock, Check, Trophy, Loader2, AlertTriangle, MapPin, Plus } from "lucide-react";
+import { ArrowLeft, Calendar, Clock, Check, Trophy, Loader2, AlertTriangle, MapPin, Plus, Trash2 } from "lucide-react";
 import AppHeader from "@/components/AppHeader";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
+import type { Season } from "@/components/season/types";
 
 interface Match {
   id: string;
@@ -29,6 +30,7 @@ export default function MatchDetail() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const [season, setSeason] = useState<Season | null>(null);
   const [match, setMatch] = useState<Match | null>(null);
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
@@ -41,12 +43,14 @@ export default function MatchDetail() {
     const { data: m } = await supabase.from("matches").select("*").eq("id", matchId).maybeSingle();
     if (!m) { setLoading(false); return; }
     setMatch(m as Match);
-    const [p, t, sc, res] = await Promise.all([
+    const [s, p, t, sc, res] = await Promise.all([
+      supabase.from("seasons").select("*").eq("id", m.season_id).maybeSingle(),
       supabase.from("season_participants").select("id,display_name,user_id").eq("season_id", m.season_id),
       supabase.from("doubles_teams").select("*").eq("season_id", m.season_id),
       supabase.from("match_scores").select("*").eq("match_id", matchId).order("set_number"),
       supabase.from("match_results").select("*").eq("match_id", matchId).maybeSingle(),
     ]);
+    setSeason((s.data as Season) || null);
     setParticipants((p.data as Participant[]) || []);
     setTeams((t.data as Team[]) || []);
     setScores((sc.data as ScoreRow[]) || []);
@@ -63,12 +67,36 @@ export default function MatchDetail() {
     ? teams.find((t) => t.id === id)?.name || "Team"
     : participants.find((p) => p.id === id)?.display_name || "Player";
 
+  const isCreator = user?.id === season?.creator_id;
+
   const myParticipant = participants.find((p) => p.user_id === user?.id);
   const myId = myParticipant?.id;
   const myTeam = teams.find((t) => t.player_a_id === myId || t.player_b_id === myId);
   const myInvolved =
     (match.side_kind === "player" && (myId === match.side_a_id || myId === match.side_b_id)) ||
     (match.side_kind === "team" && myTeam && (myTeam.id === match.side_a_id || myTeam.id === match.side_b_id));
+
+  const canDelete = isCreator && (match.status === "pending" || match.status === "scheduled" || match.status === "proposed");
+
+  const deleteMatch = async () => {
+    if (!match || !isCreator) return;
+    const confirmed = window.confirm("Delete this match? This cannot be undone.");
+    if (!confirmed) return;
+    setLoading(true);
+    try {
+      await supabase.from("match_scores").delete().eq("match_id", match.id);
+      await supabase.from("match_results").delete().eq("match_id", match.id);
+      await supabase.from("match_time_proposals").delete().eq("match_id", match.id);
+      const { error } = await supabase.from("matches").delete().eq("id", match.id);
+      if (error) throw error;
+      toast({ title: "Match deleted" });
+      navigate(`/app/seasons/${match.season_id}`);
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : "Could not delete match";
+      toast({ title: "Error", description: msg, variant: "destructive" });
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -79,10 +107,23 @@ export default function MatchDetail() {
         </button>
 
         <div className="glass-card p-6 mb-6">
-          <p className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Round {match.round}</p>
-          <h1 className="text-2xl md:text-3xl font-bold mb-3">
-            {sideLabel(match.side_a_id)} <span className="text-muted-foreground">vs</span> {sideLabel(match.side_b_id)}
-          </h1>
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Round {match.round}</p>
+              <h1 className="text-2xl md:text-3xl font-bold mb-3">
+                {sideLabel(match.side_a_id)} <span className="text-muted-foreground">vs</span> {sideLabel(match.side_b_id)}
+              </h1>
+            </div>
+            {canDelete && (
+              <button
+                onClick={deleteMatch}
+                aria-label="Delete match"
+                className="shrink-0 p-2.5 rounded-xl border border-border text-muted-foreground hover:text-destructive hover:border-destructive/40 transition-colors"
+              >
+                <Trash2 size={16} />
+              </button>
+            )}
+          </div>
           <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
             <span className="inline-flex items-center gap-1"><Calendar size={14} /> Deadline {new Date(match.deadline_at).toLocaleDateString()}</span>
             {match.scheduled_at && (

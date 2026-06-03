@@ -184,7 +184,30 @@ export default function SeasonDetail() {
             onChange={refresh}
           />
         )}
-        {tab === "schedule" && <ScheduleTab matches={matches} sideLabel={sideLabel} />}
+        {tab === "schedule" && (
+          <ScheduleTab
+            matches={matches}
+            sideLabel={sideLabel}
+            isCreator={isCreator}
+            onDelete={async (matchId) => {
+              if (!isCreator) return;
+              const confirmed = window.confirm("Delete this match? This cannot be undone.");
+              if (!confirmed) return;
+              try {
+                await supabase.from("match_scores").delete().eq("match_id", matchId);
+                await supabase.from("match_results").delete().eq("match_id", matchId);
+                await supabase.from("match_time_proposals").delete().eq("match_id", matchId);
+                const { error } = await supabase.from("matches").delete().eq("id", matchId);
+                if (error) throw error;
+                toast({ title: "Match deleted" });
+                refresh();
+              } catch (e: unknown) {
+                const msg = e instanceof Error ? e.message : "Could not delete match";
+                toast({ title: "Error", description: msg, variant: "destructive" });
+              }
+            }}
+          />
+        )}
         {tab === "standings" && <StandingsTab season={season} standings={standings} sideLabel={sideLabel} />}
         {tab === "history" && <MatchHistoryTab matches={matches} sideLabel={sideLabel} />}
 
