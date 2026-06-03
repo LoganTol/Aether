@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { LogOut, LayoutDashboard } from "lucide-react";
+import { LogOut, LayoutDashboard, Home } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import AetherLogo from "@/components/AetherLogo";
 
@@ -22,6 +22,13 @@ export default function AppHeader() {
               <span className="hidden md:inline text-xs text-muted-foreground px-2">
                 {user.email}
               </span>
+              <Link
+                to="/app/home"
+                className="p-2 rounded-xl border border-border bg-black/30 text-muted-foreground hover:text-primary hover:border-primary/50 transition-colors"
+                aria-label="Home"
+              >
+                <Home size={16} />
+              </Link>
               <button
                 onClick={async () => { await signOut(); navigate("/"); }}
                 className="p-2 rounded-xl border border-border bg-black/30 text-muted-foreground hover:text-primary hover:border-primary/50 transition-colors"
