@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Calendar, Users, Copy, Settings, AlertCircle, LayoutDashboard, CalendarDays, Trophy, History, UserCircle, UserPlus, Loader2 } from "lucide-react";
+import { ArrowLeft, Calendar, Users, Copy, Settings, AlertCircle, LayoutDashboard, CalendarDays, Trophy, History, UserCircle, UserPlus, Loader2, Trash2, Plus } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import AppHeader from "@/components/AppHeader";
 import { supabase } from "@/integrations/supabase/client";
@@ -93,6 +93,21 @@ export default function SeasonDetail() {
     else { toast({ title: "Captain rotated" }); refresh(); }
   };
 
+  const removeParticipant = async (p: { id: string; display_name: string; status: string }) => {
+    if (!isCreator) return;
+    const confirmed = window.confirm(`Remove ${p.display_name} from this season?`);
+    if (!confirmed) return;
+    const { error } = p.status === "invited"
+      ? await supabase.from("season_participants").delete().eq("id", p.id)
+      : await supabase.from("season_participants").update({ status: "withdrawn" }).eq("id", p.id);
+    if (error) {
+      toast({ title: "Could not remove member", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: p.status === "invited" ? "Invite removed" : "Member withdrawn" });
+    refresh();
+  };
+
   const tabs: { id: Tab; label: string; icon: typeof LayoutDashboard }[] = [
     { id: "overview", label: "Overview", icon: LayoutDashboard },
     { id: "schedule", label: "Schedule", icon: CalendarDays },
@@ -180,6 +195,14 @@ export default function SeasonDetail() {
                 <AddMemberDialog seasonId={season.id} onAdded={refresh} />
               </div>
             )}
+            {participants.length === 0 && (
+              <div className="glass-card p-8 text-center">
+                <p className="font-semibold">No members yet</p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {isCreator ? "Use Add member to invite players." : "The creator hasn't invited anyone yet."}
+                </p>
+              </div>
+            )}
             {participants.map((p) => (
               <div key={p.id} className="glass-card p-4 flex items-center justify-between gap-2">
                 <div>
@@ -189,13 +212,26 @@ export default function SeasonDetail() {
                     <span className={p.status === "active" ? "text-primary" : ""}>{p.status}</span>
                   </p>
                 </div>
-                {p.status === "invited" && isCreator && p.join_token && (
-                  <button
-                    onClick={() => copyInvite(p.join_token)}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-xs hover:border-primary/50"
-                  >
-                    <Copy size={12} /> Copy invite link
-                  </button>
+                {isCreator && (
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    {p.status === "invited" && p.join_token && (
+                      <button
+                        onClick={() => copyInvite(p.join_token)}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-xs hover:border-primary/50"
+                      >
+                        <Copy size={12} /> Copy invite
+                      </button>
+                    )}
+                    {p.status !== "withdrawn" && (
+                      <button
+                        onClick={() => removeParticipant(p)}
+                        aria-label="Remove member"
+                        className="p-2 rounded-lg border border-border text-muted-foreground hover:text-destructive hover:border-destructive/40"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    )}
+                  </div>
                 )}
               </div>
             ))}
