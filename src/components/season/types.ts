@@ -33,6 +33,7 @@ export interface Match {
   scheduling_captain_id: string | null;
   completed_at?: string | null;
   updated_at?: string;
+  location?: string | null;
 }
 export interface CaptainSlot {
   id: string;
