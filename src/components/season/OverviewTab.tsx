@@ -126,7 +126,9 @@ export default function OverviewTab({ season, participants, teams, matches, rota
                   <p className="font-medium truncate">
                     {sideLabel(m.side_kind, m.side_a_id)} <span className="text-muted-foreground">vs</span> {sideLabel(m.side_kind, m.side_b_id)}
                   </p>
-                  <p className="text-xs text-muted-foreground">Round {m.round}</p>
+                  <p className="text-xs text-muted-foreground truncate">
+                    Round {m.round}{m.location ? ` · ${m.location}` : ""}
+                  </p>
                 </div>
                 <div className="text-right text-xs shrink-0">
                   {m.scheduled_at ? (
