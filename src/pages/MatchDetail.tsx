@@ -117,25 +117,78 @@ export default function MatchDetail() {
         )}
 
         {match.status === "completed" && (
-          <div className="glass-card p-6">
-            <div className="flex items-center gap-2 mb-4">
-              <Trophy className="text-primary" />
-              <h3 className="font-bold">Final</h3>
-            </div>
-            <p className="text-lg font-semibold mb-3">
-              Winner: {sideLabel(result?.winner_side === "a" ? match.side_a_id : match.side_b_id)}
-            </p>
-            <div className="space-y-1 text-sm">
-              {scores.map((s) => (
-                <div key={s.id} className="flex justify-between border-b border-border py-1">
-                  <span className="text-muted-foreground">Set {s.set_number}</span>
-                  <span className="font-mono">{s.side_a_games} – {s.side_b_games}</span>
-                </div>
-              ))}
-            </div>
-          </div>
+          <BoxScore match={match} scores={scores} result={result} sideLabel={sideLabel} />
         )}
       </main>
+    </div>
+  );
+}
+
+function BoxScore({ match, scores, result, sideLabel }: {
+  match: Match; scores: ScoreRow[]; result: Result | null; sideLabel: (id: string) => string;
+}) {
+  const setsA = scores.filter((s) => s.side_a_games > s.side_b_games).length;
+  const setsB = scores.filter((s) => s.side_b_games > s.side_a_games).length;
+  const winnerA = result?.winner_side === "a";
+  return (
+    <div className="glass-card p-6">
+      <div className="flex items-center gap-2 mb-5">
+        <Trophy className="text-primary" size={18} />
+        <h3 className="font-bold uppercase tracking-wider text-xs text-muted-foreground">Final box score</h3>
+      </div>
+      <div className="overflow-x-auto scrollbar-dark -mx-2 px-2">
+        <table className="w-full text-sm border-separate border-spacing-0">
+          <thead>
+            <tr className="text-xs uppercase tracking-wider text-muted-foreground">
+              <th className="text-left font-medium pb-2 pr-3">Side</th>
+              {scores.map((s) => (
+                <th key={s.id} className="text-center font-medium pb-2 px-2 w-10">{s.set_number}</th>
+              ))}
+              <th className="text-center font-medium pb-2 pl-3 w-12">Sets</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr className={winnerA ? "text-foreground" : "text-muted-foreground"}>
+              <td className="py-3 pr-3 border-t border-border">
+                <span className="inline-flex items-center gap-2">
+                  {winnerA && <Trophy size={14} className="text-primary" />}
+                  <span className="font-semibold">{sideLabel(match.side_a_id)}</span>
+                </span>
+              </td>
+              {scores.map((s) => (
+                <td key={s.id} className={`py-3 px-2 text-center font-mono border-t border-border ${s.side_a_games > s.side_b_games ? "text-primary font-bold" : ""}`}>
+                  {s.side_a_games}
+                </td>
+              ))}
+              <td className="py-3 pl-3 text-center font-mono font-bold border-t border-border">{setsA}</td>
+            </tr>
+            <tr className={!winnerA ? "text-foreground" : "text-muted-foreground"}>
+              <td className="py-3 pr-3 border-t border-border">
+                <span className="inline-flex items-center gap-2">
+                  {!winnerA && <Trophy size={14} className="text-primary" />}
+                  <span className="font-semibold">{sideLabel(match.side_b_id)}</span>
+                </span>
+              </td>
+              {scores.map((s) => (
+                <td key={s.id} className={`py-3 px-2 text-center font-mono border-t border-border ${s.side_b_games > s.side_a_games ? "text-primary font-bold" : ""}`}>
+                  {s.side_b_games}
+                </td>
+              ))}
+              <td className="py-3 pl-3 text-center font-mono font-bold border-t border-border">{setsB}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      {result?.confirmed_by && !result.disputed && (
+        <p className="mt-4 inline-flex items-center gap-1.5 text-primary text-xs font-semibold">
+          <Check size={12} /> Confirmed by opponent
+        </p>
+      )}
+      {result?.disputed && (
+        <p className="mt-4 inline-flex items-center gap-1.5 text-destructive text-xs font-semibold">
+          <AlertTriangle size={12} /> Disputed
+        </p>
+      )}
     </div>
   );
 }

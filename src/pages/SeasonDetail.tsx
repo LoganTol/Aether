@@ -123,32 +123,40 @@ export default function SeasonDetail() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-1 border-b border-border mb-6 overflow-x-auto">
-          {tabs.map((t) => {
-            const Icon = t.icon;
-            return (
-              <button
-                key={t.id}
-                onClick={() => setTab(t.id)}
-                className={`px-4 py-2.5 text-sm font-medium whitespace-nowrap border-b-2 transition-colors inline-flex items-center gap-1.5 ${
-                  tab === t.id ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                <Icon size={14} /> {t.label}
-              </button>
-            );
-          })}
+        <div className="mb-6 -mx-4 px-4 md:mx-0 md:px-0">
+          <div className="glass-card p-1.5 flex gap-1 overflow-x-auto hide-scrollbar snap-x">
+            {tabs.map((t) => {
+              const Icon = t.icon;
+              const active = tab === t.id;
+              return (
+                <button
+                  key={t.id}
+                  onClick={() => setTab(t.id)}
+                  className={`snap-start shrink-0 px-3.5 py-2 rounded-full text-sm font-medium whitespace-nowrap inline-flex items-center gap-1.5 transition-colors ${
+                    active
+                      ? "bg-primary text-primary-foreground glow-shadow"
+                      : "text-muted-foreground hover:text-foreground hover:bg-white/5"
+                  }`}
+                >
+                  <Icon size={14} /> {t.label}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {tab === "overview" && (
           <OverviewTab
             season={season}
             participants={participants}
+            teams={teams}
             matches={matches}
             rotation={rotation}
             myParticipantId={myParticipant?.id}
+            isCreator={isCreator}
             sideLabel={sideLabel}
             onGoToSchedule={() => setTab("schedule")}
+            onChange={refresh}
           />
         )}
         {tab === "schedule" && <ScheduleTab matches={matches} sideLabel={sideLabel} />}
