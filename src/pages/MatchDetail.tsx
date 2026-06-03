@@ -276,6 +276,7 @@ function ScoreEntrySection({ match, sideLabel, myParticipantId, myInvolved, scor
   match: Match; sideLabel: (id: string) => string; myParticipantId?: string; myInvolved: boolean;
   scores: ScoreRow[]; result: Result | null; onChange: () => void;
 }) {
+  const [open, setOpen] = useState(false);
   const [sets, setSets] = useState<{ a: string; b: string }[]>(
     scores.length > 0
       ? scores.map((s) => ({ a: String(s.side_a_games), b: String(s.side_b_games) }))
