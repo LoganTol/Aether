@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Calendar, Users, Copy, Settings, AlertCircle, LayoutDashboard, CalendarDays, Trophy, History, UserCircle } from "lucide-react";
+import { ArrowLeft, Calendar, Users, Copy, Settings, AlertCircle, LayoutDashboard, CalendarDays, Trophy, History, UserCircle, UserPlus, Loader2 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import AppHeader from "@/components/AppHeader";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -172,7 +173,12 @@ export default function SeasonDetail() {
         {tab === "history" && <MatchHistoryTab matches={matches} sideLabel={sideLabel} />}
 
         {tab === "members" && (
-          <div className="space-y-2">
+          <div className="space-y-3">
+            {isCreator && (
+              <div className="flex justify-end">
+                <AddMemberDialog seasonId={season.id} onAdded={refresh} />
+              </div>
+            )}
             {participants.map((p) => (
               <div key={p.id} className="glass-card p-4 flex items-center justify-between gap-2">
                 <div>
