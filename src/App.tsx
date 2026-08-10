@@ -18,6 +18,7 @@ import JoinSeason from "./pages/JoinSeason.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import TermsAndConditions from "./pages/TermsAndConditions.tsx";
 import PrivacyPolicy from "./pages/PrivacyPolicy.tsx";
+import OAuthConsent from "./pages/OAuthConsent.tsx";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -39,6 +40,7 @@ const App = () => (
             <Route path="/app/matches/:matchId" element={<ProtectedRoute><MatchDetail /></ProtectedRoute>} />
             <Route path="/app/matches/:matchId/results" element={<ProtectedRoute><MatchScorecard /></ProtectedRoute>} />
             <Route path="/terms" element={<TermsAndConditions />} />
+            <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
             <Route path="/privacy" element={<PrivacyPolicy />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

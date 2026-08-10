@@ -1,0 +1,196 @@
+{
+  "version": 1,
+  "sdk_version": "0.26.1",
+  "path": "/functions/v1/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://rxgewhprxpkxkesrnxyd.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "aether",
+      "version": "0.1.0",
+      "title": "Aether Tennis"
+    },
+    "tools": [
+      {
+        "name": "list_seasons",
+        "title": "List seasons",
+        "description": "List the tennis seasons the signed-in user created or participates in.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_season",
+        "title": "Get season details",
+        "description": "Get a season's participants, doubles teams, and current scheduling captain.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "season_id": {
+              "type": "string",
+              "description": "The season id."
+            }
+          },
+          "required": [
+            "season_id"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_matches",
+        "title": "List matches",
+        "description": "List matches in a season, optionally filtered by status (pending, scheduled, completed).",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "season_id": {
+              "type": "string",
+              "description": "The season id."
+            },
+            "status": {
+              "description": "Optional match status filter, e.g. scheduled or completed.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "season_id"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_standings",
+        "title": "Get standings",
+        "description": "Get the current standings (wins, losses, sets, games) for a season.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "season_id": {
+              "type": "string",
+              "description": "The season id."
+            }
+          },
+          "required": [
+            "season_id"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "schedule_match",
+        "title": "Schedule a match",
+        "description": "Set the date/time and location for an existing match in a season.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "match_id": {
+              "type": "string",
+              "description": "The match id."
+            },
+            "scheduled_at": {
+              "type": "string",
+              "description": "ISO 8601 date-time for the match."
+            },
+            "location": {
+              "description": "Optional court or venue name.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "match_id",
+            "scheduled_at"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "record_match_score",
+        "title": "Record match score",
+        "description": "Record the set-by-set box score for a match and mark it completed.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": true,
+          "idempotentHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "match_id": {
+              "type": "string",
+              "description": "The match id."
+            },
+            "sets": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "side_a_games": {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  },
+                  "side_b_games": {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "side_a_games",
+                  "side_b_games"
+                ]
+              },
+              "description": "Sets in order, each with games won by side A and side B. Provide 1 to 5 sets."
+            }
+          },
+          "required": [
+            "match_id",
+            "sets"
+          ]
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}

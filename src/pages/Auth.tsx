@@ -15,7 +15,9 @@ export default function Auth() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const loc = useLocation();
-  const from = (loc.state as { from?: string } | null)?.from || "/app";
+  const nextParam = new URLSearchParams(loc.search).get("next");
+  const safeNext = nextParam && nextParam.startsWith("/") && !nextParam.startsWith("//") ? nextParam : null;
+  const from = safeNext || (loc.state as { from?: string } | null)?.from || "/app";
 
   useEffect(() => {
     if (!loading && user) navigate(from, { replace: true });
@@ -30,7 +32,7 @@ export default function Auth() {
           email,
           password,
           options: {
-            emailRedirectTo: window.location.origin + "/app",
+            emailRedirectTo: window.location.origin + from,
             data: { display_name: displayName || email.split("@")[0] },
           },
         });
@@ -51,7 +53,7 @@ export default function Auth() {
   const google = async () => {
     setBusy(true);
     const { error } = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin + "/app",
+      redirect_uri: window.location.origin + from,
     });
     if (error) {
       toast({ title: "Google sign-in error", description: error.message, variant: "destructive" });
