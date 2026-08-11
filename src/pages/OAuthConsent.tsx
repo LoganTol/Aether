@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import AetherLogo from "@/components/AetherLogo";
 import { Loader2 } from "lucide-react";
+import { Surface } from "@/components/ui-system";
 
 type OAuthNamespace = {
   getAuthorizationDetails: (id: string) => Promise<{ data: any; error: { message: string } | null }>;
@@ -63,21 +64,21 @@ export default function OAuthConsent() {
 
   return (
     <main className="min-h-screen bg-background flex items-center justify-center px-4">
-      <div className="glass-card w-full max-w-md p-8 space-y-6 text-center">
+      <Surface level={2} padded="lg" className="w-full max-w-md space-y-6 text-center">
         <AetherLogo to="/" className="text-2xl justify-center" />
         {error ? (
           <p className="text-sm text-destructive">Could not load this authorization request: {error}</p>
         ) : !details ? (
-          <p className="text-muted-foreground flex items-center justify-center gap-2">
-            <Loader2 className="animate-spin" size={16} /> Loading…
+          <p className="text-body flex items-center justify-center gap-2">
+            <Loader2 className="animate-spin" size={16} aria-hidden /> Loading…
           </p>
         ) : (
           <>
             <div className="space-y-2">
-              <h1 className="text-2xl font-bold">
+              <h1 className="text-page-title">
                 Connect {details.client?.name ?? "an app"} to your account
               </h1>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-body">
                 This lets {details.client?.name ?? "the client"} read your seasons, matches and standings, and
                 schedule matches or submit scores as you.
               </p>
@@ -86,21 +87,21 @@ export default function OAuthConsent() {
               <button
                 disabled={busy}
                 onClick={() => decide(false)}
-                className="flex-1 px-4 py-3 rounded-xl border border-border bg-black/30 hover:border-primary/50 transition-colors disabled:opacity-60"
+                className="btn-secondary flex-1 py-3"
               >
                 Deny
               </button>
               <button
                 disabled={busy}
                 onClick={() => decide(true)}
-                className="flex-1 px-4 py-3 rounded-xl bg-primary text-primary-foreground font-semibold glow-shadow disabled:opacity-60"
+                className="btn-primary flex-1 py-3"
               >
                 Approve
               </button>
             </div>
           </>
         )}
-      </div>
+      </Surface>
     </main>
   );
 }
