@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 import { ArrowLeft, ArrowRight, Loader2, Rocket } from "lucide-react";
+import { Surface } from "@/components/ui-system";
 
 interface Props {
   step: number;
@@ -34,21 +35,21 @@ export default function WizardShell({
   return (
     <div className="space-y-6 pb-28 md:pb-8">
       {/* Stepper */}
-      <div className="glass-card p-4 md:p-5">
-        <div className="flex items-center justify-between mb-3">
-          <div className="text-xs md:text-sm text-muted-foreground font-semibold tracking-wide uppercase">
+      <Surface level={1}>
+        <div className="mb-3 flex items-center justify-between">
+          <div className="text-eyebrow">
             Step {step} of {totalSteps}
           </div>
-          <div className="text-xs text-muted-foreground">{pct}%</div>
+          <div className="text-meta">{pct}%</div>
         </div>
-        <div className="h-1.5 rounded-full bg-white/5 overflow-hidden mb-4">
+        <div className="mb-4 h-1.5 overflow-hidden rounded-full bg-white/5">
           <div
             className="h-full bg-primary transition-all duration-500"
             style={{ width: `${pct}%` }}
           />
         </div>
         {/* desktop labels */}
-        <div className="hidden md:flex items-center gap-2 flex-wrap">
+        <div className="hidden flex-wrap items-center gap-2 md:flex">
           {stepLabels.map((label, i) => {
             const n = i + 1;
             const active = n === step;
@@ -56,12 +57,12 @@ export default function WizardShell({
             return (
               <div
                 key={label}
-                className={`px-3 py-1 rounded-full text-xs font-semibold border transition-all ${
+                className={`rounded-full border px-3 py-1 text-xs font-semibold transition-all ${
                   active
-                    ? "bg-primary text-primary-foreground border-primary"
+                    ? "border-primary bg-primary text-primary-foreground"
                     : done
                     ? "border-primary/40 text-primary"
-                    : "border-border text-muted-foreground"
+                    : "border-border text-[hsl(var(--text-muted))]"
                 }`}
               >
                 {n}. {label}
@@ -70,7 +71,7 @@ export default function WizardShell({
           })}
         </div>
         {/* mobile dots */}
-        <div className="md:hidden flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 md:hidden">
           {stepLabels.map((_, i) => (
             <div
               key={i}
@@ -80,25 +81,25 @@ export default function WizardShell({
             />
           ))}
         </div>
-      </div>
+      </Surface>
 
       <div>
-        <h1 className="text-2xl md:text-3xl font-bold mb-1">{title}</h1>
-        {subtitle && <p className="text-sm text-muted-foreground">{subtitle}</p>}
+        <h1 className="text-page-title mb-1">{title}</h1>
+        {subtitle && <p className="text-body">{subtitle}</p>}
       </div>
 
       <div>{children}</div>
 
       {/* Sticky action bar on mobile, inline on desktop */}
-      <div className="fixed md:static bottom-0 left-0 right-0 bg-background/95 md:bg-transparent backdrop-blur md:backdrop-blur-none border-t md:border-0 border-border p-4 md:p-0 z-30">
-        <div className="container md:px-0 max-w-3xl flex items-center justify-between gap-3">
+      <div className="fixed bottom-0 left-0 right-0 z-30 border-t border-border bg-background/95 p-4 backdrop-blur md:static md:border-0 md:bg-transparent md:p-0 md:backdrop-blur-none">
+        <div className="container flex max-w-3xl items-center justify-between gap-3 md:px-0">
           <button
             type="button"
             onClick={onBack}
             disabled={step === 1 || launching}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full border border-border text-sm font-semibold hover:border-primary/50 disabled:opacity-40"
+            className="btn-secondary rounded-full"
           >
-            <ArrowLeft size={16} /> Back
+            <ArrowLeft size={16} aria-hidden /> Back
           </button>
 
           {!isLast ? (
@@ -106,18 +107,18 @@ export default function WizardShell({
               type="button"
               onClick={onNext}
               disabled={nextDisabled}
-              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-primary text-primary-foreground font-semibold glow-shadow hover:-translate-y-0.5 transition-all disabled:opacity-40 disabled:hover:translate-y-0"
+              className="btn-primary rounded-full"
             >
-              Next <ArrowRight size={16} />
+              Next <ArrowRight size={16} aria-hidden />
             </button>
           ) : (
             <button
               type="button"
               onClick={onLaunch}
               disabled={launching}
-              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-primary text-primary-foreground font-semibold glow-shadow hover:-translate-y-0.5 transition-all disabled:opacity-60"
+              className="btn-primary rounded-full"
             >
-              {launching ? <Loader2 className="animate-spin" size={16} /> : <Rocket size={16} />}
+              {launching ? <Loader2 className="animate-spin" size={16} aria-hidden /> : <Rocket size={16} aria-hidden />}
               Launch Season
             </button>
           )}
