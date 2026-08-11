@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import type { Season, Participant, Team, Match, CaptainSlot, SideLabel } from "./types";
+import { Surface, StatBlock, SectionHeading, EmptyState } from "@/components/ui-system";
 
 interface Props {
   season: Season;
@@ -55,51 +56,48 @@ export default function OverviewTab({ season, participants, teams, matches, rota
       )}
 
       {/* Hero */}
-      <div className="glass-card p-6">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5">
-          <Stat label="Players" value={participants.filter((p) => p.status !== "withdrawn").length} />
-          <Stat label="Matches" value={total} />
-          <Stat label="Completed" value={completed} />
-          <Stat label="Captain" value={captain?.display_name?.split(" ")[0] || "—"} />
+      <Surface level={1}>
+        <div className="mb-5 grid grid-cols-2 gap-4 md:grid-cols-4">
+          <StatBlock label="Players" value={participants.filter((p) => p.status !== "withdrawn").length} />
+          <StatBlock label="Matches" value={total} />
+          <StatBlock label="Completed" value={completed} />
+          <StatBlock label="Captain" value={captain?.display_name?.split(" ")[0] || "—"} />
         </div>
-        <div className="flex items-center justify-between mb-2 text-xs uppercase tracking-wider text-muted-foreground">
-          <span>Season Progress</span>
-          <span>{pct}%</span>
+        <div className="text-eyebrow mb-2 flex items-center justify-between">
+          <span>Season progress</span>
+          <span className="nums">{pct}%</span>
         </div>
-        <Progress value={pct} className="h-2" />
-      </div>
+        <Progress value={pct} className="h-1.5" />
+      </Surface>
 
       {/* Action Required */}
-      <div className={`glass-card p-6 border ${iAmCaptain ? "border-primary/50 glow-shadow" : "border-border"}`}>
+      <Surface level={1} className={iAmCaptain ? "border-primary/40" : undefined}>
         <div className="flex items-start gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-primary/10 border border-primary/30 flex items-center justify-center shrink-0">
-            <Crown className="text-primary" size={22} />
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-primary/30 bg-primary/10">
+            <Crown className="text-primary" size={20} aria-hidden />
           </div>
           <div className="flex-1 min-w-0">
             {iAmCaptain ? (
               <>
-                <p className="text-xs uppercase tracking-wider text-primary font-semibold">You are Scheduling Captain</p>
-                <h3 className="text-xl font-bold mt-1">
+                <p className="text-eyebrow text-primary">You are scheduling captain</p>
+                <h3 className="text-section-title mt-1.5">
                   {needsScheduling} {needsScheduling === 1 ? "match needs" : "matches need"} scheduling
                 </h3>
                 {current?.window_end && (
-                  <p className="text-sm text-muted-foreground mt-1">
+                  <p className="text-meta mt-1.5">
                     Captain window ends {new Date(current.window_end).toLocaleDateString()}
                   </p>
                 )}
-                <button
-                  onClick={onGoToSchedule}
-                  className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary text-primary-foreground font-semibold text-sm glow-shadow"
-                >
-                  Schedule matches <ArrowRight size={14} />
+                <button onClick={onGoToSchedule} className="btn-primary mt-4">
+                  Schedule matches <ArrowRight size={14} aria-hidden />
                 </button>
               </>
             ) : (
               <>
-                <p className="text-xs uppercase tracking-wider text-muted-foreground">Current Captain</p>
-                <h3 className="text-xl font-bold mt-1">{captain?.display_name || "Not assigned"}</h3>
+                <p className="text-eyebrow">Current captain</p>
+                <h3 className="text-section-title mt-1.5">{captain?.display_name || "Not assigned"}</h3>
                 {current?.window_end && (
-                  <p className="text-sm text-muted-foreground mt-1">
+                  <p className="text-meta mt-1.5">
                     Captain window ends {new Date(current.window_end).toLocaleDateString()}
                   </p>
                 )}
@@ -107,54 +105,47 @@ export default function OverviewTab({ season, participants, teams, matches, rota
             )}
           </div>
         </div>
-      </div>
+      </Surface>
 
       {/* Upcoming */}
       <div>
-        <h3 className="text-sm uppercase tracking-wider text-muted-foreground mb-3">Upcoming matches</h3>
+        <SectionHeading title="Upcoming matches" />
         {upcoming.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No upcoming matches.</p>
+          <Surface level={1} padded={false}>
+            <EmptyState title="No upcoming matches" description="Scheduled matches will appear here." />
+          </Surface>
         ) : (
-          <div className="space-y-2">
+          <Surface level={1} padded={false} className="divide-y divide-border overflow-hidden">
             {upcoming.map((m) => (
               <Link
                 key={m.id}
                 to={`/app/matches/${m.id}`}
-                className="glass-card p-4 flex items-center justify-between gap-3 hover:border-primary/40 transition-colors"
+                className="flex items-center justify-between gap-3 px-4 py-3 transition-colors hover:bg-white/[0.03]"
               >
                 <div className="min-w-0">
-                  <p className="font-medium truncate">
-                    {sideLabel(m.side_kind, m.side_a_id)} <span className="text-muted-foreground">vs</span> {sideLabel(m.side_kind, m.side_b_id)}
+                  <p className="text-ui-title truncate">
+                    {sideLabel(m.side_kind, m.side_a_id)} <span className="text-[hsl(var(--text-muted))]">vs</span> {sideLabel(m.side_kind, m.side_b_id)}
                   </p>
-                  <p className="text-xs text-muted-foreground truncate">
+                  <p className="text-meta mt-0.5 truncate">
                     Round {m.round}{m.location ? ` · ${m.location}` : ""}
                   </p>
                 </div>
-                <div className="text-right text-xs shrink-0">
+                <div className="shrink-0 text-right text-xs">
                   {m.scheduled_at ? (
-                    <span className="text-primary font-semibold inline-flex items-center gap-1">
-                      <Clock size={12} /> {new Date(m.scheduled_at).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
+                    <span className="nums inline-flex items-center gap-1 font-semibold text-primary">
+                      <Clock size={12} aria-hidden /> {new Date(m.scheduled_at).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
                     </span>
                   ) : (
-                    <span className="text-muted-foreground inline-flex items-center gap-1">
-                      <Calendar size={12} /> Waiting to be scheduled
+                    <span className="inline-flex items-center gap-1 text-[hsl(var(--text-muted))]">
+                      <Calendar size={12} aria-hidden /> Waiting to be scheduled
                     </span>
                   )}
                 </div>
               </Link>
             ))}
-          </div>
+          </Surface>
         )}
       </div>
-    </div>
-  );
-}
-
-function Stat({ label, value }: { label: string; value: string | number }) {
-  return (
-    <div>
-      <p className="text-xs uppercase tracking-wider text-muted-foreground">{label}</p>
-      <p className="text-2xl font-bold mt-1">{value}</p>
     </div>
   );
 }
@@ -233,11 +224,11 @@ function CreateMatchDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <button className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-primary text-primary-foreground text-sm font-semibold glow-shadow">
-          <Plus size={14} /> Schedule a match
+        <button className="btn-primary">
+          <Plus size={14} aria-hidden /> Schedule a match
         </button>
       </DialogTrigger>
-      <DialogContent className="glass-card border-border max-w-md">
+      <DialogContent className="max-w-md border-border surface-elevated">
         <DialogHeader>
           <DialogTitle className="inline-flex items-center gap-2">
             <CalendarCheck className="text-primary" size={18} /> Schedule a match
@@ -245,57 +236,57 @@ function CreateMatchDialog({
         </DialogHeader>
         {!hasSides ? (
           <div className="space-y-3 pt-1">
-            <div className="rounded-2xl border border-border bg-black/30 p-4">
-              <p className="font-semibold text-sm">
+            <div className="rounded-xl border border-border bg-black/30 p-4">
+              <p className="text-ui-title">
                 You need at least two {season.format === "doubles" ? "teams" : "players"} first.
               </p>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-meta mt-1">
                 Add members from the Members tab, then come back here to schedule a match.
               </p>
             </div>
             <button
               onClick={() => setOpen(false)}
-              className="w-full px-5 py-2.5 rounded-full border border-border text-sm font-medium hover:border-primary/50 inline-flex items-center justify-center gap-2"
+              className="btn-secondary w-full justify-center"
             >
-              <UserPlus size={14} /> Go add members
+              <UserPlus size={14} aria-hidden /> Go add members
             </button>
           </div>
         ) : (
         <div className="space-y-3">
           <div>
-            <label className="text-xs uppercase tracking-wider text-muted-foreground">Side A</label>
+            <label className="text-eyebrow">Side A</label>
             <select
               value={sideA}
               onChange={(e) => setSideA(e.target.value)}
-              className="w-full mt-1 px-3 py-2.5 rounded-xl bg-black/30 border border-border focus:border-primary outline-none"
+              className="field mt-1.5"
             >
               <option value="">Select…</option>
               {sides.map((s) => <option key={s.id} value={s.id}>{s.label}</option>)}
             </select>
           </div>
           <div>
-            <label className="text-xs uppercase tracking-wider text-muted-foreground">Side B</label>
+            <label className="text-eyebrow">Side B</label>
             <select
               value={sideB}
               onChange={(e) => setSideB(e.target.value)}
-              className="w-full mt-1 px-3 py-2.5 rounded-xl bg-black/30 border border-border focus:border-primary outline-none"
+              className="field mt-1.5"
             >
               <option value="">Select…</option>
               {sides.filter((s) => s.id !== sideA).map((s) => <option key={s.id} value={s.id}>{s.label}</option>)}
             </select>
           </div>
           <div>
-            <label className="text-xs uppercase tracking-wider text-muted-foreground">Date & time</label>
+            <label className="text-eyebrow">Date & time</label>
             <input
               type="datetime-local"
               value={scheduledAt}
               onChange={(e) => setScheduledAt(e.target.value)}
               min={new Date(Date.now() - new Date().getTimezoneOffset() * 60_000).toISOString().slice(0, 16)}
-              className="w-full mt-1 px-3 py-2.5 rounded-xl bg-black/30 border border-border focus:border-primary outline-none"
+              className="field mt-1.5"
             />
           </div>
           <div>
-            <label className="text-xs uppercase tracking-wider text-muted-foreground inline-flex items-center gap-1">
+            <label className="text-eyebrow inline-flex items-center gap-1">
               <MapPin size={12} /> Location
             </label>
             <input
@@ -303,18 +294,18 @@ function CreateMatchDialog({
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               placeholder="e.g. Riverside Park · Court 3"
-              className="w-full mt-1 px-3 py-2.5 rounded-xl bg-black/30 border border-border focus:border-primary outline-none"
+              className="field mt-1.5"
             />
           </div>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-meta">
             Skip the time to add a "to be scheduled" placeholder — players can propose times from the match page.
           </p>
           <button
             onClick={create}
             disabled={busy || !sideA || !sideB}
-            className="w-full mt-2 px-5 py-2.5 rounded-full bg-primary text-primary-foreground font-semibold glow-shadow disabled:opacity-50 inline-flex items-center justify-center gap-2"
+            className="btn-primary mt-2 w-full"
           >
-            {busy && <Loader2 className="animate-spin" size={14} />} {scheduledAt ? "Schedule match" : "Add match"}
+            {busy && <Loader2 className="animate-spin" size={14} aria-hidden />} {scheduledAt ? "Schedule match" : "Add match"}
           </button>
         </div>
         )}
