@@ -1,138 +1,106 @@
-# Season Operations — Build Plan
+# Aether Tennis — Design System & Frontend Refactor
 
-Transform the existing Season Detail page into a six-tab operational dashboard, add a public scorecard route, and back standings with a SQL view so they're always correct.
+A visual architecture refactor across the marketing site and the authenticated product. No database, query, auth, or routing changes. Same features, materially different craft level.
 
-## What already exists (keep & extend)
+## What stays
 
-- `SeasonDetail.tsx` has Schedule / Standings / Members / Admin tabs and a captain banner. We will **add Overview and Match History**, and split Schedule into round groups with status badges.
-- `MatchDetail.tsx` already covers time proposals + score entry. We will extend it to write `completed_at`, `scheduled_by`, and `result_confirmed_at`, and add a **separate read-only scorecard** at `/app/matches/:id/results`.
-- `standings` table is read directly today and may drift. We replace it with a `season_standings` SQL view computed from `match_results` + `match_scores`.
-- `season_settings.score_format` already exists (best_of_3 / pro_set_8 / single_set_6) — score entry will respect it.
+- All business logic: auth, season creation, invites/join tokens, fixture generation, captain rotation, scheduling, score entry/confirmation, standings math, admin actions, MCP integration.
+- All routes and page-to-file mapping.
+- Brand: AETHER. / TENNIS logo, Outfit for display, Inter for UI, lime accent (73 100% 50%), dark identity.
+- Structurally sound files: the 7-step wizard state machine, season tab data fetching, match detail data flow. These get new presentation, not new logic.
 
-## Tab structure
+## What changes
+
+### Design tokens (src/index.css + tailwind.config.ts)
+Replace the single flat `--card` + `glass-card` model with a real surface hierarchy:
 
 ```text
-Season Dashboard
-├── Overview      ← NEW (default tab)
-├── Schedule      ← refactored: grouped by round + status badges
-├── Standings     ← reuses existing table, sourced from the new view, top 3 podium
-├── Match History ← NEW
-├── Members       ← unchanged
-└── Admin         ← unchanged (creator-only)
+--background      deep neutral, slightly green-tinted charcoal (not pure black)
+--surface-1       large structural regions, no/低 radius
+--surface-2       UI modules, rounded-lg / rounded-xl
+--surface-elevated  modals, composers, command menu
+--border-subtle   white/[0.06]
+--border-default  white/[0.08]
+--border-strong   white/[0.14]
+--text-primary / --text-secondary / --text-muted
+--aether-lime     existing 73 100% 50%
 ```
 
-### Overview tab content
+Removed from the system: `--shadow-glow` as a default, gradient text, decorative blobs, `animate-float`, `.glow-shadow` on ordinary elements. Glass becomes one opt-in utility used in maybe two places, not the base card.
 
-1. **Hero card** — season name, player/match counts, current captain, progress %.
-2. **Action Required** — captain variant ("You're the captain · N matches need scheduling · deadline") vs non-captain variant (who the captain is + window end).
-3. **Upcoming matches** — next 3 scheduled or awaiting-time matches.
-4. **Progress bar** — completed / total matches.
+Radius policy: `rounded-md` controls, `rounded-lg` buttons/inputs, `rounded-xl` modules, `rounded-2xl+` only for avatars/pills. Borders carry hierarchy; shadows used only on elevated surfaces.
 
-### Schedule tab
+### Typography scale
+Named utilities so sizes stop being ad hoc: `text-display`, `text-page-title`, `text-section`, `text-ui-title`, `text-body`, `text-meta`, `text-eyebrow`. Outfit restricted to display/page/section; Inter everywhere in app UI. Tight tracking only above ~40px. Tabular numerals for all scores, standings, and progress numbers.
 
-- Group by `round` (Round 1, Round 2, …).
-- Status badges with semantic colors: `pending` (muted), `proposed` (amber), `scheduled` (primary/lime), `completed` (green-ish), `disputed` (destructive), `overdue` (destructive — derived when `deadline_at < now()` and not completed).
-- Card links to `/app/matches/:id`.
+### Color discipline
+Lime reserved for: primary CTA, active nav, current captain, primary status, selected slot, rank 1, progress fill. Everything else neutral. Icons default to muted foreground.
 
-### Match History tab
+### Grid + spacing
+`PageContainer` with a 12-col grid at max-w-[1280px] (marketing sections may go to 1440px). Marketing sections use 7/5 and 5/7 asymmetric splits instead of centered 3-col card grids. Section rhythm standardized on a small set of spacing steps rather than arbitrary py-24/py-32.
 
-- Completed matches only, newest first (by `completed_at` desc, fallback `updated_at`).
-- "Sarah def. Mike" headline + per-set scores inline.
-- Card links to `/app/matches/:id/results` (read-only scorecard).
+## New shared primitives (src/components/ui-system/)
 
-### Standings tab
+Only these — no speculative abstractions:
 
-- Same table, sorted by the new view.
-- Add a **podium row** (top 3) above the table with gold/silver/bronze treatment using existing tokens.
+- `PageContainer` — grid + max width + page padding
+- `PageHeader` — title, meta line, contextual actions
+- `SectionHeader` — eyebrow/number + title + optional action
+- `Surface` — variant: flat | module | elevated
+- `Metric` / `ProgressMetric` — label, value, tabular numerals
+- `StatusBadge` — replaces MatchStatusBadge, expanded to season/participant states
+- `DataRow`, `MatchRow`, `RankingRow` — dense list rows
+- `ActionPanel` — the "next action" hero block
+- `EmptyState`
+- `PageTabs` — extracted from SeasonDetail's inline tab bar
+- `ProductPreview` — static, realistic UI fragments for the landing page
 
-## New route: Match Scorecard
+Button variants consolidated to primary / secondary / ghost / destructive in the existing shadcn `button.tsx` variants; no gradients, no glow, `rounded-lg`.
 
-`/app/matches/:id/results` — read-only:
-- Players/teams, winner, set-by-set table, submitted by, confirmed by, completed date.
-- Back link to Season → Match History.
+## Page-by-page
 
-## Match Detail enhancements
+**Landing (Index.tsx)** — full recomposition. Restrained nav (Product, How it works, For groups, Season example; transparent → bordered on scroll). Product-led hero: headline + copy + two CTAs on the left, a layered composition of real Aether UI fragments (current captain, next match, standings, season progress) on the right. Typographic "built for" strip instead of fake logos. Problem statement section with a captain-rotation week timeline (current week in lime). Five numbered product sections alternating left/right, each showing actual product UI: create the season, share responsibility, schedule the match, play and record, watch the season move. Standings module styled like an analytics table. Compact footer.
 
-- On schedule confirmation: also set `matches.scheduled_by = <participant who proposed>`.
-- On score submit: set `matches.completed_at = now()`.
-- Add **Confirm / Dispute** controls visible to the opponent (non-entering side) when `match_results` exists but `confirmed_by` is null:
-  - Confirm → set `result_confirmed_at = now()`, `confirmed_by = my participant id`.
-  - Dispute → set `disputed = true`, status stays `completed` but row badged "Disputed".
-- Score form already supports N sets; we'll constrain default rows per `score_format`.
+**App shell (AppHeader.tsx)** — compact top bar, real nav (Seasons, plus contextual season nav), account menu replacing the raw email string + loose icon buttons. Mobile: simplified bar + sheet nav.
 
-## Database changes
+**SeasonCommandCenter.tsx** — flagship screen. Page header with season name, dates, format, status, and Manage/Invite actions. Main grid: large `ActionPanel` ("You are Scheduling Captain — 3 matches need times, deadline Thursday") + season progress on the right. Secondary row: upcoming matches, standings, recent results as integrated regions.
 
-### Migration
+**SeasonDetail.tsx + tabs** — `PageTabs`; Schedule becomes an operational timeline grouped by round with compact `MatchRow`s and All / Needs scheduling / Scheduled / Completed filters. Standings becomes a real table desktop-side and compact ranking rows on mobile. Match history becomes a results ledger with clickable rows and filters. Members/Admin get the same row treatment.
 
-```sql
-ALTER TABLE public.matches
-  ADD COLUMN IF NOT EXISTS completed_at timestamptz,
-  ADD COLUMN IF NOT EXISTS scheduled_by uuid,
-  ADD COLUMN IF NOT EXISTS result_confirmed_at timestamptz;
+**MatchDetail.tsx** — state-driven workflow. One primary action derived from match status (pending → propose, proposed → choose, scheduled → enter score, awaiting confirmation → confirm, completed → scorecard). Other sections collapse to summaries instead of all being exposed at once. Existing handlers unchanged.
 
-CREATE OR REPLACE VIEW public.season_standings AS
-WITH sides AS (
-  SELECT m.season_id, m.side_kind, m.side_a_id AS side_id,
-         r.winner_side = 'a' AS won,
-         s.side_a_games AS games_for, s.side_b_games AS games_against
-  FROM matches m
-  JOIN match_results r ON r.match_id = m.id
-  JOIN match_scores  s ON s.match_id = m.id
-  WHERE m.status = 'completed'
-  UNION ALL
-  SELECT m.season_id, m.side_kind, m.side_b_id,
-         r.winner_side = 'b',
-         s.side_b_games, s.side_a_games
-  FROM matches m
-  JOIN match_results r ON r.match_id = m.id
-  JOIN match_scores  s ON s.match_id = m.id
-  WHERE m.status = 'completed'
-),
-sets AS (
-  SELECT season_id, side_kind, side_id,
-         SUM(CASE WHEN games_for > games_against THEN 1 ELSE 0 END) AS sets_won,
-         SUM(CASE WHEN games_for < games_against THEN 1 ELSE 0 END) AS sets_lost,
-         SUM(games_for) AS games_won,
-         SUM(games_against) AS games_lost
-  FROM sides GROUP BY season_id, side_kind, side_id
-),
-wl AS (
-  SELECT season_id, side_kind, side_id,
-         COUNT(*) FILTER (WHERE won) AS wins,
-         COUNT(*) FILTER (WHERE NOT won) AS losses
-  FROM (SELECT DISTINCT ON (m.id, side_id) * FROM sides
-        JOIN matches m USING (season_id)) x
-  GROUP BY season_id, side_kind, side_id
-)
-SELECT s.season_id, s.side_kind, s.side_id,
-       COALESCE(w.wins,0) AS wins, COALESCE(w.losses,0) AS losses,
-       s.sets_won, s.sets_lost, s.games_won, s.games_lost
-FROM sets s LEFT JOIN wl w USING (season_id, side_kind, side_id);
+**MatchScorecard.tsx** — sports-result presentation: FINAL header, per-player set totals, set/tiebreak grid with tabular numerals, metadata footer.
 
-GRANT SELECT ON public.season_standings TO authenticated;
-```
+**Create Season wizard** — same 7 steps and same state hook. New shell: page header, horizontal progress nav, 7-col form column and 5-col live preview panel (name, players, projected matches, captain window, dates) on desktop; single column with a collapsible summary on mobile.
 
-(Views inherit RLS from underlying tables via `is_season_member`, so no extra policy needed; the `standings` table will be kept for backwards-compat but the UI reads from `season_standings`.)
+**Dashboard / HomeLanding / Auth / Join / NotFound / legal pages** — brought onto the same tokens, headers, and row primitives; HomeLanding's four identical tiles get real hierarchy.
 
-## Files
+## Cleanup
 
-**New**
-- `src/pages/MatchScorecard.tsx` — `/app/matches/:id/results`
-- `src/components/season/OverviewTab.tsx`
-- `src/components/season/ScheduleTab.tsx` (round-grouped, status badges)
-- `src/components/season/MatchHistoryTab.tsx`
-- `src/components/season/StandingsTab.tsx` (with podium)
-- `src/components/season/MatchStatusBadge.tsx`
+Remove `src/App.css` (unused CRA leftover), the `animate-float` keyframe, unused fade-delay variants, blob/gradient decorations, glow utilities on ordinary elements, and duplicated one-off `bg-white/5` + `rounded-2xl` + `backdrop-blur` combinations across the 26 files that currently use them. No business logic removed.
 
-**Edited**
-- `src/pages/SeasonDetail.tsx` — add Overview + History tabs, default to Overview, delegate to new components.
-- `src/pages/MatchDetail.tsx` — write `completed_at` / `scheduled_by` / confirm/dispute flow.
-- `src/App.tsx` — register `/app/matches/:id/results`.
-- `src/integrations/supabase/types.ts` — regenerated by migration.
+## Files expected to change
 
-## Out of scope (deferred)
+`src/index.css`, `tailwind.config.ts`, `index.html` (font weights), `src/components/ui/button.tsx`, `AppHeader.tsx`, `AetherLogo.tsx` (sizing props only), all 14 pages, all 4 season tabs, `MatchStatusBadge.tsx`, `WizardShell.tsx` + all 7 step components, plus new files under `src/components/ui-system/`. `App.css` deleted.
 
-- Real email/push notifications for "result pending confirmation".
-- Auto-overdue cron — `overdue` is derived client-side only.
-- Editing a submitted score after confirmation (admin override only).
-- Doubles team head-to-head tiebreak; we keep the existing wins → set diff → game diff order.
+## Risks
+
+- Highest-risk files are `MatchDetail.tsx` (388 lines) and `SeasonDetail.tsx` (415 lines) — dense logic mixed with markup. I will extract presentation and keep handlers byte-identical where possible, then verify each flow in the browser.
+- The match-page state machine changes which controls are visible at a time. Every action stays reachable; if you'd rather keep all controls always visible, say so and I'll skip that part.
+- Wizard preview panel reads from existing `wizardEstimates` — no new calculations.
+- Tab/scroll behavior and toast wiring must be preserved when tabs move into `PageTabs`.
+
+## Execution order
+
+1. Tokens, typography, primitives
+2. App shell + navigation
+3. Landing page
+4. Season Command Center
+5. Schedule + Match Detail
+6. Standings + Match History + Scorecard
+7. Create Season wizard
+8. Dashboard + secondary screens
+9. Responsive + accessibility pass (375 → 1440)
+10. Dead style removal
+
+I'll verify flows in a headless browser at the end of each phase so functionality never silently regresses.
