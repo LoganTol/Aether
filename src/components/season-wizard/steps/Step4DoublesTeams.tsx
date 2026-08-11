@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { DoublesTeamInput, WizardState } from "../hooks/useWizardState";
+import { Surface } from "@/components/ui-system";
 
 interface Props {
   state: WizardState;
@@ -42,24 +43,24 @@ export default function Step4DoublesTeams({ state, creatorName, setTeams }: Prop
 
   return (
     <div className="space-y-5">
-      <div className="glass-card p-6">
-        <h2 className="text-lg font-bold mb-1">Assign doubles teams</h2>
-        <p className="text-xs text-muted-foreground">
+      <Surface level={1} padded="lg">
+        <h2 className="text-ui-title mb-1">Assign doubles teams</h2>
+        <p className="text-meta">
           {pool.length} players → {expectedTeams} fixed teams. Each player must be on exactly one team.
         </p>
-      </div>
+      </Surface>
 
       <div className="space-y-3">
         {state.doublesTeams.map((t, i) => (
-          <div key={i} className="glass-card p-4 space-y-3">
+          <Surface key={i} level={1} className="space-y-3">
             <input
               value={t.name}
               onChange={(e) => update(i, { name: e.target.value })}
               placeholder={`Team ${i + 1}`}
               maxLength={40}
-              className="w-full px-3 py-2 rounded-lg bg-black/30 border border-border focus:border-primary outline-none font-semibold"
+              className="field font-semibold"
             />
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               <PlayerSelect
                 pool={pool}
                 value={t.playerAIdx}
@@ -75,7 +76,7 @@ export default function Step4DoublesTeams({ state, creatorName, setTeams }: Prop
                 label="Player B"
               />
             </div>
-          </div>
+          </Surface>
         ))}
       </div>
     </div>
@@ -97,11 +98,11 @@ function PlayerSelect({
 }) {
   return (
     <div>
-      <label className="text-xs text-muted-foreground mb-1 block">{label}</label>
+      <label className="text-eyebrow mb-1.5 block">{label}</label>
       <select
         value={value ?? ""}
         onChange={(e) => onChange(e.target.value === "" ? null : parseInt(e.target.value))}
-        className="w-full px-3 py-2 rounded-lg bg-black/30 border border-border focus:border-primary outline-none text-sm"
+        className="field"
       >
         <option value="">— select —</option>
         {available.map((i) => (

@@ -4,6 +4,7 @@ import { Loader2, Trophy, CheckCircle2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
+import { Surface } from "@/components/ui-system";
 
 interface Participant { id: string; season_id: string; display_name: string; user_id: string | null; status: string }
 interface Season { id: string; name: string; format: string }
@@ -51,25 +52,25 @@ export default function JoinSeason() {
   if (error) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center px-4">
-        <div className="glass-card p-8 max-w-md text-center">
-          <h1 className="text-2xl font-bold mb-2">Invite not found</h1>
-          <p className="text-muted-foreground mb-4">{error}</p>
+        <Surface level={2} padded="lg" className="max-w-md text-center">
+          <h1 className="text-page-title mb-2">Invite not found</h1>
+          <p className="text-body mb-4">{error}</p>
           <Link to="/" className="text-primary hover:underline">Back to home</Link>
-        </div>
+        </Surface>
       </div>
     );
   }
 
   if (!participant || authLoading) {
-    return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Loading…</div>;
+    return <div className="min-h-screen flex items-center justify-center text-body">Loading…</div>;
   }
 
   if (participant.user_id && participant.user_id !== user?.id) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center px-4">
-        <div className="glass-card p-8 max-w-md text-center">
-          <p>This invite was already claimed by another account.</p>
-        </div>
+        <Surface level={2} padded="lg" className="max-w-md text-center">
+          <p className="text-body">This invite was already claimed by another account.</p>
+        </Surface>
       </div>
     );
   }
@@ -77,30 +78,30 @@ export default function JoinSeason() {
   if (participant.status === "active" && participant.user_id === user?.id) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center px-4">
-        <div className="glass-card p-8 max-w-md text-center">
-          <CheckCircle2 className="text-primary mx-auto mb-3" />
-          <p className="mb-4">You're already in this season.</p>
-          <Link to={`/app/seasons/${participant.season_id}`} className="inline-block px-5 py-2.5 rounded-full bg-primary text-primary-foreground font-semibold">
+        <Surface level={2} padded="lg" className="max-w-md text-center">
+          <CheckCircle2 className="text-primary mx-auto mb-3" aria-hidden />
+          <p className="text-body mb-4">You're already in this season.</p>
+          <Link to={`/app/seasons/${participant.season_id}`} className="btn-primary">
             Open season
           </Link>
-        </div>
+        </Surface>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
-      <div className="glass-card p-8 max-w-md text-center">
-        <Trophy className="text-primary mx-auto mb-4" size={36} />
-        <h1 className="text-2xl font-bold mb-2">Join {season?.name}</h1>
-        <p className="text-muted-foreground mb-6">
+      <Surface level={2} padded="lg" className="max-w-md text-center">
+        <Trophy className="text-primary mx-auto mb-4" size={36} aria-hidden />
+        <h1 className="text-page-title mb-2">Join {season?.name}</h1>
+        <p className="text-body mb-6">
           You've been invited to play as <span className="text-foreground font-medium">{participant.display_name}</span> in this {season?.format} season.
         </p>
         {!user ? (
           <Link
             to="/auth"
             state={{ from: `/join/${token}` }}
-            className="inline-block px-6 py-3 rounded-full bg-primary text-primary-foreground font-semibold glow-shadow"
+            className="btn-primary"
           >
             Sign in to accept
           </Link>
@@ -108,12 +109,12 @@ export default function JoinSeason() {
           <button
             onClick={join}
             disabled={joining}
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-primary text-primary-foreground font-semibold glow-shadow disabled:opacity-60"
+            className="btn-primary"
           >
-            {joining && <Loader2 className="animate-spin" size={16} />} Accept invite
+            {joining && <Loader2 className="animate-spin" size={16} aria-hidden />} Accept invite
           </button>
         )}
-      </div>
+      </Surface>
     </div>
   );
 }

@@ -5,6 +5,7 @@ import {
   roundCount,
   previewSchedule,
 } from "../lib/wizardEstimates";
+import { Surface, StatBlock } from "@/components/ui-system";
 
 interface Props {
   state: WizardState;
@@ -43,42 +44,42 @@ export default function Step7ReviewLaunch({ state, creatorName }: Props) {
 
   return (
     <div className="space-y-5">
-      <div className="glass-card p-6">
-        <div className="text-xs font-semibold tracking-wide uppercase text-primary mb-2">
+      <Surface level={1} padded="lg">
+        <div className="text-eyebrow mb-2 text-primary">
           Almost there
         </div>
-        <h2 className="text-2xl font-bold mb-1">{state.basics.name || "Untitled season"}</h2>
-        <p className="text-sm text-muted-foreground capitalize">
+        <h2 className="text-page-title mb-1">{state.basics.name || "Untitled season"}</h2>
+        <p className="text-body capitalize">
           {state.basics.format} · {state.basics.startDate} → {state.basics.endDate}
         </p>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-5">
-          <Big label="Players" value={pool.length} />
-          {isDoubles && <Big label="Teams" value={units.length} />}
-          <Big label="Matches" value={matches} />
-          <Big label="Rounds" value={rounds} />
+        <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-4">
+          <StatBlock label="Players" value={pool.length} />
+          {isDoubles && <StatBlock label="Teams" value={units.length} />}
+          <StatBlock label="Matches" value={matches} />
+          <StatBlock label="Rounds" value={rounds} />
         </div>
-      </div>
+      </Surface>
 
-      <div className="glass-card p-6">
-        <h3 className="text-base font-bold mb-3">Schedule preview</h3>
+      <Surface level={1} padded="lg">
+        <h3 className="text-ui-title mb-3">Schedule preview</h3>
         {preview.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Add more players to preview matches.</p>
+          <p className="text-body">Add more players to preview matches.</p>
         ) : (
           <div className="space-y-4">
             {preview.map((round) => (
               <div key={round.round}>
-                <div className="text-xs uppercase tracking-wide text-muted-foreground mb-2">
+                <div className="text-eyebrow mb-2">
                   Round {round.round}
                 </div>
                 <div className="space-y-1.5">
                   {round.matches.map((m, i) => (
                     <div
                       key={i}
-                      className="flex items-center justify-between gap-3 px-3 py-2 rounded-lg bg-black/30 border border-border text-sm"
+                      className="flex items-center justify-between gap-3 rounded-lg border border-border bg-[hsl(var(--surface-1))] px-3 py-2 text-sm"
                     >
                       <span className="font-semibold">{m.a}</span>
-                      <span className="text-xs text-muted-foreground">vs</span>
+                      <span className="text-meta">vs</span>
                       <span className="font-semibold">{m.b}</span>
                     </div>
                   ))}
@@ -87,9 +88,9 @@ export default function Step7ReviewLaunch({ state, creatorName }: Props) {
             ))}
           </div>
         )}
-      </div>
+      </Surface>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <SummaryCard title="Rules">
           <Row k="Score" v={labels[state.rules.scoreFormat]} />
           <Row k="Disputes" v={labels[state.rules.disputeResolution]} />
@@ -125,29 +126,20 @@ export default function Step7ReviewLaunch({ state, creatorName }: Props) {
   );
 }
 
-function Big({ label, value }: { label: string; value: number | string }) {
-  return (
-    <div>
-      <div className="text-2xl md:text-3xl font-bold">{value}</div>
-      <div className="text-xs text-muted-foreground">{label}</div>
-    </div>
-  );
-}
-
 function SummaryCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="glass-card p-5 space-y-2">
-      <h4 className="text-sm font-bold mb-2">{title}</h4>
+    <Surface level={1} className="space-y-2">
+      <h4 className="text-ui-title mb-2">{title}</h4>
       {children}
-    </div>
+    </Surface>
   );
 }
 
 function Row({ k, v }: { k: string; v: string }) {
   return (
-    <div className="flex items-center justify-between text-xs gap-3">
-      <span className="text-muted-foreground">{k}</span>
-      <span className="font-semibold text-right">{v}</span>
+    <div className="flex items-center justify-between gap-3 text-xs">
+      <span className="text-meta">{k}</span>
+      <span className="text-right font-semibold text-foreground">{v}</span>
     </div>
   );
 }

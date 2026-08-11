@@ -7,6 +7,7 @@ import {
   Visibility,
   WizardState,
 } from "../hooks/useWizardState";
+import { Surface } from "@/components/ui-system";
 
 interface Props {
   state: WizardState;
@@ -88,9 +89,9 @@ export default function Step5RulesAndRotation({ state, creatorName, patchRules }
         onChange={(v) => patchRules({ visibility: v })}
       />
 
-      <div className="glass-card p-6 space-y-4">
-        <h3 className="text-base font-bold">Captain rotation</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+      <Surface level={1} padded="lg" className="space-y-4">
+        <h3 className="text-ui-title">Captain rotation</h3>
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
           {rotationOptions.map((o) => {
             const active = state.rules.rotationMode === o.v;
             return (
@@ -101,28 +102,28 @@ export default function Step5RulesAndRotation({ state, creatorName, patchRules }
                   patchRules({ rotationMode: o.v });
                   if (o.v === "manual") setTimeout(ensureManualOrder, 0);
                 }}
-                className={`text-left p-3 rounded-xl border transition-all ${
+                className={`rounded-xl border p-3 text-left transition-all ${
                   active
                     ? "border-primary bg-primary/10"
                     : "border-border hover:border-primary/50"
                 }`}
               >
-                <div className="font-semibold text-sm">{o.label}</div>
-                <div className="text-xs text-muted-foreground">{o.desc}</div>
+                <div className="text-sm font-semibold">{o.label}</div>
+                <div className="text-meta">{o.desc}</div>
               </button>
             );
           })}
         </div>
 
         {state.rules.rotationMode === "manual" && state.rules.manualOrder.length === pool.length && (
-          <div className="border border-border rounded-xl p-3 space-y-1">
+          <div className="space-y-1 rounded-xl border border-border p-3">
             {state.rules.manualOrder.map((poolIdx, i) => (
               <div
                 key={i}
-                className="flex items-center justify-between gap-2 px-2 py-1.5 rounded-lg bg-black/30"
+                className="flex items-center justify-between gap-2 rounded-lg bg-[hsl(var(--surface-1))] px-2 py-1.5"
               >
                 <div className="text-sm">
-                  <span className="text-xs text-muted-foreground mr-2">{i + 1}.</span>
+                  <span className="text-meta mr-2">{i + 1}.</span>
                   {pool[poolIdx]}
                 </div>
                 <div className="flex gap-1">
@@ -130,26 +131,26 @@ export default function Step5RulesAndRotation({ state, creatorName, patchRules }
                     type="button"
                     onClick={() => move(i, -1)}
                     disabled={i === 0}
-                    className="p-1.5 rounded-md border border-border disabled:opacity-30 hover:border-primary/50"
+                    className="icon-btn h-7 w-7 disabled:opacity-30"
                     aria-label="Move up"
                   >
-                    <ArrowUp size={12} />
+                    <ArrowUp size={12} aria-hidden />
                   </button>
                   <button
                     type="button"
                     onClick={() => move(i, 1)}
                     disabled={i === state.rules.manualOrder.length - 1}
-                    className="p-1.5 rounded-md border border-border disabled:opacity-30 hover:border-primary/50"
+                    className="icon-btn h-7 w-7 disabled:opacity-30"
                     aria-label="Move down"
                   >
-                    <ArrowDown size={12} />
+                    <ArrowDown size={12} aria-hidden />
                   </button>
                 </div>
               </div>
             ))}
           </div>
         )}
-      </div>
+      </Surface>
     </div>
   );
 }
@@ -166,9 +167,9 @@ function RadioCard<T extends string>({
   onChange: (v: T) => void;
 }) {
   return (
-    <div className="glass-card p-6 space-y-3">
-      <h3 className="text-base font-bold">{title}</h3>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+    <Surface level={1} padded="lg" className="space-y-3">
+      <h3 className="text-ui-title">{title}</h3>
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         {options.map((o) => {
           const active = value === o.v;
           return (
@@ -176,16 +177,16 @@ function RadioCard<T extends string>({
               key={o.v}
               type="button"
               onClick={() => onChange(o.v)}
-              className={`text-left p-3 rounded-xl border transition-all ${
+              className={`rounded-xl border p-3 text-left transition-all ${
                 active ? "border-primary bg-primary/10" : "border-border hover:border-primary/50"
               }`}
             >
-              <div className="font-semibold text-sm">{o.label}</div>
-              <div className="text-xs text-muted-foreground">{o.desc}</div>
+              <div className="text-sm font-semibold">{o.label}</div>
+              <div className="text-meta">{o.desc}</div>
             </button>
           );
         })}
       </div>
-    </div>
+    </Surface>
   );
 }

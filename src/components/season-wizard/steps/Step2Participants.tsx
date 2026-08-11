@@ -10,6 +10,7 @@ import {
   weeksBetween,
   recommendedSeasonLength,
 } from "../lib/wizardEstimates";
+import { Surface, StatBlock } from "@/components/ui-system";
 
 interface Props {
   state: WizardState;
@@ -54,32 +55,32 @@ export default function Step2Participants({ state, creatorName, setParticipants 
 
   return (
     <div className="space-y-5">
-      <div className="glass-card p-6">
-        <div className="flex items-center justify-between mb-4">
+      <Surface level={1} padded="lg">
+        <div className="mb-4 flex items-center justify-between">
           <div>
-            <h2 className="text-lg font-bold">Players</h2>
-            <p className="text-xs text-muted-foreground">
+            <h2 className="text-ui-title">Players</h2>
+            <p className="text-meta mt-0.5">
               You're auto-added as a player. Add at least 1 more.
             </p>
           </div>
           <button
             type="button"
             onClick={addRow}
-            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-border text-sm hover:border-primary/50"
+            className="btn-secondary"
           >
-            <Plus size={14} /> Add player
+            <Plus size={14} aria-hidden /> Add player
           </button>
         </div>
 
         <div className="space-y-2">
           {state.participants.map((p, i) => (
-            <div key={i} className="flex flex-col sm:flex-row gap-2">
+            <div key={i} className="flex flex-col gap-2 sm:flex-row">
               <input
                 placeholder="Name"
                 value={p.display_name}
                 onChange={(e) => updateRow(i, "display_name", e.target.value)}
                 maxLength={60}
-                className="flex-1 px-3 py-2 rounded-lg bg-black/30 border border-border focus:border-primary outline-none text-sm"
+                className="field flex-1"
               />
               <input
                 type="email"
@@ -87,15 +88,15 @@ export default function Step2Participants({ state, creatorName, setParticipants 
                 value={p.email}
                 onChange={(e) => updateRow(i, "email", e.target.value)}
                 maxLength={120}
-                className="flex-1 px-3 py-2 rounded-lg bg-black/30 border border-border focus:border-primary outline-none text-sm"
+                className="field flex-1"
               />
               <button
                 type="button"
                 onClick={() => removeRow(i)}
-                className="p-2 rounded-lg border border-border text-muted-foreground hover:text-destructive"
+                className="icon-btn hover:border-destructive/40 hover:text-destructive"
                 aria-label="Remove player"
               >
-                <Trash2 size={14} />
+                <Trash2 size={14} aria-hidden />
               </button>
             </div>
           ))}
@@ -104,62 +105,53 @@ export default function Step2Participants({ state, creatorName, setParticipants 
         <button
           type="button"
           onClick={copyInviteLink}
-          className="mt-4 inline-flex items-center gap-2 text-sm text-primary hover:underline"
+          className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline"
         >
-          {linkCopied ? <Check size={14} /> : <Copy size={14} />}
+          {linkCopied ? <Check size={14} aria-hidden /> : <Copy size={14} aria-hidden />}
           Copy invite link template
         </button>
-      </div>
+      </Surface>
 
       {/* Live roster */}
-      <div className="glass-card p-6">
-        <div className="flex items-baseline justify-between mb-3">
-          <h3 className="text-base font-bold">Participants: {totalPlayers}</h3>
+      <Surface level={1} padded="lg">
+        <div className="mb-3 flex items-baseline justify-between">
+          <h3 className="text-ui-title">Participants: {totalPlayers}</h3>
         </div>
         <ul className="space-y-1.5">
           <li className="flex items-center gap-2 text-sm">
-            <Check size={14} className="text-primary" />
+            <Check size={14} className="text-primary" aria-hidden />
             <span>{creatorName}</span>
-            <span className="text-xs text-muted-foreground">(you)</span>
+            <span className="text-meta">(you)</span>
           </li>
           {valid.map((p, i) => (
             <li key={i} className="flex items-center gap-2 text-sm">
-              <Check size={14} className="text-primary" />
+              <Check size={14} className="text-primary" aria-hidden />
               <span>{p.display_name}</span>
             </li>
           ))}
         </ul>
-      </div>
+      </Surface>
 
       {/* Round Robin Impact */}
-      <div className="glass-card p-6 border-primary/30">
-        <div className="text-xs font-semibold tracking-wide uppercase text-primary mb-3">
+      <Surface level={1} padded="lg" className="border-primary/30">
+        <div className="text-eyebrow mb-3 text-primary">
           Round-Robin Impact
         </div>
-        <div className="grid grid-cols-3 gap-3 mb-4">
-          <div>
-            <div className="text-2xl md:text-3xl font-bold">{matches}</div>
-            <div className="text-xs text-muted-foreground">Matches</div>
-          </div>
-          <div>
-            <div className="text-2xl md:text-3xl font-bold">{rounds}</div>
-            <div className="text-xs text-muted-foreground">Rounds</div>
-          </div>
-          <div>
-            <div className="text-2xl md:text-3xl font-bold">{recWeeks || "—"}</div>
-            <div className="text-xs text-muted-foreground">Est. weeks</div>
-          </div>
+        <div className="mb-4 grid grid-cols-3 gap-3">
+          <StatBlock label="Matches" value={matches} />
+          <StatBlock label="Rounds" value={rounds} />
+          <StatBlock label="Est. weeks" value={recWeeks || "—"} />
         </div>
-        <p className="text-xs text-muted-foreground">
-          Recommended: <span className="text-foreground font-semibold">{rec.minWeeks}–{rec.maxWeeks} weeks</span>.
-          Your plan: <span className="text-foreground font-semibold">{planWeeks || "—"} weeks</span>.
+        <p className="text-meta">
+          Recommended: <span className="font-semibold text-foreground">{rec.minWeeks}–{rec.maxWeeks} weeks</span>.
+          Your plan: <span className="font-semibold text-foreground">{planWeeks || "—"} weeks</span>.
         </p>
         {planTooShort && (
-          <p className="text-xs text-destructive mt-2">
+          <p className="mt-2 text-xs text-destructive">
             Your season window may be too short to comfortably fit {matches} matches. Consider extending the end date.
           </p>
         )}
-      </div>
+      </Surface>
     </div>
   );
 }

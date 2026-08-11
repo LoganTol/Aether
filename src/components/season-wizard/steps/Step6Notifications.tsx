@@ -1,4 +1,5 @@
 import { WizardState } from "../hooks/useWizardState";
+import { Surface } from "@/components/ui-system";
 
 interface Props {
   state: WizardState;
@@ -9,7 +10,7 @@ export default function Step6Notifications({ state, patch }: Props) {
   const n = state.notifications;
   return (
     <div className="space-y-5">
-      <div className="glass-card p-6 space-y-4">
+      <Surface level={1} padded="lg" className="space-y-4">
         <Toggle
           label="Captain reminders"
           desc="Nudge the current captain when their window opens."
@@ -30,7 +31,7 @@ export default function Step6Notifications({ state, patch }: Props) {
         />
         {n.weeklyDigest && (
           <div>
-            <label className="text-sm text-muted-foreground mb-1 block">
+            <label className="text-eyebrow mb-1.5 block">
               Digest frequency (days)
             </label>
             <input
@@ -39,12 +40,12 @@ export default function Step6Notifications({ state, patch }: Props) {
               max={30}
               value={n.digestFrequencyDays}
               onChange={(e) => patch({ digestFrequencyDays: parseInt(e.target.value) || 7 })}
-              className="w-full max-w-[160px] px-4 py-2.5 rounded-xl bg-black/30 border border-border focus:border-primary outline-none"
+              className="field max-w-[160px]"
             />
           </div>
         )}
-      </div>
-      <p className="text-xs text-muted-foreground">
+      </Surface>
+      <p className="text-meta">
         Email delivery rolls out shortly — your preferences are saved with the season either way.
       </p>
     </div>
@@ -66,19 +67,19 @@ function Toggle({
     <button
       type="button"
       onClick={() => onChange(!checked)}
-      className="w-full text-left flex items-start justify-between gap-3 p-3 rounded-xl border border-border hover:border-primary/50 transition-all"
+      className="flex w-full items-start justify-between gap-3 rounded-xl border border-border p-3 text-left transition-all hover:border-primary/50"
     >
       <div>
-        <div className="font-semibold text-sm">{label}</div>
-        <div className="text-xs text-muted-foreground">{desc}</div>
+        <div className="text-sm font-semibold">{label}</div>
+        <div className="text-meta">{desc}</div>
       </div>
       <div
-        className={`shrink-0 mt-0.5 w-10 h-6 rounded-full transition-all relative ${
+        className={`relative mt-0.5 h-6 w-10 shrink-0 rounded-full transition-all ${
           checked ? "bg-primary" : "bg-white/15"
         }`}
       >
         <div
-          className={`absolute top-0.5 w-5 h-5 rounded-full bg-background transition-all ${
+          className={`absolute top-0.5 h-5 w-5 rounded-full bg-background transition-all ${
             checked ? "left-4" : "left-0.5"
           }`}
         />
