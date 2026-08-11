@@ -5,6 +5,7 @@ import {
   roundCount,
   weeksBetween,
 } from "../lib/wizardEstimates";
+import { Surface, StatBlock } from "@/components/ui-system";
 
 interface Props {
   state: WizardState;
@@ -22,8 +23,8 @@ export default function Step3FormatReview({ state, creatorName }: Props) {
 
   return (
     <div className="space-y-5">
-      <div className="glass-card p-6 space-y-4">
-        <h2 className="text-lg font-bold">Season summary</h2>
+      <Surface level={1} padded="lg" className="space-y-4">
+        <h2 className="text-ui-title">Season summary</h2>
         <div className="grid grid-cols-2 gap-4 text-sm">
           <Stat label="Name" value={state.basics.name || "—"} />
           <Stat label="Format" value={state.basics.format} className="capitalize" />
@@ -32,30 +33,30 @@ export default function Step3FormatReview({ state, creatorName }: Props) {
           <Stat label="Captain window" value={`${state.basics.captainWindowDays} days`} />
           <Stat label="Match deadline" value={`${state.basics.matchDeadlineDays} days`} />
         </div>
-      </div>
+      </Surface>
 
-      <div className="glass-card p-6 border-primary/30">
-        <div className="text-xs font-semibold tracking-wide uppercase text-primary mb-3">
+      <Surface level={1} padded="lg" className="border-primary/30">
+        <div className="text-eyebrow mb-3 text-primary">
           What this generates
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <Big label="Players" value={total} />
-          {isDoubles && <Big label="Teams" value={units} />}
-          <Big label="Matches" value={matches} />
-          <Big label="Rounds" value={rounds} />
-          <Big label="Weeks" value={weeks || "—"} />
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <StatBlock label="Players" value={total} />
+          {isDoubles && <StatBlock label="Teams" value={units} />}
+          <StatBlock label="Matches" value={matches} />
+          <StatBlock label="Rounds" value={rounds} />
+          <StatBlock label="Weeks" value={weeks || "—"} />
         </div>
-      </div>
+      </Surface>
 
-      <div className="glass-card p-6">
-        <h3 className="text-base font-bold mb-3">Roster</h3>
-        <ul className="text-sm space-y-1.5 list-disc list-inside text-muted-foreground">
-          <li className="text-foreground">{creatorName} <span className="text-xs text-muted-foreground">(host)</span></li>
+      <Surface level={1} padded="lg">
+        <h3 className="text-ui-title mb-3">Roster</h3>
+        <ul className="list-inside list-disc space-y-1.5 text-sm text-[hsl(var(--text-muted))]">
+          <li className="text-foreground">{creatorName} <span className="text-meta">(host)</span></li>
           {valid.map((p, i) => (
             <li key={i} className="text-foreground">{p.display_name}</li>
           ))}
         </ul>
-      </div>
+      </Surface>
     </div>
   );
 }
@@ -63,17 +64,8 @@ export default function Step3FormatReview({ state, creatorName }: Props) {
 function Stat({ label, value, className }: { label: string; value: string; className?: string }) {
   return (
     <div>
-      <div className="text-xs text-muted-foreground">{label}</div>
-      <div className={`font-semibold ${className || ""}`}>{value}</div>
-    </div>
-  );
-}
-
-function Big({ label, value }: { label: string; value: number | string }) {
-  return (
-    <div>
-      <div className="text-2xl md:text-3xl font-bold">{value}</div>
-      <div className="text-xs text-muted-foreground">{label}</div>
+      <div className="text-meta">{label}</div>
+      <div className={`font-semibold text-foreground ${className || ""}`}>{value}</div>
     </div>
   );
 }
