@@ -140,6 +140,29 @@
   .text-eyebrow {
     @apply text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-[hsl(var(--text-muted))];
   }
+
+  /* ---- Action primitives ---- */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .btn-primary {
+    @apply btn bg-primary text-primary-foreground hover:opacity-90;
+  }
+  .btn-secondary {
+    @apply btn border border-border text-foreground hover:bg-[hsl(var(--surface-elevated))];
+  }
+  .btn-ghost {
+    @apply btn text-[hsl(var(--text-muted))] hover:text-foreground;
+  }
+  .btn-danger {
+    @apply btn border border-destructive/40 text-destructive hover:bg-destructive/10;
+  }
+  .icon-btn {
+    @apply inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border text-[hsl(var(--text-muted))] transition-colors hover:text-foreground;
+  }
+  .field {
+    @apply w-full rounded-lg border border-border bg-[hsl(var(--surface-1))] px-3 py-2 text-sm text-foreground outline-none transition-colors placeholder:text-[hsl(var(--text-muted))] focus:border-primary/60;
+  }
 }
 
 @layer utilities {
