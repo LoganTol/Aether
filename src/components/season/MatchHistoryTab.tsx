@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Trophy } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Match, SideLabel } from "./types";
+import { Surface, EmptyState } from "@/components/ui-system";
 
 interface Result { match_id: string; winner_side: "a" | "b" }
 interface Score { match_id: string; set_number: number; side_a_games: number; side_b_games: number }
@@ -40,15 +41,18 @@ export default function MatchHistoryTab({ matches, sideLabel }: { matches: Match
 
   if (completed.length === 0) {
     return (
-      <div className="glass-card p-10 text-center">
-        <Trophy className="mx-auto text-muted-foreground mb-3" />
-        <p className="text-muted-foreground">No completed matches yet. Results will appear here.</p>
-      </div>
+      <Surface level={1} padded={false}>
+        <EmptyState
+          icon={<Trophy size={16} aria-hidden />}
+          title="No completed matches yet"
+          description="Finished matches and their box scores collect here."
+        />
+      </Surface>
     );
   }
 
   return (
-    <div className="space-y-2">
+    <Surface level={1} padded={false} className="divide-y divide-border overflow-hidden">
       {completed.map((m) => {
         const r = results[m.id];
         const sets = scores[m.id] || [];
@@ -58,33 +62,33 @@ export default function MatchHistoryTab({ matches, sideLabel }: { matches: Match
           <Link
             key={m.id}
             to={`/app/matches/${m.id}/results`}
-            className="glass-card p-4 flex items-center justify-between gap-4 hover:border-primary/40 transition-colors"
+            className="flex items-center justify-between gap-4 px-4 py-3 transition-colors hover:bg-[hsl(var(--surface-2))]"
           >
             <div className="min-w-0">
-              <p className="text-xs text-muted-foreground uppercase tracking-wider">Round {m.round}</p>
-              <p className="font-medium truncate">
+              <p className="text-eyebrow">Round {m.round}</p>
+              <p className="text-ui-title mt-1 truncate">
                 {winnerSide ? (
                   <>
                     <span className="text-primary">{sideLabel(m.side_kind, winnerSide)}</span>
-                    <span className="text-muted-foreground"> def. </span>
+                    <span className="text-[hsl(var(--text-muted))]"> def. </span>
                     <span>{sideLabel(m.side_kind, loserSide!)}</span>
                   </>
                 ) : (
                   <>{sideLabel(m.side_kind, m.side_a_id)} vs {sideLabel(m.side_kind, m.side_b_id)}</>
                 )}
               </p>
-              <div className="flex flex-wrap gap-2 mt-1 text-xs font-mono text-muted-foreground">
+              <div className="text-meta nums mt-1 flex flex-wrap gap-2">
                 {sets.map((s) => (
                   <span key={s.set_number}>{s.side_a_games}–{s.side_b_games}</span>
                 ))}
               </div>
             </div>
-            <div className="text-right text-xs text-muted-foreground shrink-0">
+            <div className="text-meta shrink-0 text-right">
               {m.completed_at ? new Date(m.completed_at).toLocaleDateString() : ""}
             </div>
           </Link>
         );
       })}
-    </div>
+    </Surface>
   );
 }
