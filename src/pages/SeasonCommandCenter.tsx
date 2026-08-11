@@ -12,6 +12,15 @@ import {
 } from "lucide-react";
 import AppHeader from "@/components/AppHeader";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  PageContainer,
+  PageHeader,
+  Surface,
+  StatBlock,
+  StatusPill,
+  SectionHeading,
+  EmptyState,
+} from "@/components/ui-system";
 
 interface SeasonRow {
   id: string;
@@ -69,9 +78,9 @@ export default function SeasonCommandCenter() {
     return (
       <div className="min-h-screen bg-background">
         <AppHeader />
-        <main className="container py-16 flex justify-center">
-          <Loader2 className="animate-spin text-primary" />
-        </main>
+        <PageContainer className="flex justify-center py-16">
+          <Loader2 className="animate-spin text-primary" aria-label="Loading season" />
+        </PageContainer>
       </div>
     );
   }
@@ -80,7 +89,14 @@ export default function SeasonCommandCenter() {
     return (
       <div className="min-h-screen bg-background">
         <AppHeader />
-        <main className="container py-16 text-center text-muted-foreground">Season not found.</main>
+        <PageContainer className="py-16">
+          <Surface level={1} padded={false}>
+            <EmptyState
+              title="Season not found"
+              description="This season may have been deleted, or you no longer have access to it."
+            />
+          </Surface>
+        </PageContainer>
       </div>
     );
   }
@@ -88,86 +104,81 @@ export default function SeasonCommandCenter() {
   return (
     <div className="min-h-screen bg-background">
       <AppHeader />
-      <main className="container py-8 max-w-4xl space-y-6">
-        {/* Hero */}
-        <div className="glass-card p-6 md:p-8 border-primary/40 relative overflow-hidden">
-          <div className="absolute -top-20 -right-20 w-60 h-60 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
-          <div className="text-xs font-semibold tracking-widest uppercase text-primary mb-2">
-            Season Ready
-          </div>
-          <h1 className="text-3xl md:text-4xl font-bold mb-2">{season.name}</h1>
-          <p className="text-sm text-muted-foreground capitalize mb-6">
-            {season.format} · {season.start_date} → {season.end_date}
+      <main>
+        <PageContainer className="space-y-8 py-8">
+          <PageHeader
+            eyebrow={<StatusPill tone="active">Season ready</StatusPill>}
+            title={season.name}
+            description={
+              <span className="capitalize">
+                {season.format} · {season.start_date} → {season.end_date}
+              </span>
+            }
+            actions={
+              <button
+                onClick={() => navigate(`/app/seasons/${id}`)}
+                className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
+              >
+                Open season <ChevronRight size={16} aria-hidden />
+              </button>
+            }
+          />
+
+          <Surface level={1}>
+            <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
+              <StatBlock label="Players" value={playerCount} hint="In this season" />
+              <StatBlock label="Matches" value={matchCount} hint="Fixtures generated" />
+              <StatBlock
+                label="Current captain"
+                value={<span className="text-lg">{currentCaptain || "TBD"}</span>}
+                emphasis={!!currentCaptain}
+                hint="Holds scheduling duty"
+              />
+              <StatBlock
+                label="Starts"
+                value={<span className="text-lg">{season.start_date}</span>}
+                hint="First round opens"
+              />
+            </div>
+          </Surface>
+
+          <section>
+            <SectionHeading title="Next steps" hint="Everything you can do from here" />
+            <div className="grid gap-px overflow-hidden rounded-xl border border-border bg-border sm:grid-cols-2">
+              <ActionCard
+                icon={<Trophy size={16} />}
+                title="View schedule"
+                desc="Fixtures, rounds and matches"
+                onClick={() => navigate(`/app/seasons/${id}`)}
+              />
+              <ActionCard
+                icon={<Mail size={16} />}
+                title="Invite more players"
+                desc="Add players or share invite links"
+                onClick={() => navigate(`/app/seasons/${id}?tab=players`)}
+              />
+              <ActionCard
+                icon={<Settings size={16} />}
+                title="Season settings"
+                desc="Rules, rotation, deadlines"
+                onClick={() => navigate(`/app/seasons/${id}?tab=settings`)}
+              />
+              <ActionCard
+                icon={<Users size={16} />}
+                title="Manage participants"
+                desc="Status, withdrawals, captain order"
+                onClick={() => navigate(`/app/seasons/${id}?tab=players`)}
+              />
+            </div>
+          </section>
+
+          <p className="text-meta flex items-center gap-2">
+            <Crown size={13} aria-hidden />
+            The captain rotates automatically — you will not need to chase anyone.
+            <Calendar size={13} className="ml-1" aria-hidden />
           </p>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Metric icon={<Users size={16} />} label="Players" value={playerCount} />
-            <Metric icon={<Trophy size={16} />} label="Matches generated" value={matchCount} />
-            <Metric
-              icon={<Crown size={16} />}
-              label="Current captain"
-              value={currentCaptain || "TBD"}
-              big={false}
-            />
-            <Metric
-              icon={<Calendar size={16} />}
-              label="Season starts"
-              value={season.start_date}
-              big={false}
-            />
-          </div>
-        </div>
-
-        {/* Quick actions */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <ActionCard
-            icon={<Trophy size={18} />}
-            title="View Schedule"
-            desc="Fixtures, rounds and matches"
-            onClick={() => navigate(`/app/seasons/${id}`)}
-          />
-          <ActionCard
-            icon={<Mail size={18} />}
-            title="Invite More Players"
-            desc="Add players or share invite links"
-            onClick={() => navigate(`/app/seasons/${id}?tab=players`)}
-          />
-          <ActionCard
-            icon={<Settings size={18} />}
-            title="Season Settings"
-            desc="Rules, rotation, deadlines"
-            onClick={() => navigate(`/app/seasons/${id}?tab=settings`)}
-          />
-          <ActionCard
-            icon={<Users size={18} />}
-            title="Manage Participants"
-            desc="Status, withdrawals, captain order"
-            onClick={() => navigate(`/app/seasons/${id}?tab=players`)}
-          />
-        </div>
+        </PageContainer>
       </main>
-    </div>
-  );
-}
-
-function Metric({
-  icon,
-  label,
-  value,
-  big = true,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string | number;
-  big?: boolean;
-}) {
-  return (
-    <div>
-      <div className="text-muted-foreground flex items-center gap-1.5 text-xs mb-1">
-        {icon}
-        {label}
-      </div>
-      <div className={big ? "text-3xl font-bold" : "text-lg font-bold truncate"}>{value}</div>
     </div>
   );
 }
@@ -186,18 +197,21 @@ function ActionCard({
   return (
     <button
       onClick={onClick}
-      className="glass-card p-5 text-left hover:border-primary/50 transition-all group flex items-center justify-between gap-3"
+      className="surface-1 group flex items-center justify-between gap-3 p-5 text-left transition-colors hover:bg-[hsl(var(--surface-2))]"
     >
       <div className="flex items-start gap-3">
-        <div className="p-2 rounded-lg bg-primary/15 text-primary">{icon}</div>
-        <div>
-          <div className="font-semibold">{title}</div>
-          <div className="text-xs text-muted-foreground">{desc}</div>
-        </div>
+        <span className="mt-0.5 text-primary" aria-hidden>
+          {icon}
+        </span>
+        <span>
+          <span className="text-ui-title block text-foreground">{title}</span>
+          <span className="text-meta mt-0.5 block">{desc}</span>
+        </span>
       </div>
       <ChevronRight
-        size={18}
-        className="text-muted-foreground group-hover:text-primary transition-colors"
+        size={16}
+        aria-hidden
+        className="shrink-0 text-[hsl(var(--text-muted))] transition-colors group-hover:text-primary"
       />
     </button>
   );

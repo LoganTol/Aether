@@ -11,6 +11,7 @@ import ScheduleTab from "@/components/season/ScheduleTab";
 import StandingsTab from "@/components/season/StandingsTab";
 import MatchHistoryTab from "@/components/season/MatchHistoryTab";
 import type { Season, Participant, Team, Match, CaptainSlot, StandingRow } from "@/components/season/types";
+import { PageContainer, Surface, StatusPill, SectionHeading, EmptyState } from "@/components/ui-system";
 
 type Tab = "overview" | "schedule" | "standings" | "history" | "members" | "admin";
 
@@ -55,7 +56,9 @@ export default function SeasonDetail() {
     return (
       <div className="min-h-screen bg-background">
         <AppHeader />
-        <div className="container py-20 text-center text-muted-foreground">Loading…</div>
+        <PageContainer width="wide" className="flex justify-center py-16">
+          <Loader2 className="animate-spin text-primary" aria-label="Loading season" />
+        </PageContainer>
       </div>
     );
   }
@@ -63,10 +66,15 @@ export default function SeasonDetail() {
     return (
       <div className="min-h-screen bg-background">
         <AppHeader />
-        <div className="container py-20 text-center">
-          <AlertCircle className="mx-auto mb-4 text-muted-foreground" />
-          <p>Season not found.</p>
-        </div>
+        <PageContainer width="wide" className="py-16">
+          <Surface level={1} padded={false}>
+            <EmptyState
+              icon={<AlertCircle size={16} aria-hidden />}
+              title="Season not found"
+              description="This season may have been deleted, or you no longer have access to it."
+            />
+          </Surface>
+        </PageContainer>
       </div>
     );
   }
@@ -126,29 +134,28 @@ export default function SeasonDetail() {
   return (
     <div className="min-h-screen bg-background">
       <AppHeader />
-      <main className="container py-8">
-        <button onClick={() => navigate("/app")} className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary mb-4">
-          <ArrowLeft size={16} /> All seasons
+      <main>
+        <PageContainer width="wide" className="py-8">
+        <button onClick={() => navigate("/app")} className="text-meta mb-5 inline-flex items-center gap-2 transition-colors hover:text-foreground">
+          <ArrowLeft size={14} aria-hidden /> All seasons
         </button>
 
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
-          <div>
-            <h1 className="text-3xl md:text-4xl font-bold">{season.name}</h1>
-            <div className="flex flex-wrap gap-3 mt-2 text-sm text-muted-foreground">
-              <span className="inline-flex items-center gap-1 capitalize"><Users size={14} /> {season.format}</span>
-              <span className="inline-flex items-center gap-1">
-                <Calendar size={14} /> {new Date(season.start_date).toLocaleDateString()} – {new Date(season.end_date).toLocaleDateString()}
+        <div className="mb-6 flex flex-col justify-between gap-4 md:flex-row md:items-end">
+          <div className="min-w-0">
+            <h1 className="text-page-title">{season.name}</h1>
+            <div className="text-meta mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-2">
+              <span className="inline-flex items-center gap-1.5 capitalize"><Users size={13} aria-hidden /> {season.format}</span>
+              <span className="inline-flex items-center gap-1.5">
+                <Calendar size={13} aria-hidden /> {new Date(season.start_date).toLocaleDateString()} – {new Date(season.end_date).toLocaleDateString()}
               </span>
-              <span className={`uppercase tracking-wider text-xs px-2 py-0.5 rounded-full ${
-                season.status === "active" ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground"
-              }`}>{season.status}</span>
+              <StatusPill tone={season.status === "active" ? "active" : "neutral"}>{season.status}</StatusPill>
             </div>
           </div>
         </div>
 
         {/* Tabs */}
-        <div className="mb-6 -mx-4 px-4 md:mx-0 md:px-0">
-          <div className="glass-card p-1.5 flex gap-1 overflow-x-auto hide-scrollbar">
+        <div className="-mx-4 mb-6 px-4 md:mx-0 md:px-0">
+          <div className="flex gap-1 overflow-x-auto border-b border-border hide-scrollbar" role="tablist">
             {tabs.map((t) => {
               const Icon = t.icon;
               const active = tab === t.id;
@@ -157,13 +164,15 @@ export default function SeasonDetail() {
                   key={t.id}
                   ref={(el) => { tabRefs.current[t.id] = el; }}
                   onClick={() => selectTab(t.id)}
-                  className={`shrink-0 px-3.5 py-2 rounded-full text-sm font-medium whitespace-nowrap inline-flex items-center gap-1.5 transition-colors ${
+                  role="tab"
+                  aria-selected={active}
+                  className={`-mb-px inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap border-b-2 px-3.5 py-2.5 text-sm font-medium transition-colors ${
                     active
-                      ? "bg-primary text-primary-foreground glow-shadow"
-                      : "text-muted-foreground hover:text-foreground hover:bg-white/5"
+                      ? "border-primary text-foreground"
+                      : "border-transparent text-[hsl(var(--text-muted))] hover:text-foreground"
                   }`}
                 >
-                  <Icon size={14} /> {t.label}
+                  <Icon size={14} aria-hidden /> {t.label}
                 </button>
               );
             })}
@@ -219,18 +228,20 @@ export default function SeasonDetail() {
               </div>
             )}
             {participants.length === 0 && (
-              <div className="glass-card p-8 text-center">
-                <p className="font-semibold">No members yet</p>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {isCreator ? "Use Add member to invite players." : "The creator hasn't invited anyone yet."}
-                </p>
-              </div>
+              <Surface level={1} padded={false}>
+                <EmptyState
+                  title="No members yet"
+                  description={isCreator ? "Use Add member to invite players." : "The creator hasn't invited anyone yet."}
+                />
+              </Surface>
             )}
+            {participants.length > 0 && (
+            <Surface level={1} padded={false} className="divide-y divide-border overflow-hidden">
             {participants.map((p) => (
-              <div key={p.id} className="glass-card p-4 flex items-center justify-between gap-2">
-                <div>
-                  <p className="font-semibold">{p.display_name}</p>
-                  <p className="text-xs text-muted-foreground">
+              <div key={p.id} className="flex items-center justify-between gap-2 px-4 py-3">
+                <div className="min-w-0">
+                  <p className="text-ui-title truncate">{p.display_name}</p>
+                  <p className="text-meta mt-0.5 truncate">
                     {p.invited_email || "no email"} ·{" "}
                     <span className={p.status === "active" ? "text-primary" : ""}>{p.status}</span>
                   </p>
@@ -240,56 +251,57 @@ export default function SeasonDetail() {
                     {p.status === "invited" && p.join_token && (
                       <button
                         onClick={() => copyInvite(p.join_token)}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-xs hover:border-primary/50"
+                        className="btn-secondary px-3 py-1.5 text-xs"
                       >
-                        <Copy size={12} /> Copy invite
+                        <Copy size={12} aria-hidden /> Copy invite
                       </button>
                     )}
                     {p.status !== "withdrawn" && (
                       <button
                         onClick={() => removeParticipant(p)}
                         aria-label="Remove member"
-                        className="p-2 rounded-lg border border-border text-muted-foreground hover:text-destructive hover:border-destructive/40"
+                        className="icon-btn h-8 w-8 hover:border-destructive/40 hover:text-destructive"
                       >
-                        <Trash2 size={14} />
+                        <Trash2 size={14} aria-hidden />
                       </button>
                     )}
                   </div>
                 )}
               </div>
             ))}
+            </Surface>
+            )}
           </div>
         )}
 
         {tab === "admin" && isCreator && (
           <div className="space-y-4">
-            <div className="glass-card p-6">
-              <h3 className="font-bold mb-2">Rotate captain</h3>
-              <p className="text-sm text-muted-foreground mb-4">
+            <Surface level={1}>
+              <SectionHeading title="Rotate captain" hint="Commissioner override" />
+              <p className="text-body mb-4">
                 Manually advance the scheduling captain to the next person in rotation.
               </p>
-              <button
-                onClick={advanceCaptain}
-                className="px-4 py-2 rounded-xl border border-border hover:border-primary/50 text-sm"
-              >
+              <button onClick={advanceCaptain} className="btn-secondary">
                 Advance captain
               </button>
-            </div>
-            <div className="glass-card p-6">
-              <h3 className="font-bold mb-2">Captain rotation order</h3>
-              <ol className="text-sm space-y-1">
+            </Surface>
+            <Surface level={1}>
+              <SectionHeading title="Captain rotation order" />
+              <ol className="divide-y divide-border text-sm">
                 {rotation.map((r) => {
                   const p = participants.find((x) => x.id === r.participant_id);
                   return (
-                    <li key={r.id} className={r.is_current ? "text-primary font-semibold" : "text-muted-foreground"}>
-                      {r.position + 1}. {p?.display_name || "—"} {r.is_current && "← current"}
+                    <li key={r.id} className={`flex items-center justify-between gap-3 py-2.5 ${r.is_current ? "font-semibold text-primary" : "text-[hsl(var(--text-muted))]"}`}>
+                      <span className="nums truncate">{r.position + 1}. {p?.display_name || "—"}</span>
+                      {r.is_current && <StatusPill tone="active">Current</StatusPill>}
                     </li>
                   );
                 })}
               </ol>
-            </div>
+            </Surface>
           </div>
         )}
+        </PageContainer>
       </main>
     </div>
   );
@@ -351,16 +363,16 @@ function AddMemberDialog({ seasonId, onAdded }: { seasonId: string; onAdded: () 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <button className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-primary text-primary-foreground text-sm font-semibold glow-shadow">
-          <UserPlus size={14} /> Add member
+        <button className="btn-primary">
+          <UserPlus size={14} aria-hidden /> Add member
         </button>
       </DialogTrigger>
-      <DialogContent className="glass-card border-border max-w-lg">
+      <DialogContent className="max-w-lg border-border surface-elevated">
         <DialogHeader>
           <DialogTitle>Add members</DialogTitle>
         </DialogHeader>
         <div className="space-y-3">
-          <div className="grid grid-cols-[1fr_1fr_auto] gap-2 text-xs uppercase tracking-wider text-muted-foreground px-1">
+          <div className="text-eyebrow grid grid-cols-[1fr_1fr_auto] gap-2 px-1">
             <span>Display name</span>
             <span>Email (optional)</span>
             <span className="sr-only">Remove</span>
@@ -373,41 +385,41 @@ function AddMemberDialog({ seasonId, onAdded }: { seasonId: string; onAdded: () 
                   value={r.name}
                   onChange={(e) => updateRow(i, { name: e.target.value })}
                   placeholder="Alex Rivera"
-                  className="px-3 py-2.5 rounded-xl bg-black/30 border border-border focus:border-primary outline-none"
+                  className="field"
                 />
                 <input
                   type="email"
                   value={r.email}
                   onChange={(e) => updateRow(i, { email: e.target.value })}
                   placeholder="player@example.com"
-                  className="px-3 py-2.5 rounded-xl bg-black/30 border border-border focus:border-primary outline-none"
+                  className="field"
                 />
                 <button
                   onClick={() => removeRow(i)}
                   disabled={rows.length === 1}
                   aria-label="Remove row"
-                  className="p-2 rounded-lg border border-border text-muted-foreground hover:text-destructive hover:border-destructive/40 disabled:opacity-30"
+                  className="icon-btn hover:border-destructive/40 hover:text-destructive disabled:opacity-30"
                 >
-                  <Trash2 size={14} />
+                  <Trash2 size={14} aria-hidden />
                 </button>
               </div>
             ))}
           </div>
           <button
             onClick={addRow}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-xs text-muted-foreground hover:text-primary hover:border-primary/50"
+            className="btn-secondary px-3 py-1.5 text-xs"
           >
-            <Plus size={12} /> Add another
+            <Plus size={12} aria-hidden /> Add another
           </button>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-meta">
             An invite link is generated for each member — copy it from the members list.
           </p>
           <button
             onClick={submit}
             disabled={busy}
-            className="w-full mt-1 px-5 py-2.5 rounded-full bg-primary text-primary-foreground font-semibold glow-shadow disabled:opacity-50 inline-flex items-center justify-center gap-2"
+            className="btn-primary mt-1 w-full"
           >
-            {busy && <Loader2 className="animate-spin" size={14} />} Save members
+            {busy && <Loader2 className="animate-spin" size={14} aria-hidden />} Save members
           </button>
         </div>
       </DialogContent>

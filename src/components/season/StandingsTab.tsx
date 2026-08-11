@@ -1,65 +1,74 @@
-import { Trophy } from "lucide-react";
 import type { Season, StandingRow, SideLabel } from "./types";
+import { Surface, EmptyState, StatusPill } from "@/components/ui-system";
+import { Trophy } from "lucide-react";
 
 export default function StandingsTab({ season, standings, sideLabel }: { season: Season; standings: StandingRow[]; sideLabel: SideLabel }) {
   const sorted = sortStandings(standings);
 
   if (sorted.length === 0) {
     return (
-      <div className="glass-card p-10 text-center">
-        <Trophy className="mx-auto text-muted-foreground mb-3" />
-        <p className="text-muted-foreground">No matches played yet. Standings will appear here.</p>
-      </div>
+      <Surface level={1} padded={false}>
+        <EmptyState
+          icon={<Trophy size={16} aria-hidden />}
+          title="No matches played yet"
+          description="Standings build themselves as soon as the first box score is recorded."
+        />
+      </Surface>
     );
   }
 
-  const podium = sorted.slice(0, 3);
-  const medalColors = ["text-amber-400", "text-slate-300", "text-amber-700"];
-  const medalEmoji = ["🥇", "🥈", "🥉"];
+  const leader = sorted[0];
 
   return (
-    <div className="space-y-6">
-      {podium.length >= 1 && (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          {podium.map((s, i) => (
-            <div key={s.side_id} className={`glass-card p-5 border ${i === 0 ? "border-primary/40 glow-shadow" : "border-border"}`}>
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-2xl">{medalEmoji[i]}</span>
-                <span className={`text-xs uppercase tracking-wider font-semibold ${medalColors[i]}`}>#{i + 1}</span>
-              </div>
-              <p className="font-bold text-lg truncate">{sideLabel(s.side_kind, s.side_id)}</p>
-              <p className="text-sm text-muted-foreground mt-1">{s.wins}-{s.losses} · {s.sets_won - s.sets_lost >= 0 ? "+" : ""}{s.sets_won - s.sets_lost} sets</p>
-            </div>
-          ))}
+    <div className="space-y-5">
+      <Surface level={1} className="flex items-center justify-between gap-4">
+        <div className="min-w-0">
+          <p className="text-eyebrow">Currently leading</p>
+          <p className="text-page-title mt-1.5 truncate">{sideLabel(leader.side_kind, leader.side_id)}</p>
+          <p className="text-meta mt-1.5">
+            {leader.wins}-{leader.losses} · {leader.sets_won - leader.sets_lost >= 0 ? "+" : ""}
+            {leader.sets_won - leader.sets_lost} sets
+          </p>
         </div>
-      )}
+        <StatusPill tone="active">#1</StatusPill>
+      </Surface>
 
-      <div className="glass-card overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="text-xs uppercase tracking-wider text-muted-foreground bg-black/30">
-            <tr>
-              <th className="text-left px-4 py-3">#</th>
-              <th className="text-left px-4 py-3">{season.format === "doubles" ? "Team" : "Player"}</th>
-              <th className="text-right px-2 py-3">W</th>
-              <th className="text-right px-2 py-3">L</th>
-              <th className="text-right px-2 py-3 hidden sm:table-cell">Sets</th>
-              <th className="text-right px-4 py-3 hidden sm:table-cell">Games</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sorted.map((s, i) => (
-              <tr key={s.side_id} className="border-t border-border">
-                <td className="px-4 py-3 font-bold">{i + 1}</td>
-                <td className="px-4 py-3">{sideLabel(s.side_kind, s.side_id)}</td>
-                <td className="px-2 py-3 text-right text-primary font-semibold">{s.wins}</td>
-                <td className="px-2 py-3 text-right">{s.losses}</td>
-                <td className="px-2 py-3 text-right hidden sm:table-cell">{s.sets_won}-{s.sets_lost}</td>
-                <td className="px-4 py-3 text-right hidden sm:table-cell">{s.games_won}-{s.games_lost}</td>
+      <Surface level={1} padded={false} className="overflow-hidden">
+        <div className="scrollbar-dark overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-border">
+                <th className="text-eyebrow px-4 py-3 text-left">#</th>
+                <th className="text-eyebrow px-4 py-3 text-left">
+                  {season.format === "doubles" ? "Team" : "Player"}
+                </th>
+                <th className="text-eyebrow px-2 py-3 text-right">W</th>
+                <th className="text-eyebrow px-2 py-3 text-right">L</th>
+                <th className="text-eyebrow hidden px-2 py-3 text-right sm:table-cell">Sets</th>
+                <th className="text-eyebrow hidden px-4 py-3 text-right sm:table-cell">Games</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody className="nums divide-y divide-border">
+              {sorted.map((s, i) => (
+                <tr key={s.side_id} className="transition-colors hover:bg-[hsl(var(--surface-2))]">
+                  <td className={`px-4 py-3 font-semibold ${i === 0 ? "text-primary" : "text-[hsl(var(--text-muted))]"}`}>
+                    {i + 1}
+                  </td>
+                  <td className="px-4 py-3 text-foreground">{sideLabel(s.side_kind, s.side_id)}</td>
+                  <td className="px-2 py-3 text-right font-semibold text-foreground">{s.wins}</td>
+                  <td className="px-2 py-3 text-right text-[hsl(var(--text-muted))]">{s.losses}</td>
+                  <td className="hidden px-2 py-3 text-right text-[hsl(var(--text-muted))] sm:table-cell">
+                    {s.sets_won}-{s.sets_lost}
+                  </td>
+                  <td className="hidden px-4 py-3 text-right text-[hsl(var(--text-muted))] sm:table-cell">
+                    {s.games_won}-{s.games_lost}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Surface>
     </div>
   );
 }

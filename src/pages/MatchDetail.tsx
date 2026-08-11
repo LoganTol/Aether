@@ -6,6 +6,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
 import type { Season } from "@/components/season/types";
+import { PageContainer, Surface, StatusPill, SectionHeading, EmptyState } from "@/components/ui-system";
+import { deriveStatus } from "@/components/season/MatchStatusBadge";
 
 interface Match {
   id: string;
@@ -24,6 +26,16 @@ interface Participant { id: string; display_name: string; user_id: string | null
 interface Team { id: string; name: string; player_a_id: string; player_b_id: string }
 interface ScoreRow { id: string; set_number: number; side_a_games: number; side_b_games: number }
 interface Result { id: string; winner_side: "a" | "b"; entered_by: string | null; confirmed_by: string | null; disputed: boolean }
+
+const statusTone = {
+  pending: "neutral",
+  proposed: "warning",
+  scheduled: "active",
+  completed: "success",
+  forfeited: "neutral",
+  disputed: "danger",
+  overdue: "danger",
+} as const;
 
 export default function MatchDetail() {
   const { matchId } = useParams<{ matchId: string }>();
@@ -60,8 +72,28 @@ export default function MatchDetail() {
 
   useEffect(() => { refresh(); }, [refresh]);
 
-  if (loading) return <div className="min-h-screen bg-background"><AppHeader /><div className="container py-20 text-center text-muted-foreground">Loading…</div></div>;
-  if (!match) return <div className="min-h-screen bg-background"><AppHeader /><div className="container py-20 text-center">Match not found.</div></div>;
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <AppHeader />
+        <PageContainer width="narrow" className="flex justify-center py-16">
+          <Loader2 className="animate-spin text-primary" aria-label="Loading match" />
+        </PageContainer>
+      </div>
+    );
+  }
+  if (!match) {
+    return (
+      <div className="min-h-screen bg-background">
+        <AppHeader />
+        <PageContainer width="narrow" className="py-16">
+          <Surface level={1} padded={false}>
+            <EmptyState title="Match not found" description="This match may have been deleted." />
+          </Surface>
+        </PageContainer>
+      </div>
+    );
+  }
 
   const sideLabel = (id: string) => match.side_kind === "team"
     ? teams.find((t) => t.id === id)?.name || "Team"
@@ -98,51 +130,70 @@ export default function MatchDetail() {
     }
   };
 
+  const derived = deriveStatus(match.status, match.deadline_at);
+
   return (
     <div className="min-h-screen bg-background">
       <AppHeader />
-      <main className="container py-8 max-w-2xl">
-        <button onClick={() => navigate(`/app/seasons/${match.season_id}`)} className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary mb-4">
-          <ArrowLeft size={16} /> Back to season
-        </button>
+      <main>
+        <PageContainer width="narrow" className="space-y-6 py-8">
+          <button
+            onClick={() => navigate(`/app/seasons/${match.season_id}`)}
+            className="text-meta inline-flex items-center gap-2 transition-colors hover:text-foreground"
+          >
+            <ArrowLeft size={14} aria-hidden /> Back to season
+          </button>
 
-        <div className="glass-card p-6 mb-6">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <p className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Round {match.round}</p>
-              <h1 className="text-2xl md:text-3xl font-bold mb-3">
-                {sideLabel(match.side_a_id)} <span className="text-muted-foreground">vs</span> {sideLabel(match.side_b_id)}
-              </h1>
+          {/* Match header */}
+          <Surface level={1} padded="lg">
+            <div className="flex items-start justify-between gap-4">
+              <div className="min-w-0">
+                <div className="flex items-center gap-3">
+                  <span className="text-eyebrow">Round {match.round}</span>
+                  <StatusPill tone={statusTone[derived]}>{derived}</StatusPill>
+                </div>
+                <h1 className="text-page-title mt-3">
+                  {sideLabel(match.side_a_id)}{" "}
+                  <span className="text-[hsl(var(--text-muted))]">vs</span>{" "}
+                  {sideLabel(match.side_b_id)}
+                </h1>
+              </div>
+              {canDelete && (
+                <button onClick={deleteMatch} aria-label="Delete match" className="icon-btn shrink-0 hover:border-destructive/40 hover:text-destructive">
+                  <Trash2 size={15} aria-hidden />
+                </button>
+              )}
             </div>
-            {canDelete && (
-              <button
-                onClick={deleteMatch}
-                aria-label="Delete match"
-                className="shrink-0 p-2.5 rounded-xl border border-border text-muted-foreground hover:text-destructive hover:border-destructive/40 transition-colors"
-              >
-                <Trash2 size={16} />
-              </button>
-            )}
-          </div>
-          <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
-            <span className="inline-flex items-center gap-1"><Calendar size={14} /> Deadline {new Date(match.deadline_at).toLocaleDateString()}</span>
-            {match.scheduled_at && (
-              <span className="inline-flex items-center gap-1 text-primary"><Clock size={14} /> {new Date(match.scheduled_at).toLocaleString()}</span>
-            )}
-            {match.location && (
-              <span className="inline-flex items-center gap-1"><MapPin size={14} /> {match.location}</span>
-            )}
-            <span className="capitalize">{match.status}</span>
-          </div>
-        </div>
 
-        {(match.status === "scheduled" || match.status === "pending" || match.status === "proposed") && (
-          <ScoreEntrySection match={match} sideLabel={sideLabel} myParticipantId={myId} myInvolved={!!myInvolved} scores={scores} result={result} onChange={refresh} />
-        )}
+            {/* Scheduling details stay visible regardless of the primary action */}
+            <dl className="text-meta mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-border pt-4">
+              <div className="inline-flex items-center gap-1.5">
+                <Calendar size={13} aria-hidden />
+                <span>Deadline {new Date(match.deadline_at).toLocaleDateString()}</span>
+              </div>
+              {match.scheduled_at && (
+                <div className="inline-flex items-center gap-1.5 text-primary">
+                  <Clock size={13} aria-hidden />
+                  <span>{new Date(match.scheduled_at).toLocaleString()}</span>
+                </div>
+              )}
+              {match.location && (
+                <div className="inline-flex items-center gap-1.5">
+                  <MapPin size={13} aria-hidden />
+                  <span>{match.location}</span>
+                </div>
+              )}
+            </dl>
+          </Surface>
 
-        {match.status === "completed" && (
-          <BoxScore match={match} scores={scores} result={result} sideLabel={sideLabel} />
-        )}
+          {(match.status === "scheduled" || match.status === "pending" || match.status === "proposed") && (
+            <ScoreEntrySection match={match} sideLabel={sideLabel} myParticipantId={myId} myInvolved={!!myInvolved} scores={scores} result={result} onChange={refresh} />
+          )}
+
+          {match.status === "completed" && (
+            <BoxScore match={match} scores={scores} result={result} sideLabel={sideLabel} />
+          )}
+        </PageContainer>
       </main>
     </div>
   );
@@ -155,65 +206,62 @@ function BoxScore({ match, scores, result, sideLabel }: {
   const setsB = scores.filter((s) => s.side_b_games > s.side_a_games).length;
   const winnerA = result?.winner_side === "a";
   return (
-    <div className="glass-card p-6">
-      <div className="flex items-center gap-2 mb-5">
-        <Trophy className="text-primary" size={18} />
-        <h3 className="font-bold uppercase tracking-wider text-xs text-muted-foreground">Final box score</h3>
-      </div>
-      <div className="overflow-x-auto scrollbar-dark -mx-2 px-2">
-        <table className="w-full text-sm border-separate border-spacing-0">
+    <Surface level={1}>
+      <SectionHeading title="Final box score" />
+      <div className="scrollbar-dark -mx-2 overflow-x-auto px-2">
+        <table className="w-full border-separate border-spacing-0 text-sm">
           <thead>
-            <tr className="text-xs uppercase tracking-wider text-muted-foreground">
-              <th className="text-left font-medium pb-2 pr-3">Side</th>
+            <tr>
+              <th className="text-eyebrow pb-2 pr-3 text-left font-semibold">Side</th>
               {scores.map((s) => (
-                <th key={s.id} className="text-center font-medium pb-2 px-2 w-10">{s.set_number}</th>
+                <th key={s.id} className="text-eyebrow w-10 px-2 pb-2 text-center font-semibold">{s.set_number}</th>
               ))}
-              <th className="text-center font-medium pb-2 pl-3 w-12">Sets</th>
+              <th className="text-eyebrow w-12 pb-2 pl-3 text-center font-semibold">Sets</th>
             </tr>
           </thead>
-          <tbody>
-            <tr className={winnerA ? "text-foreground" : "text-muted-foreground"}>
-              <td className="py-3 pr-3 border-t border-border">
+          <tbody className="nums">
+            <tr className={winnerA ? "text-foreground" : "text-[hsl(var(--text-muted))]"}>
+              <td className="border-t border-border py-3 pr-3">
                 <span className="inline-flex items-center gap-2">
-                  {winnerA && <Trophy size={14} className="text-primary" />}
+                  {winnerA && <Trophy size={13} className="text-primary" aria-label="Winner" />}
                   <span className="font-semibold">{sideLabel(match.side_a_id)}</span>
                 </span>
               </td>
               {scores.map((s) => (
-                <td key={s.id} className={`py-3 px-2 text-center font-mono border-t border-border ${s.side_a_games > s.side_b_games ? "text-primary font-bold" : ""}`}>
+                <td key={s.id} className={`border-t border-border px-2 py-3 text-center ${s.side_a_games > s.side_b_games ? "font-bold text-primary" : ""}`}>
                   {s.side_a_games}
                 </td>
               ))}
-              <td className="py-3 pl-3 text-center font-mono font-bold border-t border-border">{setsA}</td>
+              <td className="border-t border-border py-3 pl-3 text-center font-bold">{setsA}</td>
             </tr>
-            <tr className={!winnerA ? "text-foreground" : "text-muted-foreground"}>
-              <td className="py-3 pr-3 border-t border-border">
+            <tr className={!winnerA ? "text-foreground" : "text-[hsl(var(--text-muted))]"}>
+              <td className="border-t border-border py-3 pr-3">
                 <span className="inline-flex items-center gap-2">
-                  {!winnerA && <Trophy size={14} className="text-primary" />}
+                  {!winnerA && <Trophy size={13} className="text-primary" aria-label="Winner" />}
                   <span className="font-semibold">{sideLabel(match.side_b_id)}</span>
                 </span>
               </td>
               {scores.map((s) => (
-                <td key={s.id} className={`py-3 px-2 text-center font-mono border-t border-border ${s.side_b_games > s.side_a_games ? "text-primary font-bold" : ""}`}>
+                <td key={s.id} className={`border-t border-border px-2 py-3 text-center ${s.side_b_games > s.side_a_games ? "font-bold text-primary" : ""}`}>
                   {s.side_b_games}
                 </td>
               ))}
-              <td className="py-3 pl-3 text-center font-mono font-bold border-t border-border">{setsB}</td>
+              <td className="border-t border-border py-3 pl-3 text-center font-bold">{setsB}</td>
             </tr>
           </tbody>
         </table>
       </div>
       {result?.confirmed_by && !result.disputed && (
-        <p className="mt-4 inline-flex items-center gap-1.5 text-primary text-xs font-semibold">
-          <Check size={12} /> Confirmed by opponent
+        <p className="text-meta mt-4 inline-flex items-center gap-1.5 font-semibold text-primary">
+          <Check size={12} aria-hidden /> Confirmed by opponent
         </p>
       )}
       {result?.disputed && (
-        <p className="mt-4 inline-flex items-center gap-1.5 text-destructive text-xs font-semibold">
-          <AlertTriangle size={12} /> Disputed
+        <p className="text-meta mt-4 inline-flex items-center gap-1.5 font-semibold text-destructive">
+          <AlertTriangle size={12} aria-hidden /> Disputed
         </p>
       )}
-    </div>
+    </Surface>
   );
 }
 
@@ -289,33 +337,38 @@ function ScoreEntrySection({ match, sideLabel, myParticipantId, myInvolved, scor
     };
 
     return (
-      <div className="glass-card p-6">
-        <h3 className="font-bold mb-2 inline-flex items-center gap-2"><Trophy className="text-primary" size={18} /> Result entered</h3>
-        <p className="text-muted-foreground text-sm">Winner: {sideLabel(result.winner_side === "a" ? match.side_a_id : match.side_b_id)}</p>
+      <Surface level={1}>
+        <SectionHeading title="Result entered" />
+        <p className="text-ui-title">
+          Winner:{" "}
+          <span className="text-primary">
+            {sideLabel(result.winner_side === "a" ? match.side_a_id : match.side_b_id)}
+          </span>
+        </p>
         {result.disputed && (
-          <p className="mt-3 inline-flex items-center gap-1.5 text-destructive text-sm font-semibold">
-            <AlertTriangle size={14} /> Disputed — awaiting admin review
+          <p className="text-body mt-3 inline-flex items-center gap-1.5 font-semibold text-destructive">
+            <AlertTriangle size={14} aria-hidden /> Disputed — awaiting admin review
           </p>
         )}
         {result.confirmed_by && !result.disputed && (
-          <p className="mt-3 inline-flex items-center gap-1.5 text-primary text-sm font-semibold">
-            <Check size={14} /> Confirmed by opponent
+          <p className="text-body mt-3 inline-flex items-center gap-1.5 font-semibold text-primary">
+            <Check size={14} aria-hidden /> Confirmed by opponent
           </p>
         )}
         {isOpponent && awaitingConfirm && (
-          <div className="mt-4 flex gap-2">
-            <button onClick={confirm} className="px-4 py-2 rounded-full bg-primary text-primary-foreground font-semibold text-sm inline-flex items-center gap-1.5">
-              <Check size={14} /> Confirm result
+          <div className="mt-5 flex flex-wrap gap-2">
+            <button onClick={confirm} className="btn-primary">
+              <Check size={14} aria-hidden /> Confirm result
             </button>
-            <button onClick={dispute} className="px-4 py-2 rounded-full border border-destructive/40 text-destructive font-semibold text-sm inline-flex items-center gap-1.5">
-              <AlertTriangle size={14} /> Dispute
+            <button onClick={dispute} className="btn-danger">
+              <AlertTriangle size={14} aria-hidden /> Dispute
             </button>
           </div>
         )}
         {!isOpponent && awaitingConfirm && (
-          <p className="text-xs text-muted-foreground mt-3">Waiting for opponent to confirm…</p>
+          <p className="text-meta mt-3">Waiting for opponent to confirm…</p>
         )}
-      </div>
+      </Surface>
     );
   }
 
@@ -323,66 +376,62 @@ function ScoreEntrySection({ match, sideLabel, myParticipantId, myInvolved, scor
     return (
       <button
         onClick={() => setOpen(true)}
-        className="w-full glass-card p-5 flex items-center justify-between gap-3 hover:border-primary/50 transition-colors group"
+        className="group flex w-full items-center justify-between gap-3 rounded-xl border border-border surface-1 p-5 text-left transition-colors hover:border-primary/50"
       >
-        <div className="flex items-center gap-3 text-left">
-          <div className="w-11 h-11 rounded-2xl bg-primary/15 border border-primary/40 flex items-center justify-center shrink-0 group-hover:bg-primary/25 transition-colors">
-            <Plus className="text-primary" size={20} />
-          </div>
-          <div>
-            <p className="font-bold">Add score</p>
-            <p className="text-xs text-muted-foreground">Enter the final games for each set.</p>
-          </div>
-        </div>
-        <Trophy className="text-muted-foreground group-hover:text-primary transition-colors" size={18} />
+        <span className="flex items-center gap-3">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-primary/40 bg-primary/10 text-primary">
+            <Plus size={18} aria-hidden />
+          </span>
+          <span>
+            <span className="text-ui-title block">Add score</span>
+            <span className="text-meta mt-0.5 block">Enter the final games for each set.</span>
+          </span>
+        </span>
+        <Trophy size={16} aria-hidden className="text-[hsl(var(--text-muted))] transition-colors group-hover:text-primary" />
       </button>
     );
   }
 
   return (
-    <div className="glass-card p-6">
-      <h3 className="font-bold mb-3 inline-flex items-center gap-2">
-        <Trophy className="text-primary" size={18} /> Box score
-      </h3>
-      <div className="grid grid-cols-[1fr_auto_1fr] gap-3 mb-2 text-xs text-muted-foreground">
-        <span>{sideLabel(match.side_a_id)}</span>
-        <span></span>
-        <span className="text-right">{sideLabel(match.side_b_id)}</span>
+    <Surface level={1}>
+      <SectionHeading title="Box score" hint="Games won in each set" />
+      <div className="mb-2 grid grid-cols-[1fr_auto_1fr] gap-3 text-meta">
+        <span className="truncate">{sideLabel(match.side_a_id)}</span>
+        <span />
+        <span className="truncate text-right">{sideLabel(match.side_b_id)}</span>
       </div>
-      <div className="space-y-2 mb-4">
+      <div className="mb-5 space-y-2">
         {sets.map((s, i) => (
-          <div key={i} className="grid grid-cols-[1fr_auto_1fr] gap-3 items-center">
+          <div key={i} className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
             <input
-              type="number" min={0} max={20}
+              type="number" min={0} max={20} inputMode="numeric"
+              aria-label={`${sideLabel(match.side_a_id)} games in set ${i + 1}`}
               value={s.a}
               onChange={(e) => setSets((arr) => arr.map((r, idx) => idx === i ? { ...r, a: e.target.value } : r))}
-              className="px-3 py-2 rounded-lg bg-black/30 border border-border focus:border-primary outline-none text-center font-mono"
+              className="field nums text-center"
             />
-            <span className="text-muted-foreground text-sm">Set {i + 1}</span>
+            <span className="text-meta w-14 text-center">Set {i + 1}</span>
             <input
-              type="number" min={0} max={20}
+              type="number" min={0} max={20} inputMode="numeric"
+              aria-label={`${sideLabel(match.side_b_id)} games in set ${i + 1}`}
               value={s.b}
               onChange={(e) => setSets((arr) => arr.map((r, idx) => idx === i ? { ...r, b: e.target.value } : r))}
-              className="px-3 py-2 rounded-lg bg-black/30 border border-border focus:border-primary outline-none text-center font-mono"
+              className="field nums text-center"
             />
           </div>
         ))}
       </div>
-      <div className="flex gap-2">
-        <button onClick={() => setSets((s) => [...s, { a: "", b: "" }])} className="px-3 py-2 rounded-lg border border-border text-sm hover:border-primary/50">
-          + Add set
+      <div className="flex flex-wrap items-center gap-2">
+        <button onClick={() => setSets((s) => [...s, { a: "", b: "" }])} className="btn-secondary">
+          Add set
         </button>
-        <button onClick={() => setOpen(false)} className="px-3 py-2 rounded-lg border border-border text-sm hover:border-primary/50">
+        <button onClick={() => setOpen(false)} className="btn-ghost">
           Cancel
         </button>
-        <button
-          onClick={submit}
-          disabled={busy}
-          className="ml-auto px-5 py-2.5 rounded-full bg-primary text-primary-foreground font-semibold disabled:opacity-50 flex items-center gap-2"
-        >
-          {busy && <Loader2 className="animate-spin" size={14} />} Save score
+        <button onClick={submit} disabled={busy} className="btn-primary ml-auto">
+          {busy && <Loader2 className="animate-spin" size={14} aria-hidden />} Save score
         </button>
       </div>
-    </div>
+    </Surface>
   );
 }

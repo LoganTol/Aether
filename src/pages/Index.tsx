@@ -1,155 +1,238 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, Trophy, Users, Repeat, CalendarCheck, Award } from "lucide-react";
+import { ArrowRight, Repeat, CalendarCheck, Trophy, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import AetherLogo from "@/components/AetherLogo";
+import { PageContainer, Surface, StatBlock } from "@/components/ui-system";
+import {
+  CaptainPreview,
+  ScheduledPreview,
+  StandingsPreview,
+  MatchCardPreview,
+} from "@/components/marketing/ProductPreview";
 
-const features = [
+const pillars = [
   {
     icon: Repeat,
-    title: "Rotating Captains",
-    desc: "Scheduling responsibility passes between players each week. No single organizer burns out — the season keeps moving.",
+    title: "Rotating captains",
+    desc: "Scheduling duty passes on a fixed window. Nobody becomes the permanent organizer.",
   },
   {
     icon: CalendarCheck,
-    title: "One-Tap Scheduling",
-    desc: "Captains propose three times. Opponents tap to confirm. Matches get booked without endless group chats.",
+    title: "Deadlines that hold",
+    desc: "Every fixture carries a due date, so a season never quietly stalls in a group chat.",
   },
   {
     icon: Trophy,
-    title: "Auto Standings",
-    desc: "Singles and doubles round-robins with live wins, sets, and games. No spreadsheets.",
+    title: "Standings on their own",
+    desc: "Enter a box score once. Wins, sets and games update for everyone instantly.",
   },
+  {
+    icon: ShieldCheck,
+    title: "A commissioner when needed",
+    desc: "The season creator can reschedule, correct a score, or nudge the rotation forward.",
+  },
+];
+
+const audiences = [
+  "Couples",
+  "Neighborhoods",
+  "HOAs",
+  "Friend groups",
+  "Local clubs",
+  "Office leagues",
+  "Mixed doubles",
+  "Coaching groups",
 ];
 
 const Index = () => {
   const { user } = useAuth();
   const target = user ? "/app" : "/auth";
+
   return (
     <div className="min-h-screen bg-background">
-      <header className="sticky top-0 w-full py-4 md:py-6 z-50 bg-background/80 backdrop-blur-md">
-        <div className="container flex justify-between items-center">
-          <AetherLogo to="/" className="text-2xl md:text-3xl" />
-          <div className="flex items-center gap-2 md:gap-3">
+      <header className="sticky top-0 z-50 w-full border-b border-border bg-background/85 backdrop-blur-md">
+        <PageContainer width="wide" className="flex h-14 items-center justify-between gap-4">
+          <AetherLogo to="/" className="text-lg sm:text-xl" />
+          <div className="flex items-center gap-1 sm:gap-2">
             <Link
               to={target}
-              className="px-3 py-2 text-sm text-muted-foreground hover:text-primary transition-colors"
+              className="rounded-lg px-3 py-1.5 text-sm text-[hsl(var(--text-muted))] transition-colors hover:text-foreground"
             >
               {user ? "Dashboard" : "Sign in"}
             </Link>
             <Link
               to={target}
-              className="inline-flex items-center gap-2 px-5 py-2 text-sm md:px-7 md:py-3 md:text-base font-semibold rounded-full bg-primary text-primary-foreground glow-shadow transition-all duration-300 hover:-translate-y-0.5"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3.5 py-1.5 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
             >
-              {user ? "Open app" : "Start a season"} <ArrowRight size={16} />
+              {user ? "Open app" : "Start a season"}
+              <ArrowRight size={15} aria-hidden />
             </Link>
           </div>
-        </div>
+        </PageContainer>
       </header>
 
-      {/* Hero */}
-      <section className="min-h-[88vh] flex items-center relative overflow-hidden pt-10">
-        <div className="absolute -top-[20%] -right-[10%] w-[600px] h-[600px] bg-[radial-gradient(circle,hsl(var(--secondary))_0%,transparent_70%)] opacity-50 blur-[80px] -z-10" />
-        <div className="absolute bottom-[10%] -left-[5%] w-[400px] h-[400px] bg-[radial-gradient(circle,hsl(var(--primary)/0.15)_0%,transparent_70%)] blur-[60px] -z-10" />
-
-        <div className="container text-center max-w-4xl mx-auto">
-          <p className="text-primary font-semibold tracking-widest uppercase text-xs md:text-sm mb-5 animate-fade-up">
-            Social Tennis Seasons
-          </p>
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 animate-fade-up leading-[1.05]">
-            Run a tennis season <span className="text-primary">without</span> running yourself ragged.
-          </h1>
-          <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto animate-fade-up-delay-1">
-            Aether Tennis helps neighborhoods, couples, friend groups, HOAs, and clubs organize their own round-robin season — with rotating scheduling captains so nobody gets stuck managing everything.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 animate-fade-up-delay-2">
-            <Link
-              to={target}
-              className="inline-flex items-center gap-2 px-10 py-4 text-lg font-semibold rounded-full bg-primary text-primary-foreground glow-shadow transition-all duration-300 hover:-translate-y-0.5"
-            >
-              {user ? "Open dashboard" : "Create your season"} <ArrowRight size={18} />
-            </Link>
-            <a href="#how" className="px-6 py-3 text-sm text-muted-foreground hover:text-foreground transition-colors">
-              See how it works
-            </a>
-          </div>
-        </div>
-      </section>
-
-      {/* Features */}
-      <section id="how" className="py-24 bg-gradient-to-b from-transparent to-card relative">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-1 rounded-full bg-gradient-to-r from-transparent via-primary to-transparent" />
-        <div className="container">
-          <h2 className="text-3xl md:text-5xl font-bold text-center mb-4">
-            The <span className="text-primary">accountability</span> engine
-          </h2>
-          <p className="text-muted-foreground text-center mb-14 max-w-xl mx-auto">
-            Every screen answers three questions: who owes what, by when, and what happens next.
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {features.map((f) => (
-              <div
-                key={f.title}
-                className="glass-card p-8 md:p-10 transition-all duration-300 hover:-translate-y-2 hover:border-primary/30 hover:glow-shadow group"
-              >
-                <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-6 group-hover:bg-primary/20 transition-colors">
-                  <f.icon className="text-primary" size={24} />
+      <main>
+        {/* Hero — asymmetric split: claim left, real product surface right */}
+        <section className="border-b border-border py-16 sm:py-24">
+          <PageContainer width="wide">
+            <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] lg:gap-16">
+              <div className="animate-fade-up">
+                <p className="text-eyebrow">Social tennis seasons</p>
+                <h1 className="text-display mt-5">
+                  Run a season without
+                  <br className="hidden sm:block" /> becoming{" "}
+                  <span className="text-primary">the organizer</span>.
+                </h1>
+                <p className="text-body mt-6 max-w-xl text-base">
+                  Aether Tennis turns a group of players into a real round-robin season:
+                  generated fixtures, rotating scheduling captains, hard deadlines and
+                  standings that keep themselves current.
+                </p>
+                <div className="mt-8 flex flex-wrap items-center gap-3">
+                  <Link
+                    to={target}
+                    className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
+                  >
+                    {user ? "Open dashboard" : "Create your season"}
+                    <ArrowRight size={16} aria-hidden />
+                  </Link>
+                  <a
+                    href="#how"
+                    className="rounded-lg border border-border px-5 py-2.5 text-sm text-[hsl(var(--text-secondary))] transition-colors hover:border-strong hover:text-foreground"
+                  >
+                    See how it works
+                  </a>
                 </div>
-                <h3 className="text-2xl font-bold mb-3 group-hover:text-primary transition-colors">
-                  {f.title}
-                </h3>
-                <p className="text-muted-foreground">{f.desc}</p>
+                <dl className="mt-10 grid max-w-md grid-cols-3 gap-6 border-t border-border pt-6">
+                  <StatBlock label="Players minimum" value="2" />
+                  <StatBlock label="Setup" value="< 1 min" />
+                  <StatBlock label="Spreadsheets" value="0" emphasis />
+                </dl>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
-      {/* Who it's for */}
-      <section className="py-20">
-        <div className="container max-w-4xl">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
-            Built for groups that <span className="text-primary">actually finish</span> their seasons
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {["Couples", "Neighborhoods", "HOAs", "Friend Groups", "Local Clubs", "Office Leagues", "Mixed Doubles", "Coaching Groups"].map((g) => (
-              <div key={g} className="glass-card px-4 py-5 text-center text-sm md:text-base font-medium">
-                <Users className="text-primary mx-auto mb-2" size={20} />
-                {g}
+              <div className="animate-fade-up-delay-1 space-y-4">
+                <CaptainPreview />
+                <ScheduledPreview />
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
+            </div>
+          </PageContainer>
+        </section>
 
-      {/* CTA */}
-      <section className="py-24">
-        <div className="container max-w-3xl text-center">
-          <Award className="text-primary mx-auto mb-6" size={40} />
-          <h2 className="text-3xl md:text-5xl font-bold mb-6">
-            Your next season starts in <span className="text-primary">under a minute</span>.
-          </h2>
-          <p className="text-muted-foreground mb-10 text-lg">
-            Name it, pick singles or doubles, invite your players. We handle the schedule and rotate the captain so the season actually finishes.
-          </p>
-          <Link
-            to={target}
-            className="inline-flex items-center gap-2 px-10 py-4 text-lg font-semibold rounded-full bg-primary text-primary-foreground glow-shadow transition-all duration-300 hover:-translate-y-0.5"
-          >
-            {user ? "Open dashboard" : "Get started free"} <ArrowRight size={18} />
-          </Link>
-        </div>
-      </section>
+        {/* Pillars */}
+        <section id="how" className="border-b border-border py-16 sm:py-24">
+          <PageContainer width="wide">
+            <div className="max-w-2xl">
+              <p className="text-eyebrow">The accountability engine</p>
+              <h2 className="text-section mt-4">
+                Every screen answers who owes what, by when, and what happens next.
+              </h2>
+            </div>
+            <div className="mt-10 grid gap-px overflow-hidden rounded-xl border border-border bg-border sm:grid-cols-2">
+              {pillars.map((p) => (
+                <div key={p.title} className="surface-1 p-6 sm:p-8">
+                  <p.icon className="text-primary" size={20} aria-hidden />
+                  <h3 className="mt-4 font-heading text-lg font-semibold tracking-tight">
+                    {p.title}
+                  </h3>
+                  <p className="text-body mt-2">{p.desc}</p>
+                </div>
+              ))}
+            </div>
+          </PageContainer>
+        </section>
 
-      <footer className="border-t border-border bg-card/50">
-        <div className="container py-8 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
-          <p>© 2026 Aether Tennis. All Rights Reserved.</p>
+        {/* Scoring / standings — reversed split */}
+        <section className="border-b border-border py-16 sm:py-24">
+          <PageContainer width="wide">
+            <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,24rem)_minmax(0,1fr)] lg:gap-16">
+              <div className="order-2 space-y-4 lg:order-1">
+                <MatchCardPreview />
+                <StandingsPreview />
+              </div>
+              <div className="order-1 lg:order-2">
+                <p className="text-eyebrow">Scores and standings</p>
+                <h2 className="text-section mt-4">
+                  One box score, and the table takes care of itself.
+                </h2>
+                <p className="text-body mt-5 max-w-lg text-base">
+                  Any member of the season can enter a result. Sets, games and win
+                  records propagate to the standings immediately — and the creator can
+                  correct a score if something was entered wrong.
+                </p>
+                <ul className="mt-7 space-y-3 border-t border-border pt-6">
+                  {[
+                    "Set-by-set entry built for a phone at courtside",
+                    "Match history and scorecards kept for the whole season",
+                    "Location and time stay attached to every fixture",
+                  ].map((line) => (
+                    <li key={line} className="text-body flex gap-3">
+                      <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-primary" aria-hidden />
+                      {line}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </PageContainer>
+        </section>
+
+        {/* Audiences */}
+        <section className="border-b border-border py-16 sm:py-20">
+          <PageContainer width="wide">
+            <p className="text-eyebrow">Built for</p>
+            <h2 className="text-section mt-4 max-w-2xl">
+              Groups that want to actually finish their season.
+            </h2>
+            <div className="mt-8 flex flex-wrap gap-2">
+              {audiences.map((a) => (
+                <span
+                  key={a}
+                  className="rounded-full border border-border px-3.5 py-1.5 text-sm text-[hsl(var(--text-secondary))]"
+                >
+                  {a}
+                </span>
+              ))}
+            </div>
+          </PageContainer>
+        </section>
+
+        {/* CTA */}
+        <section className="py-16 sm:py-24">
+          <PageContainer width="wide">
+            <Surface level={1} padded="lg" className="text-center">
+              <h2 className="text-section mx-auto max-w-2xl">
+                Your next season starts in{" "}
+                <span className="text-primary">under a minute</span>.
+              </h2>
+              <p className="text-body mx-auto mt-4 max-w-xl">
+                Name it, pick singles or doubles, invite your players. Aether builds the
+                schedule and rotates the captain so the season finishes.
+              </p>
+              <Link
+                to={target}
+                className="mt-8 inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
+              >
+                {user ? "Open dashboard" : "Get started free"}
+                <ArrowRight size={16} aria-hidden />
+              </Link>
+            </Surface>
+          </PageContainer>
+        </section>
+      </main>
+
+      <footer className="border-t border-border">
+        <PageContainer width="wide" className="flex flex-col items-center justify-between gap-4 py-8 sm:flex-row">
+          <p className="text-meta">© 2026 Aether Tennis. All rights reserved.</p>
           <div className="flex items-center gap-6">
-            <Link to="/terms" className="hover:text-primary transition-colors">Terms & Conditions</Link>
-            <Link to="/privacy" className="hover:text-primary transition-colors">Privacy Policy</Link>
+            <Link to="/terms" className="text-meta transition-colors hover:text-foreground">
+              Terms &amp; Conditions
+            </Link>
+            <Link to="/privacy" className="text-meta transition-colors hover:text-foreground">
+              Privacy Policy
+            </Link>
           </div>
-        </div>
+        </PageContainer>
       </footer>
-      <div className="h-1 bg-gradient-to-r from-secondary via-primary to-secondary" />
     </div>
   );
 };
