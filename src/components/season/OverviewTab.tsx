@@ -236,7 +236,7 @@ function CreateMatchDialog({
         </DialogHeader>
         {!hasSides ? (
           <div className="space-y-3 pt-1">
-            <div className="rounded-xl border border-border bg-black/30 p-4">
+            <div className="rounded-xl border border-border bg-muted p-4">
               <p className="text-ui-title">
                 You need at least two {season.format === "doubles" ? "teams" : "players"} first.
               </p>
