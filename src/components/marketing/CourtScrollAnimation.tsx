@@ -1,20 +1,43 @@
 import { useEffect, useRef, useState } from "react";
 
 /**
- * A tennis court seen from the umpire's point of view — standing at the side
- * of the net, mid-court. The lines draw themselves as the section scrolls,
- * and the ball crosses to the far side when you scroll down and comes back
- * when you scroll up.
+ * A tennis court in true one-point perspective, seen from the umpire's spot:
+ * standing at the side of the net, looking straight across the court so the
+ * baselines sit left and right. Lines draw themselves as the section scrolls,
+ * and the ball's position along the court tracks the scroll position exactly.
  * Purely presentational.
  */
+
+// --- world -> screen projection -------------------------------------------
+// World: X = along the court (baseline to baseline), Z = across the court
+// (away from the viewer), Y = height above the surface.
+const CAM_DIST = 30; // metres from camera to court centre line
+const CAM_H = 9; // camera height (exaggerated for readability)
+const F = 618; // focal length in px
+const CX = 320;
+const HORIZON = 62;
+
+type Pt = { x: number; y: number };
+
+const project = (X: number, Z: number, Y = 0): Pt => {
+  const d = Z + CAM_DIST;
+  return { x: CX + (F * X) / d, y: HORIZON + (F * (CAM_H - Y)) / d };
+};
+
+const len = (a: Pt, b: Pt) => Math.hypot(b.x - a.x, b.y - a.y);
+
+// --- real court dimensions (metres) ---------------------------------------
+const HALF_LEN = 11.885; // baseline to net
+const HALF_DOUBLES = 5.485;
+const HALF_SINGLES = 4.115;
+const SERVICE = 6.4; // service line distance from net
+const CENTER_MARK = 0.3;
+const NET_POST = HALF_DOUBLES + 0.914;
+
 const CourtScrollAnimation = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const [progress, setProgress] = useState(0);
   const [reduced, setReduced] = useState(false);
-  const [ballPos, setBallPos] = useState(0.5);
-  const ballTarget = useRef(1);
-  const lastScrollY = useRef(0);
-  const rafBall = useRef(0);
 
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -36,20 +59,14 @@ const CourtScrollAnimation = () => {
       if (!el) return;
       const rect = el.getBoundingClientRect();
       const vh = window.innerHeight || 1;
-      // 0 when the section's top enters the viewport bottom, 1 once it is centered/past
-      const raw = (vh - rect.top) / (vh * 0.75 + rect.height * 0.5);
+      // 0 as the section enters from the bottom, 1 as it leaves past the top
+      const raw = (vh - rect.top) / (vh + rect.height);
       setProgress(Math.min(1, Math.max(0, raw)));
     };
     const onScroll = () => {
-      const y = window.scrollY;
-      if (Math.abs(y - lastScrollY.current) > 2) {
-        ballTarget.current = y > lastScrollY.current ? 1 : 0;
-        lastScrollY.current = y;
-      }
       if (!frame) frame = requestAnimationFrame(update);
     };
     update();
-    lastScrollY.current = window.scrollY;
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onScroll);
     return () => {
@@ -59,44 +76,53 @@ const CourtScrollAnimation = () => {
     };
   }, [reduced]);
 
-  // smooth the ball toward whichever side the scroll direction points at
-  useEffect(() => {
-    if (reduced) return;
-    const tick = () => {
-      setBallPos((prev) => {
-        const next = prev + (ballTarget.current - prev) * 0.06;
-        return Math.abs(ballTarget.current - next) < 0.001 ? ballTarget.current : next;
-      });
-      rafBall.current = requestAnimationFrame(tick);
-    };
-    rafBall.current = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(rafBall.current);
-  }, [reduced]);
-
-  const ease = (t: number) => 1 - Math.pow(1 - t, 3);
-  const p = ease(progress);
-
-  // staggered line reveal helper
+  const p = progress;
+  // line reveal runs on the first part of the travel
   const seg = (start: number, end: number) =>
     Math.min(1, Math.max(0, (p - start) / (end - start)));
+  const netT = seg(0.05, 0.28);
+  const outerT = seg(0.08, 0.4);
+  const innerT = seg(0.22, 0.6);
 
-  const draw = (length: number, t: number) => ({
-    strokeDasharray: length,
-    strokeDashoffset: length * (1 - t),
-  });
+  // straight world line -> svg path + dash values for the draw-on effect
+  const line = (
+    x1: number,
+    z1: number,
+    x2: number,
+    z2: number,
+    t: number,
+    y1 = 0,
+    y2 = 0,
+  ) => {
+    const a = project(x1, z1, y1);
+    const b = project(x2, z2, y2);
+    const l = len(a, b);
+    return {
+      d: `M${a.x.toFixed(1)} ${a.y.toFixed(1)} L${b.x.toFixed(1)} ${b.y.toFixed(1)}`,
+      strokeDasharray: l,
+      strokeDashoffset: l * (1 - t),
+    };
+  };
 
-  const netT = seg(0, 0.25);
-  const outerT = seg(0.1, 0.5);
-  const innerT = seg(0.35, 0.75);
-  const ballT = seg(0.55, 1);
+  const poly = (pts: [number, number][]) =>
+    pts
+      .map(([x, z]) => {
+        const q = project(x, z);
+        return `${q.x.toFixed(1)},${q.y.toFixed(1)}`;
+      })
+      .join(" ");
 
-  // side-on rally: ball crosses the net left <-> right along the mid-depth line
-  const t = reduced ? 0.5 : ballPos;
-  const groundY = 268;
-  const ballX = 200 + (440 - 200) * t;
-  const arc = Math.sin(t * Math.PI);
-  const ballY = groundY - 12 - arc * 96;
-  const ballScale = 0.85 + arc * 0.35;
+  // --- ball: position along the court maps directly to scroll progress ------
+  const u = reduced ? 0.5 : p;
+  const ballX = -HALF_LEN * 0.92 + 2 * HALF_LEN * 0.92 * u;
+  // two hops across the court, second one lower
+  const hop = u * 2;
+  const hopIndex = Math.min(1, Math.floor(hop));
+  const hopT = hop - hopIndex;
+  const ballY = 0.25 + Math.sin(Math.PI * hopT) * (3.4 - hopIndex * 1.1);
+  const ball = project(ballX, 0, ballY);
+  const shadow = project(ballX, 0, 0);
+  const ballR = (F * 0.28) / CAM_DIST;
 
   return (
     <section ref={sectionRef} className="border-b border-border py-16 sm:py-24">
@@ -115,21 +141,30 @@ const CourtScrollAnimation = () => {
 
           <div className="relative">
             <svg
-              viewBox="0 0 640 440"
+              viewBox="0 145 640 178"
               className="w-full"
               role="img"
-              aria-label="Illustration of a tennis court"
+              aria-label="Illustration of a tennis court seen from the side of the net"
             >
               <defs>
                 <linearGradient id="courtFill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0.14" />
-                  <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity="0.03" />
+                  <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0.05" />
+                  <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity="0.16" />
                 </linearGradient>
+                <radialGradient id="ballShine" cx="35%" cy="30%" r="70%">
+                  <stop offset="0%" stopColor="hsl(66 95% 72%)" />
+                  <stop offset="100%" stopColor="hsl(70 80% 48%)" />
+                </radialGradient>
               </defs>
 
-              {/* court surface — viewed from the side of the net */}
+              {/* playing surface (doubles court) */}
               <polygon
-                points="190,150 450,150 600,380 40,380"
+                points={poly([
+                  [-HALF_LEN, HALF_DOUBLES],
+                  [HALF_LEN, HALF_DOUBLES],
+                  [HALF_LEN, -HALF_DOUBLES],
+                  [-HALF_LEN, -HALF_DOUBLES],
+                ])}
                 fill="url(#courtFill)"
                 style={{ opacity: outerT }}
               />
@@ -137,74 +172,141 @@ const CourtScrollAnimation = () => {
               <g
                 fill="none"
                 stroke="hsl(var(--foreground))"
-                strokeOpacity="0.45"
-                strokeWidth="2"
-                strokeLinecap="round"
+                strokeOpacity="0.42"
+                strokeWidth="1.6"
+                strokeLinecap="butt"
               >
-                {/* outer boundary: baselines left & right, sidelines near & far */}
-                <path
-                  d="M190 150 L450 150 L600 380 L40 380 Z"
-                  {...draw(1400, outerT)}
-                />
-                {/* singles sidelines (running away from the viewer) */}
-                <path d="M214 158 L92 372" {...draw(260, innerT)} />
-                <path d="M426 158 L548 372" {...draw(260, innerT)} />
-                {/* service lines, parallel to the net */}
-                <path d="M250 150 L170 380" {...draw(250, innerT)} />
-                <path d="M390 150 L470 380" {...draw(250, innerT)} />
+                {/* doubles sidelines (run left-right, near and far) */}
+                <path {...line(-HALF_LEN, -HALF_DOUBLES, HALF_LEN, -HALF_DOUBLES, outerT)} />
+                <path {...line(-HALF_LEN, HALF_DOUBLES, HALF_LEN, HALF_DOUBLES, outerT)} />
+                {/* baselines (run away from the viewer) */}
+                <path {...line(-HALF_LEN, -HALF_DOUBLES, -HALF_LEN, HALF_DOUBLES, outerT)} />
+                <path {...line(HALF_LEN, -HALF_DOUBLES, HALF_LEN, HALF_DOUBLES, outerT)} />
+                {/* singles sidelines */}
+                <path {...line(-HALF_LEN, -HALF_SINGLES, HALF_LEN, -HALF_SINGLES, innerT)} />
+                <path {...line(-HALF_LEN, HALF_SINGLES, HALF_LEN, HALF_SINGLES, innerT)} />
+                {/* service lines */}
+                <path {...line(-SERVICE, -HALF_SINGLES, -SERVICE, HALF_SINGLES, innerT)} />
+                <path {...line(SERVICE, -HALF_SINGLES, SERVICE, HALF_SINGLES, innerT)} />
                 {/* centre service line */}
-                <path d="M210 265 L430 265" {...draw(220, innerT)} />
-                {/* centre marks on each baseline */}
-                <path d="M190 265 L210 265" {...draw(20, innerT)} />
-                <path d="M430 265 L450 265" {...draw(20, innerT)} />
+                <path {...line(-SERVICE, 0, SERVICE, 0, innerT)} />
+                {/* centre marks on both baselines */}
+                <path {...line(HALF_LEN, 0, HALF_LEN - CENTER_MARK, 0, innerT)} />
+                <path {...line(-HALF_LEN, 0, -HALF_LEN + CENTER_MARK, 0, innerT)} />
               </g>
 
-              {/* net — runs straight away from the viewer through court centre */}
+              {/* net — spans the width of the court through X = 0 */}
               <g style={{ opacity: netT }}>
-                {/* mesh: slight camera offset makes the net read as a thin band */}
                 <polygon
-                  points="320,380 338,150 338,122 320,312"
+                  points={`${poly([[0, -NET_POST]])} ${poly([[0, NET_POST]])} ${[
+                    project(0, NET_POST, 1.07),
+                    project(0, 0, 0.914),
+                    project(0, -NET_POST, 1.07),
+                  ]
+                    .map((q) => `${q.x.toFixed(1)},${q.y.toFixed(1)}`)
+                    .join(" ")}`}
                   fill="hsl(var(--foreground))"
-                  fillOpacity="0.07"
+                  fillOpacity="0.09"
                 />
-                {/* tape along the top of the net */}
-                <path
-                  d="M320 312 L338 122"
-                  stroke="hsl(var(--primary))"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  fill="none"
-                  {...draw(200, netT)}
-                />
-                {/* posts + base line of the net */}
-                <path
-                  d="M320 380 L320 312 M338 150 L338 122 M320 380 L338 150"
+                {/* mesh bands */}
+                <g
                   stroke="hsl(var(--foreground))"
-                  strokeOpacity="0.3"
-                  strokeWidth="2"
-                  strokeLinecap="round"
+                  strokeOpacity="0.16"
+                  strokeWidth="1"
                   fill="none"
-                  {...draw(330, netT)}
+                >
+                  {[0.25, 0.5, 0.75].map((h) => {
+                    const a = project(0, -NET_POST, 1.07 * h);
+                    const m = project(0, 0, 0.914 * h);
+                    const b = project(0, NET_POST, 1.07 * h);
+                    return (
+                      <path
+                        key={h}
+                        d={`M${a.x.toFixed(1)} ${a.y.toFixed(1)} Q${m.x.toFixed(1)} ${(
+                          m.y + 2
+                        ).toFixed(1)} ${b.x.toFixed(1)} ${b.y.toFixed(1)}`}
+                      />
+                    );
+                  })}
+                </g>
+                {/* tape along the top of the net, sagging to the centre strap */}
+                {(() => {
+                  const a = project(0, -NET_POST, 1.07);
+                  const m = project(0, 0, 0.914);
+                  const b = project(0, NET_POST, 1.07);
+                  const l = len(a, m) + len(m, b);
+                  return (
+                    <path
+                      d={`M${a.x.toFixed(1)} ${a.y.toFixed(1)} Q${m.x.toFixed(1)} ${(
+                        m.y + 3
+                      ).toFixed(1)} ${b.x.toFixed(1)} ${b.y.toFixed(1)}`}
+                      stroke="hsl(var(--primary))"
+                      strokeWidth="2.4"
+                      fill="none"
+                      strokeDasharray={l}
+                      strokeDashoffset={l * (1 - netT)}
+                    />
+                  );
+                })()}
+                {/* posts */}
+                <g
+                  stroke="hsl(var(--foreground))"
+                  strokeOpacity="0.35"
+                  strokeWidth="2"
+                  fill="none"
+                >
+                  <path {...line(0, -NET_POST, 0, -NET_POST, netT, 0, 1.07)} />
+                  <path {...line(0, NET_POST, 0, NET_POST, netT, 0, 1.07)} />
+                </g>
+                <line
+                  x1={project(0, -NET_POST).x}
+                  y1={project(0, -NET_POST).y}
+                  x2={project(0, -NET_POST, 1.07).x}
+                  y2={project(0, -NET_POST, 1.07).y}
+                  stroke="hsl(var(--foreground))"
+                  strokeOpacity="0.35"
+                  strokeWidth="2.4"
+                />
+                <line
+                  x1={project(0, NET_POST).x}
+                  y1={project(0, NET_POST).y}
+                  x2={project(0, NET_POST, 1.07).x}
+                  y2={project(0, NET_POST, 1.07).y}
+                  stroke="hsl(var(--foreground))"
+                  strokeOpacity="0.35"
+                  strokeWidth="2.4"
+                />
+                {/* centre strap */}
+                <line
+                  x1={project(0, 0).x}
+                  y1={project(0, 0).y}
+                  x2={project(0, 0, 0.914).x}
+                  y2={project(0, 0, 0.914).y}
+                  stroke="hsl(var(--foreground))"
+                  strokeOpacity="0.25"
+                  strokeWidth="1.5"
                 />
               </g>
 
               {/* ball */}
-              <g style={{ opacity: ballT > 0 ? 1 : 0 }}>
+              <g style={{ opacity: outerT }}>
                 <ellipse
-                  cx={ballX}
-                  cy={ballY + 14}
-                  rx={10 * ballScale}
-                  ry={3 * ballScale}
+                  cx={shadow.x}
+                  cy={shadow.y}
+                  rx={ballR * 1.3}
+                  ry={ballR * 0.4}
                   fill="hsl(var(--foreground))"
-                  opacity="0.12"
+                  opacity={0.16 - (ballY - 0.25) * 0.03}
                 />
-                <circle
-                  cx={ballX}
-                  cy={ballY}
-                  r={9 * ballScale}
-                  fill="hsl(70 90% 55%)"
-                  stroke="hsl(var(--foreground))"
-                  strokeOpacity="0.18"
+                <circle cx={ball.x} cy={ball.y} r={ballR} fill="url(#ballShine)" />
+                <path
+                  d={`M${(ball.x - ballR).toFixed(1)} ${ball.y.toFixed(1)} q${(
+                    ballR * 0.9
+                  ).toFixed(1)} ${(ballR * 0.85).toFixed(1)} ${(ballR * 2).toFixed(1)} 0`}
+                  fill="none"
+                  stroke="hsl(0 0% 100%)"
+                  strokeOpacity="0.75"
+                  strokeWidth="1"
                 />
               </g>
             </svg>
