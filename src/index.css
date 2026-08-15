@@ -25,9 +25,9 @@
     --text-secondary: 140 6% 32%;
     --text-muted: 140 5% 45%;
 
-    /* Brand — tennis-ball yellow: neon for rings/glows, slightly deeper for fills */
-    --aether-yellow: 54 100% 46%;
-    --aether-yellow-neon: 54 100% 54%;
+    /* Brand — iMessage-style green: bright for rings/glows, slightly deeper for fills */
+    --aether-green: 135 58% 46%;
+    --aether-green-bright: 135 70% 52%;
 
     /* shadcn mappings */
     --card: var(--surface-2);
@@ -36,8 +36,8 @@
     --popover: var(--surface-elevated);
     --popover-foreground: var(--text-primary);
 
-    --primary: var(--aether-yellow);
-    --primary-foreground: 140 15% 8%;
+    --primary: var(--aether-green);
+    --primary-foreground: 0 0% 100%;
 
     --secondary: 90 18% 94%;
     --secondary-foreground: var(--text-primary);
@@ -45,7 +45,7 @@
     --muted: 90 16% 95%;
     --muted-foreground: var(--text-muted);
 
-    --accent: 54 100% 92%;
+    --accent: 135 60% 92%;
     --accent-foreground: var(--text-primary);
 
     --destructive: 4 72% 48%;
@@ -53,7 +53,7 @@
 
     --border: var(--border-default);
     --input: var(--border-default);
-    --ring: var(--aether-yellow-neon);
+    --ring: var(--aether-green-bright);
 
     --radius: 0.625rem;
 
@@ -64,12 +64,12 @@
 
     --sidebar-background: var(--surface-1);
     --sidebar-foreground: var(--text-primary);
-    --sidebar-primary: var(--aether-yellow);
-    --sidebar-primary-foreground: 140 15% 8%;
+    --sidebar-primary: var(--aether-green);
+    --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: var(--surface-2);
     --sidebar-accent-foreground: var(--text-primary);
     --sidebar-border: var(--border-default);
-    --sidebar-ring: var(--aether-yellow-neon);
+    --sidebar-ring: var(--aether-green-bright);
   }
 }
 
