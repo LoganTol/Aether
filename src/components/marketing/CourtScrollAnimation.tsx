@@ -77,9 +77,6 @@ const CourtScrollAnimation = () => {
   }, [reduced]);
 
   const p = progress;
-  // line reveal runs on the first part of the travel
-  const seg = (start: number, end: number) =>
-    Math.min(1, Math.max(0, (p - start) / (end - start)));
   // court + net are always fully drawn; only the ball reacts to scroll
   const netT = 1;
   const outerT = 1;
