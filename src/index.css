@@ -26,8 +26,8 @@
     --text-muted: 140 5% 45%;
 
     /* Brand — neon lime for fills, deepened variant for legible text */
-    --aether-lime: 73 90% 36%;
-    --aether-lime-neon: 73 100% 50%;
+    --aether-lime: 62 88% 33%;
+    --aether-lime-neon: 64 100% 50%;
 
     /* shadcn mappings */
     --card: var(--surface-2);
@@ -45,7 +45,7 @@
     --muted: 90 16% 95%;
     --muted-foreground: var(--text-muted);
 
-    --accent: 73 80% 92%;
+    --accent: 62 85% 90%;
     --accent-foreground: var(--text-primary);
 
     --destructive: 4 72% 48%;
