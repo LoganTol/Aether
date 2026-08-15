@@ -9,6 +9,7 @@ import {
   StandingsPreview,
   MatchCardPreview,
 } from "@/components/marketing/ProductPreview";
+import CourtScrollAnimation from "@/components/marketing/CourtScrollAnimation";
 
 const pillars = [
   {
@@ -142,6 +143,8 @@ const Index = () => {
         </section>
 
         {/* Scoring / standings — reversed split */}
+        <CourtScrollAnimation />
+
         <section className="border-b border-border py-16 sm:py-24">
           <PageContainer width="wide">
             <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,24rem)_minmax(0,1fr)] lg:gap-16">
