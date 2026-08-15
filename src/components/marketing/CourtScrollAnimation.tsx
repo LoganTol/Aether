@@ -141,7 +141,7 @@ const CourtScrollAnimation = () => {
 
           <div className="relative">
             <svg
-              viewBox="0 0 640 340"
+              viewBox="0 145 640 178"
               className="w-full"
               role="img"
               aria-label="Illustration of a tennis court seen from the side of the net"
@@ -206,8 +206,29 @@ const CourtScrollAnimation = () => {
                     .map((q) => `${q.x.toFixed(1)},${q.y.toFixed(1)}`)
                     .join(" ")}`}
                   fill="hsl(var(--foreground))"
-                  fillOpacity="0.06"
+                  fillOpacity="0.09"
                 />
+                {/* mesh bands */}
+                <g
+                  stroke="hsl(var(--foreground))"
+                  strokeOpacity="0.16"
+                  strokeWidth="1"
+                  fill="none"
+                >
+                  {[0.25, 0.5, 0.75].map((h) => {
+                    const a = project(0, -NET_POST, 1.07 * h);
+                    const m = project(0, 0, 0.914 * h);
+                    const b = project(0, NET_POST, 1.07 * h);
+                    return (
+                      <path
+                        key={h}
+                        d={`M${a.x.toFixed(1)} ${a.y.toFixed(1)} Q${m.x.toFixed(1)} ${(
+                          m.y + 2
+                        ).toFixed(1)} ${b.x.toFixed(1)} ${b.y.toFixed(1)}`}
+                      />
+                    );
+                  })}
+                </g>
                 {/* tape along the top of the net, sagging to the centre strap */}
                 {(() => {
                   const a = project(0, -NET_POST, 1.07);
