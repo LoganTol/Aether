@@ -80,9 +80,10 @@ const CourtScrollAnimation = () => {
   // line reveal runs on the first part of the travel
   const seg = (start: number, end: number) =>
     Math.min(1, Math.max(0, (p - start) / (end - start)));
-  const netT = seg(0.05, 0.28);
-  const outerT = seg(0.08, 0.4);
-  const innerT = seg(0.22, 0.6);
+  // court + net are always fully drawn; only the ball reacts to scroll
+  const netT = 1;
+  const outerT = 1;
+  const innerT = 1;
 
   // straight world line -> svg path + dash values for the draw-on effect
   const line = (
@@ -115,11 +116,8 @@ const CourtScrollAnimation = () => {
   // --- ball: position along the court maps directly to scroll progress ------
   const u = reduced ? 0.5 : p;
   const ballX = -HALF_LEN * 0.92 + 2 * HALF_LEN * 0.92 * u;
-  // two hops across the court, second one lower
-  const hop = u * 2;
-  const hopIndex = Math.min(1, Math.floor(hop));
-  const hopT = hop - hopIndex;
-  const ballY = 0.25 + Math.sin(Math.PI * hopT) * (3.4 - hopIndex * 1.1);
+  // one smooth arc over the net, apex at mid-court
+  const ballY = 0.3 + Math.sin(Math.PI * u) * 3.6;
   const ball = project(ballX, 0, ballY);
   const shadow = project(ballX, 0, 0);
   const ballR = (F * 0.28) / CAM_DIST;
@@ -206,13 +204,13 @@ const CourtScrollAnimation = () => {
                     .map((q) => `${q.x.toFixed(1)},${q.y.toFixed(1)}`)
                     .join(" ")}`}
                   fill="hsl(var(--foreground))"
-                  fillOpacity="0.09"
+                  fillOpacity="0.14"
                 />
                 {/* mesh bands */}
                 <g
                   stroke="hsl(var(--foreground))"
-                  strokeOpacity="0.16"
-                  strokeWidth="1"
+                  strokeOpacity="0.3"
+                  strokeWidth="1.6"
                   fill="none"
                 >
                   {[0.25, 0.5, 0.75].map((h) => {
@@ -241,7 +239,7 @@ const CourtScrollAnimation = () => {
                         m.y + 3
                       ).toFixed(1)} ${b.x.toFixed(1)} ${b.y.toFixed(1)}`}
                       stroke="hsl(var(--primary))"
-                      strokeWidth="2.4"
+                      strokeWidth="4"
                       fill="none"
                       strokeDasharray={l}
                       strokeDashoffset={l * (1 - netT)}
@@ -251,8 +249,8 @@ const CourtScrollAnimation = () => {
                 {/* posts */}
                 <g
                   stroke="hsl(var(--foreground))"
-                  strokeOpacity="0.35"
-                  strokeWidth="2"
+                  strokeOpacity="0.5"
+                  strokeWidth="3"
                   fill="none"
                 >
                   <path {...line(0, -NET_POST, 0, -NET_POST, netT, 0, 1.07)} />
@@ -264,8 +262,8 @@ const CourtScrollAnimation = () => {
                   x2={project(0, -NET_POST, 1.07).x}
                   y2={project(0, -NET_POST, 1.07).y}
                   stroke="hsl(var(--foreground))"
-                  strokeOpacity="0.35"
-                  strokeWidth="2.4"
+                  strokeOpacity="0.5"
+                  strokeWidth="3.5"
                 />
                 <line
                   x1={project(0, NET_POST).x}
@@ -273,8 +271,8 @@ const CourtScrollAnimation = () => {
                   x2={project(0, NET_POST, 1.07).x}
                   y2={project(0, NET_POST, 1.07).y}
                   stroke="hsl(var(--foreground))"
-                  strokeOpacity="0.35"
-                  strokeWidth="2.4"
+                  strokeOpacity="0.5"
+                  strokeWidth="3.5"
                 />
                 {/* centre strap */}
                 <line
@@ -283,8 +281,8 @@ const CourtScrollAnimation = () => {
                   x2={project(0, 0, 0.914).x}
                   y2={project(0, 0, 0.914).y}
                   stroke="hsl(var(--foreground))"
-                  strokeOpacity="0.25"
-                  strokeWidth="1.5"
+                  strokeOpacity="0.4"
+                  strokeWidth="2"
                 />
               </g>
 
