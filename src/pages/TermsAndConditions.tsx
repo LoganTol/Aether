@@ -8,7 +8,7 @@ const TermsAndConditions = () => {
     <header className="sticky top-0 w-full py-4 md:py-8 z-50 bg-background/80 backdrop-blur-md">
       <div className="container flex justify-between items-center">
         <div className="flex items-center gap-3">
-          <button onClick={() => navigate(-1)} className="p-2 rounded-xl border border-border bg-black/30 text-muted-foreground hover:text-primary hover:border-primary/50 transition-colors" aria-label="Go back">
+          <button onClick={() => navigate(-1)} className="p-2 rounded-xl border border-border bg-muted text-muted-foreground hover:text-primary hover:border-primary/50 transition-colors" aria-label="Go back">
             <ArrowLeft size={18} />
           </button>
           <Link to="/" className="font-heading text-2xl md:text-3xl font-bold tracking-wide">

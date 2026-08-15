@@ -6,27 +6,28 @@
 
 @layer base {
   :root {
-    /* Foundation */
-    --background: 140 6% 5%;
-    --foreground: 90 6% 96%;
+    /* Foundation — light */
+    --background: 90 20% 98%;
+    --foreground: 140 12% 10%;
 
     /* Surface hierarchy */
-    --surface-1: 140 5% 7%;
-    --surface-2: 140 5% 10%;
-    --surface-elevated: 140 5% 13%;
+    --surface-1: 90 18% 96%;
+    --surface-2: 0 0% 100%;
+    --surface-elevated: 0 0% 100%;
 
     /* Borders */
-    --border-subtle: 0 0% 100% / 0.06;
-    --border-default: 0 0% 100% / 0.09;
-    --border-strong: 0 0% 100% / 0.16;
+    --border-subtle: 140 10% 10% / 0.07;
+    --border-default: 140 10% 10% / 0.12;
+    --border-strong: 140 10% 10% / 0.24;
 
     /* Text */
-    --text-primary: 90 6% 96%;
-    --text-secondary: 90 4% 72%;
-    --text-muted: 90 4% 52%;
+    --text-primary: 140 12% 10%;
+    --text-secondary: 140 6% 32%;
+    --text-muted: 140 5% 45%;
 
-    /* Brand */
-    --aether-lime: 73 100% 50%;
+    /* Brand — neon lime for fills, deepened variant for legible text */
+    --aether-lime: 73 90% 36%;
+    --aether-lime-neon: 73 100% 50%;
 
     /* shadcn mappings */
     --card: var(--surface-2);
@@ -36,18 +37,18 @@
     --popover-foreground: var(--text-primary);
 
     --primary: var(--aether-lime);
-    --primary-foreground: 140 10% 6%;
+    --primary-foreground: 90 40% 99%;
 
-    --secondary: 140 5% 13%;
+    --secondary: 90 18% 94%;
     --secondary-foreground: var(--text-primary);
 
-    --muted: 140 5% 10%;
+    --muted: 90 16% 95%;
     --muted-foreground: var(--text-muted);
 
-    --accent: 140 5% 14%;
+    --accent: 73 80% 92%;
     --accent-foreground: var(--text-primary);
 
-    --destructive: 4 74% 56%;
+    --destructive: 4 72% 48%;
     --destructive-foreground: 0 0% 100%;
 
     --border: var(--border-default);
@@ -56,7 +57,7 @@
 
     --radius: 0.625rem;
 
-    --shadow-elevated: 0 16px 40px -20px rgba(0, 0, 0, 0.8);
+    --shadow-elevated: 0 14px 34px -18px hsl(140 20% 20% / 0.14);
 
     --font-main: 'Inter', system-ui, sans-serif;
     --font-heading: 'Outfit', system-ui, sans-serif;
@@ -64,7 +65,7 @@
     --sidebar-background: var(--surface-1);
     --sidebar-foreground: var(--text-primary);
     --sidebar-primary: var(--aether-lime);
-    --sidebar-primary-foreground: 140 10% 6%;
+    --sidebar-primary-foreground: 90 40% 99%;
     --sidebar-accent: var(--surface-2);
     --sidebar-accent-foreground: var(--text-primary);
     --sidebar-border: var(--border-default);
@@ -83,7 +84,7 @@
     line-height: 1.55;
     overflow-x: hidden;
     scrollbar-width: thin;
-    scrollbar-color: hsl(0 0% 20%) transparent;
+    scrollbar-color: hsl(140 8% 72%) transparent;
     font-feature-settings: "cv02", "cv03", "cv04";
   }
 
@@ -95,12 +96,12 @@
     background: hsl(var(--background));
   }
   ::-webkit-scrollbar-thumb {
-    background-color: hsl(0 0% 16%);
+    background-color: hsl(140 8% 76%);
     border-radius: 9999px;
     border: 2px solid hsl(var(--background));
   }
   ::-webkit-scrollbar-thumb:hover {
-    background-color: hsl(0 0% 26%);
+    background-color: hsl(140 8% 62%);
   }
 
   h1, h2, h3, h4 {
@@ -201,7 +202,7 @@
 
   .scrollbar-dark {
     scrollbar-width: thin;
-    scrollbar-color: hsl(0 0% 22%) transparent;
+    scrollbar-color: hsl(140 8% 74%) transparent;
   }
   .scrollbar-dark::-webkit-scrollbar {
     height: 6px;
@@ -211,11 +212,11 @@
     background: transparent;
   }
   .scrollbar-dark::-webkit-scrollbar-thumb {
-    background-color: hsl(0 0% 20%);
+    background-color: hsl(140 8% 76%);
     border-radius: 9999px;
   }
   .scrollbar-dark::-webkit-scrollbar-thumb:hover {
-    background-color: hsl(0 0% 30%);
+    background-color: hsl(140 8% 60%);
   }
 
   .hide-scrollbar {
