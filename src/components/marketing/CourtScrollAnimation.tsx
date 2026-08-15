@@ -161,28 +161,30 @@ const CourtScrollAnimation = () => {
 
               {/* net — runs straight away from the viewer through court centre */}
               <g style={{ opacity: netT }}>
+                {/* mesh: slight camera offset makes the net read as a thin band */}
+                <polygon
+                  points="320,380 338,150 338,122 320,312"
+                  fill="hsl(var(--foreground))"
+                  fillOpacity="0.07"
+                />
+                {/* tape along the top of the net */}
                 <path
-                  d="M320 150 L320 380"
+                  d="M320 312 L338 122"
                   stroke="hsl(var(--primary))"
                   strokeWidth="3"
                   strokeLinecap="round"
                   fill="none"
-                  {...draw(230, netT)}
+                  {...draw(200, netT)}
                 />
+                {/* posts + base line of the net */}
                 <path
-                  d="M320 150 L320 108 M320 380 L320 288 M320 108 L320 108"
+                  d="M320 380 L320 312 M338 150 L338 122 M320 380 L338 150"
                   stroke="hsl(var(--foreground))"
                   strokeOpacity="0.3"
                   strokeWidth="2"
+                  strokeLinecap="round"
                   fill="none"
-                  {...draw(140, netT)}
-                />
-                <path
-                  d="M320 380 L320 288 L320 150 L320 108 Z"
-                  stroke="hsl(var(--foreground))"
-                  strokeOpacity="0"
-                  fill="hsl(var(--foreground))"
-                  fillOpacity="0.08"
+                  {...draw(330, netT)}
                 />
               </g>
 
