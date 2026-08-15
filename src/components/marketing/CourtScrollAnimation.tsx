@@ -1,14 +1,20 @@
 import { useEffect, useRef, useState } from "react";
 
 /**
- * A tennis court in perspective whose lines draw themselves as the section
- * scrolls through the viewport, with a ball rallying between baselines.
+ * A tennis court seen from the umpire's point of view — standing at the side
+ * of the net, mid-court. The lines draw themselves as the section scrolls,
+ * and the ball crosses to the far side when you scroll down and comes back
+ * when you scroll up.
  * Purely presentational.
  */
 const CourtScrollAnimation = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const [progress, setProgress] = useState(0);
   const [reduced, setReduced] = useState(false);
+  const [ballPos, setBallPos] = useState(0.5);
+  const ballTarget = useRef(1);
+  const lastScrollY = useRef(0);
+  const rafBall = useRef(0);
 
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -35,9 +41,15 @@ const CourtScrollAnimation = () => {
       setProgress(Math.min(1, Math.max(0, raw)));
     };
     const onScroll = () => {
+      const y = window.scrollY;
+      if (Math.abs(y - lastScrollY.current) > 2) {
+        ballTarget.current = y > lastScrollY.current ? 1 : 0;
+        lastScrollY.current = y;
+      }
       if (!frame) frame = requestAnimationFrame(update);
     };
     update();
+    lastScrollY.current = window.scrollY;
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onScroll);
     return () => {
@@ -45,6 +57,20 @@ const CourtScrollAnimation = () => {
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
     };
+  }, [reduced]);
+
+  // smooth the ball toward whichever side the scroll direction points at
+  useEffect(() => {
+    if (reduced) return;
+    const tick = () => {
+      setBallPos((prev) => {
+        const next = prev + (ballTarget.current - prev) * 0.06;
+        return Math.abs(ballTarget.current - next) < 0.001 ? ballTarget.current : next;
+      });
+      rafBall.current = requestAnimationFrame(tick);
+    };
+    rafBall.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafBall.current);
   }, [reduced]);
 
   const ease = (t: number) => 1 - Math.pow(1 - t, 3);
@@ -64,15 +90,13 @@ const CourtScrollAnimation = () => {
   const innerT = seg(0.35, 0.75);
   const ballT = seg(0.55, 1);
 
-  // rally arc: ball travels far baseline -> near baseline with a bounce
-  const bx = 320;
-  const byFar = 96;
-  const byNear = 372;
-  const cycle = (ballT * 2) % 2;
-  const dir = cycle > 1 ? 2 - cycle : cycle;
-  const ballY = byFar + (byNear - byFar) * dir;
-  const ballX = bx + Math.sin(dir * Math.PI) * 92 * (cycle > 1 ? -1 : 1);
-  const ballScale = 0.7 + 0.5 * dir;
+  // side-on rally: ball crosses the net left <-> right along the mid-depth line
+  const t = reduced ? 0.5 : ballPos;
+  const groundY = 268;
+  const ballX = 200 + (440 - 200) * t;
+  const arc = Math.sin(t * Math.PI);
+  const ballY = groundY - 12 - arc * 96;
+  const ballScale = 0.85 + arc * 0.35;
 
   return (
     <section ref={sectionRef} className="border-b border-border py-16 sm:py-24">
@@ -103,9 +127,9 @@ const CourtScrollAnimation = () => {
                 </linearGradient>
               </defs>
 
-              {/* court surface */}
+              {/* court surface — viewed from the side of the net */}
               <polygon
-                points="196,90 444,90 604,380 36,380"
+                points="190,150 450,150 600,380 40,380"
                 fill="url(#courtFill)"
                 style={{ opacity: outerT }}
               />
@@ -117,49 +141,50 @@ const CourtScrollAnimation = () => {
                 strokeWidth="2"
                 strokeLinecap="round"
               >
-                {/* outer boundary */}
+                {/* outer boundary: baselines left & right, sidelines near & far */}
                 <path
-                  d="M196 90 L444 90 L604 380 L36 380 Z"
-                  {...draw(1500, outerT)}
+                  d="M190 150 L450 150 L600 380 L40 380 Z"
+                  {...draw(1400, outerT)}
                 />
-                {/* singles sidelines */}
-                <path d="M214 90 L76 380" {...draw(320, innerT)} />
-                <path d="M426 90 L564 380" {...draw(320, innerT)} />
-                {/* far service line */}
-                <path d="M181 160 L459 160" {...draw(280, innerT)} />
-                {/* near service line */}
-                <path d="M109 310 L531 310" {...draw(424, innerT)} />
-                {/* center service line */}
-                <path d="M320 160 L320 310" {...draw(150, innerT)} />
-                {/* center marks */}
-                <path d="M320 90 L320 98" {...draw(10, innerT)} />
-                <path d="M320 370 L320 380" {...draw(12, innerT)} />
+                {/* singles sidelines (running away from the viewer) */}
+                <path d="M214 158 L92 372" {...draw(260, innerT)} />
+                <path d="M426 158 L548 372" {...draw(260, innerT)} />
+                {/* service lines, parallel to the net */}
+                <path d="M250 150 L170 380" {...draw(250, innerT)} />
+                <path d="M390 150 L470 380" {...draw(250, innerT)} />
+                {/* centre service line */}
+                <path d="M210 265 L430 265" {...draw(220, innerT)} />
+                {/* centre marks on each baseline */}
+                <path d="M190 265 L210 265" {...draw(20, innerT)} />
+                <path d="M430 265 L450 265" {...draw(20, innerT)} />
               </g>
 
-              {/* net */}
+              {/* net — runs straight away from the viewer through court centre */}
               <g style={{ opacity: netT }}>
+                {/* mesh: slight camera offset makes the net read as a thin band */}
+                <polygon
+                  points="320,380 338,150 338,122 320,312"
+                  fill="hsl(var(--foreground))"
+                  fillOpacity="0.07"
+                />
+                {/* tape along the top of the net */}
                 <path
-                  d="M116 235 L524 235"
+                  d="M320 312 L338 122"
                   stroke="hsl(var(--primary))"
                   strokeWidth="3"
                   strokeLinecap="round"
                   fill="none"
-                  {...draw(408, netT)}
+                  {...draw(200, netT)}
                 />
+                {/* posts + base line of the net */}
                 <path
-                  d="M116 235 L116 296 M524 235 L524 296 M116 296 L524 296"
+                  d="M320 380 L320 312 M338 150 L338 122 M320 380 L338 150"
                   stroke="hsl(var(--foreground))"
                   strokeOpacity="0.3"
                   strokeWidth="2"
+                  strokeLinecap="round"
                   fill="none"
-                  {...draw(530, netT)}
-                />
-                <path
-                  d="M150 236 L150 295 M184 236 L184 295 M218 236 L218 295 M252 236 L252 295 M286 236 L286 295 M320 236 L320 295 M354 236 L354 295 M388 236 L388 295 M422 236 L422 295 M456 236 L456 295 M490 236 L490 295 M524 236 L524 295"
-                  stroke="hsl(var(--foreground))"
-                  strokeOpacity="0.14"
-                  strokeWidth="1.5"
-                  fill="none"
+                  {...draw(330, netT)}
                 />
               </g>
 
