@@ -123,38 +123,39 @@ const CourtScrollAnimation = () => {
                   {...draw(1500, outerT)}
                 />
                 {/* singles sidelines */}
-                <path d="M224 90 L516 380" {...draw(320, innerT)} />
-                <path d="M416 90 L124 380" {...draw(320, innerT)} />
-                {/* service line */}
-                <path d="M170 235 L470 235" {...draw(300, innerT)} />
-                {/* center service line */}
-                <path d="M320 235 L320 90" {...draw(150, innerT)} />
+                <path d="M214 90 L76 380" {...draw(320, innerT)} />
+                <path d="M426 90 L564 380" {...draw(320, innerT)} />
                 {/* far service line */}
-                <path d="M243 160 L397 160" {...draw(160, innerT)} />
+                <path d="M181 160 L459 160" {...draw(280, innerT)} />
+                {/* near service line */}
+                <path d="M109 310 L531 310" {...draw(424, innerT)} />
+                {/* center service line */}
+                <path d="M320 160 L320 310" {...draw(150, innerT)} />
                 {/* center marks */}
-                <path d="M320 372 L320 380" {...draw(10, innerT)} />
+                <path d="M320 90 L320 98" {...draw(10, innerT)} />
+                <path d="M320 370 L320 380" {...draw(12, innerT)} />
               </g>
 
               {/* net */}
               <g style={{ opacity: netT }}>
                 <path
-                  d="M150 235 L490 235"
+                  d="M116 235 L524 235"
                   stroke="hsl(var(--primary))"
                   strokeWidth="3"
                   strokeLinecap="round"
                   fill="none"
-                  {...draw(340, netT)}
+                  {...draw(408, netT)}
                 />
                 <path
-                  d="M150 235 L150 292 M490 235 L490 292 M150 292 L490 292"
+                  d="M116 235 L116 296 M524 235 L524 296 M116 296 L524 296"
                   stroke="hsl(var(--foreground))"
                   strokeOpacity="0.3"
                   strokeWidth="2"
                   fill="none"
-                  {...draw(460, netT)}
+                  {...draw(530, netT)}
                 />
                 <path
-                  d="M180 238 L180 288 M215 240 L215 288 M250 241 L250 289 M285 242 L285 290 M320 243 L320 291 M355 242 L355 290 M390 241 L390 289 M425 240 L425 288 M460 238 L460 288"
+                  d="M150 236 L150 295 M184 236 L184 295 M218 236 L218 295 M252 236 L252 295 M286 236 L286 295 M320 236 L320 295 M354 236 L354 295 M388 236 L388 295 M422 236 L422 295 M456 236 L456 295 M490 236 L490 295 M524 236 L524 295"
                   stroke="hsl(var(--foreground))"
                   strokeOpacity="0.14"
                   strokeWidth="1.5"
