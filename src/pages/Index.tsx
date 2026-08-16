@@ -75,7 +75,8 @@ const Index = () => {
               <div className="animate-fade-up">
                 <p className="text-eyebrow">Social tennis seasons</p>
                 <h1 className="text-display mt-5">
-                  Your Season. Your Players. Your Way.
+                  Your Season. Your Players.{" "}
+                  <span className="text-primary">Your Way.</span>
                 </h1>
                 <p className="text-body mt-6 max-w-xl text-base">
                   Aether Tennis turns a group of players into a real round-robin season:
