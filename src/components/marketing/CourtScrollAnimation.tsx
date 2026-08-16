@@ -167,7 +167,9 @@ const CourtScrollAnimation = () => {
   const yFar = project(0, HALF_LEN * 1.12, 0).y;
   const vbTop = yFar - 26;
   const vbH = yNear - yFar + 46;
-  const viewBox = `0 ${f1(vbTop)} 640 ${f1(vbH)}`;
+  const vbW = isMobile ? 392 : 640; // tighter crop on small screens
+  const vbX = 320 - vbW / 2;
+  const viewBox = `${f1(vbX)} ${f1(vbTop)} ${f1(vbW)} ${f1(vbH)}`;
 
   // ------------------------------------------------------------- the ball --
   const u = reduced ? 0.5 : progress;
@@ -488,9 +490,9 @@ const CourtScrollAnimation = () => {
 
               {/* atmospheric falloff */}
               <rect
-                x="0"
+                x={vbX}
                 y={vbTop}
-                width="640"
+                width={vbW}
                 height={vbH}
                 fill="url(#edgeFade)"
                 pointerEvents="none"
