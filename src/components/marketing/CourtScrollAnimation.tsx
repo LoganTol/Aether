@@ -177,7 +177,7 @@ const CourtScrollAnimation = () => {
   const ball = project(0, ballZ, ballY);
   const ground = project(0, ballZ, 0);
   const depth = ballZ + cam.dist;
-  const ballR = (cam.f * (isMobile ? 0.16 : 0.125)) / depth;
+  const ballR = (cam.f * (isMobile ? 0.3 : 0.23)) / depth;
 
   // rotation follows distance travelled; reverses with scroll direction
   const spin = (u * 2 * travelZ * 360) / (2 * Math.PI * 0.0335) * 0.012;
@@ -346,8 +346,8 @@ const CourtScrollAnimation = () => {
                   <stop offset="0%" stopColor="hsl(160 22% 7%)" />
                   <stop offset="100%" stopColor="hsl(160 24% 5%)" />
                 </linearGradient>
-                <radialGradient id="pool" cx="50%" cy="46%" r="55%">
-                  <stop offset="0%" stopColor="hsl(90 40% 76%)" stopOpacity="0.16" />
+                <radialGradient id="pool" cx="50%" cy="38%" r="62%">
+                  <stop offset="0%" stopColor="hsl(90 40% 78%)" stopOpacity="0.2" />
                   <stop offset="60%" stopColor="hsl(120 30% 60%)" stopOpacity="0.05" />
                   <stop offset="100%" stopColor="hsl(160 30% 10%)" stopOpacity="0" />
                 </radialGradient>
