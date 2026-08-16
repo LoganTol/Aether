@@ -31,6 +31,7 @@ const NET_H_MID = 0.914;
 type Pt = { x: number; y: number };
 type Cam = {
   dist: number; // camera distance outside the near sideline
+  camX: number; // lateral seat position along the court (0 = on the net axis)
   height: number; // eye height
   f: number;
   cx: number;
@@ -40,31 +41,37 @@ type Cam = {
   vbW: number;
 };
 
-const DESKTOP_CAM: Cam = {
-  dist: 5.2,
-  height: 1.95,
+const seat = (c: Omit<Cam, "cx">): Cam => ({
+  ...c,
+  // keep the rally optically centred in the frame
+  cx: 480 + (c.f * c.camX) / (MID_Z + c.dist),
+});
+
+const DESKTOP_CAM: Cam = seat({
+  dist: 6.4,
+  camX: -4.2,
+  height: 2.5,
   f: 520,
-  cx: 480,
-  horizon: 152,
-  travel: 9.4,
-  ballScale: 0.13,
-  vbW: 960,
-};
-const MOBILE_CAM: Cam = {
-  dist: 6.6,
-  height: 2.9,
-  f: 520,
-  cx: 480,
   horizon: 150,
-  travel: 5.0,
-  ballScale: 0.22,
+  travel: 9.6,
+  ballScale: 0.15,
+  vbW: 960,
+});
+const MOBILE_CAM: Cam = seat({
+  dist: 8.2,
+  camX: -3.6,
+  height: 3.3,
+  f: 520,
+  horizon: 148,
+  travel: 5.6,
+  ballScale: 0.24,
   vbW: 540,
-};
+});
 
 const makeProject = (cam: Cam) => (X: number, Z: number, Y = 0): Pt => {
   const d = Z + cam.dist;
   return {
-    x: cam.cx + (cam.f * X) / d,
+    x: cam.cx + (cam.f * (X - cam.camX)) / d,
     y: cam.horizon + (cam.f * (cam.height - Y)) / d,
   };
 };
@@ -210,11 +217,11 @@ const CourtScrollAnimation = () => {
         points={poly([
           [0, NET_Z0],
           [0, NET_Z1],
-          [NET_H_POST * SUN.x, NET_Z1 + NET_H_POST * SUN.z],
-          [NET_H_MID * SUN.x, NET_Z0 + NET_H_MID * SUN.z],
+          [NET_H_POST * SUN.x * 0.6, NET_Z1 + NET_H_POST * SUN.z * 0.6],
+          [NET_H_POST * SUN.x * 0.6, NET_Z0 + NET_H_POST * SUN.z * 0.6],
         ])}
-        fill="hsl(198 30% 30%)"
-        opacity="0.22"
+        fill="hsl(198 32% 26%)"
+        opacity="0.14"
       />
       {/* mesh */}
       <polygon
@@ -411,16 +418,6 @@ const CourtScrollAnimation = () => {
           />
 
           {/* playing surface */}
-          <polygon
-            points={poly([
-              [-HALF_LEN - 6.4, -5.5],
-              [HALF_LEN + 6.4, -5.5],
-              [HALF_LEN + 6.4, WIDTH_DOUBLES + 5.5],
-              [-HALF_LEN - 6.4, WIDTH_DOUBLES + 5.5],
-            ])}
-            fill="hsl(196 26% 52%)"
-            opacity="0.5"
-          />
           <polygon
             points={poly([
               [-HALF_LEN, 0],
