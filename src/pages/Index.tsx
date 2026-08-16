@@ -53,20 +53,19 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-50 w-full border-b border-border bg-background/85 backdrop-blur-md">
         <PageContainer width="wide" className="flex h-14 items-center justify-between gap-4">
-          <AetherLogo to="/" className="text-lg sm:text-xl" />
+          <AetherLogo to="/" className="text-xl sm:text-2xl" />
           <div className="flex items-center gap-1 sm:gap-2">
             <Link
               to={target}
               className="rounded-lg px-3 py-1.5 text-sm text-[hsl(var(--text-muted))] transition-colors hover:text-foreground"
             >
-              {user ? "Dashboard" : "Sign in"}
+              {user ? "Dashboard" : "Log In"}
             </Link>
             <Link
               to={target}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3.5 py-1.5 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
+              className="inline-flex items-center rounded-lg bg-primary px-3.5 py-1.5 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
             >
-              {user ? "Open app" : "Start a season"}
-              <ArrowRight size={15} aria-hidden />
+              {user ? "Open app" : "Get Started"}
             </Link>
           </div>
         </PageContainer>
@@ -80,9 +79,7 @@ const Index = () => {
               <div className="animate-fade-up">
                 <p className="text-eyebrow">Social tennis seasons</p>
                 <h1 className="text-display mt-5">
-                  Run a season without
-                  <br className="hidden sm:block" /> becoming{" "}
-                  <span className="text-primary">the organizer</span>.
+                  Your Season. Your Players. Your Way.
                 </h1>
                 <p className="text-body mt-6 max-w-xl text-base">
                   Aether Tennis turns a group of players into a real round-robin season:
@@ -92,10 +89,9 @@ const Index = () => {
                 <div className="mt-8 flex flex-wrap items-center gap-3">
                   <Link
                     to={target}
-                    className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
+                    className="inline-flex items-center rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
                   >
-                    {user ? "Open dashboard" : "Create your season"}
-                    <ArrowRight size={16} aria-hidden />
+                    Get Started
                   </Link>
                   <a
                     href="#how"
@@ -104,11 +100,6 @@ const Index = () => {
                     See how it works
                   </a>
                 </div>
-                <dl className="mt-10 grid max-w-md grid-cols-3 gap-6 border-t border-border pt-6">
-                  <StatBlock label="Players minimum" value="2" />
-                  <StatBlock label="Setup" value="< 1 min" />
-                  <StatBlock label="Spreadsheets" value="0" emphasis />
-                </dl>
               </div>
 
               <div className="animate-fade-up-delay-1 space-y-4">
@@ -213,10 +204,9 @@ const Index = () => {
               </p>
               <Link
                 to={target}
-                className="mt-8 inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
+                className="mt-8 inline-flex items-center rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
               >
                 {user ? "Open dashboard" : "Get started free"}
-                <ArrowRight size={16} aria-hidden />
               </Link>
             </Surface>
           </PageContainer>
