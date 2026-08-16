@@ -52,7 +52,7 @@ const seat = (c: Omit<Cam, "cx">): Cam => ({
 
 const DESKTOP_CAM: Cam = seat({
   dist: 6.0,
-  camX: -2.4,
+  camX: 0,
   height: 2.05,
   f: 520,
   horizon: 150,
@@ -63,7 +63,7 @@ const DESKTOP_CAM: Cam = seat({
 });
 const MOBILE_CAM: Cam = seat({
   dist: 7.0,
-  camX: -1.8,
+  camX: 0,
   height: 2.7,
   f: 520,
   horizon: 148,
@@ -322,10 +322,11 @@ const CourtScrollAnimation = () => {
         >
           <defs>
             <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="hsl(199 48% 91%)" />
-              <stop offset="45%" stopColor="hsl(202 56% 84%)" />
-              <stop offset="80%" stopColor="hsl(196 46% 89%)" />
-              <stop offset="100%" stopColor="hsl(44 46% 90%)" />
+              <stop offset="0%" stopColor="hsl(218 58% 74%)" />
+              <stop offset="32%" stopColor="hsl(282 46% 79%)" />
+              <stop offset="58%" stopColor="hsl(14 82% 80%)" />
+              <stop offset="80%" stopColor="hsl(26 94% 76%)" />
+              <stop offset="100%" stopColor="hsl(40 98% 78%)" />
             </linearGradient>
             <linearGradient id="courtSurface" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="hsl(162 22% 46%)" />
@@ -337,23 +338,31 @@ const CourtScrollAnimation = () => {
               <stop offset="100%" stopColor="hsl(36 20% 70%)" />
             </linearGradient>
             <linearGradient id="trees" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="hsl(140 20% 62%)" />
-              <stop offset="100%" stopColor="hsl(146 22% 44%)" />
+              <stop offset="0%" stopColor="hsl(120 16% 55%)" />
+              <stop offset="100%" stopColor="hsl(140 20% 38%)" />
             </linearGradient>
             <linearGradient id="sunWash" x1="0" y1="0" x2="1" y2="0.4">
-              <stop offset="0%" stopColor="hsl(44 90% 78%)" stopOpacity="0.34" />
-              <stop offset={`${sunSweep}%`} stopColor="hsl(44 88% 82%)" stopOpacity="0.16" />
-              <stop offset="100%" stopColor="hsl(204 40% 60%)" stopOpacity="0.12" />
+              <stop offset="0%" stopColor="hsl(28 94% 70%)" stopOpacity="0.40" />
+              <stop offset={`${sunSweep}%`} stopColor="hsl(40 92% 78%)" stopOpacity="0.20" />
+              <stop offset="100%" stopColor="hsl(268 38% 58%)" stopOpacity="0.16" />
             </linearGradient>
             <linearGradient id="netMesh" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="hsl(200 10% 24%)" stopOpacity="0.42" />
               <stop offset="100%" stopColor="hsl(200 10% 20%)" stopOpacity="0.24" />
             </linearGradient>
-            <radialGradient id="ballBody" cx="32%" cy="28%" r="76%">
-              <stop offset="0%" stopColor="hsl(70 96% 80%)" />
-              <stop offset="52%" stopColor="hsl(74 82% 58%)" />
-              <stop offset="100%" stopColor="hsl(92 46% 34%)" />
+            <radialGradient id="ballBody" cx="34%" cy="30%" r="78%">
+              <stop offset="0%" stopColor="hsl(66 98% 82%)" />
+              <stop offset="42%" stopColor="hsl(70 88% 64%)" />
+              <stop offset="78%" stopColor="hsl(80 62% 44%)" />
+              <stop offset="100%" stopColor="hsl(96 44% 27%)" />
             </radialGradient>
+            <radialGradient id="ballWarm" cx="26%" cy="22%" r="60%">
+              <stop offset="0%" stopColor="hsl(38 100% 88%)" stopOpacity="0.55" />
+              <stop offset="100%" stopColor="hsl(38 100% 80%)" stopOpacity="0" />
+            </radialGradient>
+            <clipPath id="ballClip">
+              <circle r={ballR} />
+            </clipPath>
             <filter id="shadowSoft" x="-120%" y="-300%" width="340%" height="700%">
               <feGaussianBlur stdDeviation={Math.max(0.6, lift * 2.6)} />
             </filter>
@@ -487,30 +496,39 @@ const CourtScrollAnimation = () => {
           <g transform={`translate(${f1(ball.x)} ${f1(ball.y)})`}>
             <g transform={`scale(${(2 - squash).toFixed(3)} ${squash.toFixed(3)})`}>
               <circle r={ballR} fill="url(#ballBody)" />
-              <circle r={ballR} fill="none" stroke="hsl(78 60% 42%)" strokeOpacity="0.18" strokeWidth={Math.max(0.3, ballR * 0.05)} />
-              <g transform={`rotate(${spin.toFixed(2)})`}>
-                <path
-                  d={`M${f1(-ballR)} 0 q${f1(ballR * 0.95)} ${f1(ballR * 0.95)} ${f1(ballR * 2)} 0`}
-                  fill="none"
-                  stroke="hsl(60 40% 98%)"
-                  strokeOpacity="0.8"
-                  strokeWidth={Math.max(0.5, ballR * 0.13)}
-                />
-                <path
-                  d={`M${f1(-ballR)} 0 q${f1(ballR * 0.95)} ${f1(-ballR * 0.95)} ${f1(ballR * 2)} 0`}
-                  fill="none"
-                  stroke="hsl(60 40% 98%)"
-                  strokeOpacity="0.42"
-                  strokeWidth={Math.max(0.4, ballR * 0.1)}
+              <g clipPath="url(#ballClip)">
+                {/* felt seams: the classic two-arc curve, drawn pole to pole */}
+                <g transform={`rotate(${spin.toFixed(2)})`}>
+                  {[-1, 1].map((s) => (
+                    <path
+                      key={s}
+                      d={`M${f1(-ballR * 1.02)} 0 C${f1(-ballR * 0.55)} ${f1(s * ballR * 0.66)} ${f1(ballR * 0.55)} ${f1(s * ballR * 0.66)} ${f1(ballR * 1.02)} 0`}
+                      fill="none"
+                      stroke="hsl(56 42% 97%)"
+                      strokeOpacity={s === -1 ? 0.92 : 0.72}
+                      strokeLinecap="round"
+                      strokeWidth={Math.max(0.45, ballR * 0.11)}
+                    />
+                  ))}
+                </g>
+                {/* warm sunset bounce + core shading */}
+                <circle r={ballR} fill="url(#ballWarm)" />
+                <ellipse
+                  cx={-ballR * 0.32}
+                  cy={-ballR * 0.36}
+                  rx={ballR * 0.26}
+                  ry={ballR * 0.18}
+                  fill="hsl(50 100% 98%)"
+                  opacity="0.5"
+                  transform={`rotate(-24 ${f1(-ballR * 0.32)} ${f1(-ballR * 0.36)})`}
                 />
               </g>
-              <ellipse
-                cx={-ballR * 0.34}
-                cy={-ballR * 0.4}
-                rx={ballR * 0.32}
-                ry={ballR * 0.22}
-                fill="hsl(56 96% 96%)"
-                opacity="0.55"
+              <circle
+                r={ballR}
+                fill="none"
+                stroke="hsl(96 44% 24%)"
+                strokeOpacity="0.3"
+                strokeWidth={Math.max(0.3, ballR * 0.07)}
               />
             </g>
           </g>
