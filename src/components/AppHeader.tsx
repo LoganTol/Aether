@@ -16,8 +16,8 @@ export default function AppHeader() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/85 backdrop-blur-md">
-      <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
-        <AetherLogo to={user ? "/app/home" : "/"} className="text-lg sm:text-xl" />
+      <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
+        <AetherLogo to={user ? "/app/home" : "/"} className="text-2xl sm:text-3xl" />
 
         {user && (
           <nav className="flex items-center gap-1" aria-label="Main">
