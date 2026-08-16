@@ -36,6 +36,7 @@ type Cam = {
   f: number;
   cx: number;
   horizon: number;
+  rallyZ: number; // depth of the rally plane (the ball's lane)
   travel: number; // half of the ball's horizontal travel, in metres
   ballScale: number;
   vbW: number;
@@ -44,27 +45,29 @@ type Cam = {
 const seat = (c: Omit<Cam, "cx">): Cam => ({
   ...c,
   // keep the rally optically centred in the frame
-  cx: 480 + (c.f * c.camX) / (MID_Z + c.dist),
+  cx: 480 + (c.f * c.camX) / (c.rallyZ + c.dist),
 });
 
 const DESKTOP_CAM: Cam = seat({
   dist: 6.0,
   camX: -2.4,
-  height: 2.3,
+  height: 2.05,
   f: 520,
   horizon: 150,
-  travel: 9.6,
-  ballScale: 0.26,
+  rallyZ: 2.3,
+  travel: 6.9,
+  ballScale: 0.24,
   vbW: 960,
 });
 const MOBILE_CAM: Cam = seat({
-  dist: 7.4,
-  camX: -2.0,
-  height: 3.1,
+  dist: 7.0,
+  camX: -1.8,
+  height: 2.7,
   f: 520,
   horizon: 148,
-  travel: 5.8,
-  ballScale: 0.34,
+  rallyZ: 2.8,
+  travel: 4.4,
+  ballScale: 0.3,
   vbW: 540,
 });
 
@@ -190,7 +193,7 @@ const CourtScrollAnimation = () => {
   const u = reduced ? 0.42 : progress;
   const ballX = -cam.travel + 2 * cam.travel * u;
   // gentle depth drift so the rally reads three-dimensional
-  const ballZ = 4.0 + Math.sin(u * Math.PI) * 1.4;
+  const ballZ = cam.rallyZ + Math.sin(u * Math.PI) * 1.3;
   const ballY = reduced ? 1.6 : heightAt(u);
   const ball = project(ballX, ballZ, ballY);
   const depth = ballZ + cam.dist;
