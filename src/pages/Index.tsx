@@ -9,6 +9,7 @@ import {
   MatchCardPreview,
 } from "@/components/marketing/ProductPreview";
 import CourtScrollAnimation from "@/components/marketing/CourtScrollAnimation";
+import Seo from "@/components/Seo";
 
 const pillars = [
   {
@@ -46,6 +47,8 @@ const audiences = [
 
 const Index = () => {
   return (
+    <>
+    <Seo title="Aether Tennis — Tennis Seasons Made Simple" description="Aether Tennis turns a group of players into a real round-robin season with generated fixtures, rotating captains, and automated standings." path="/" />
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-50 w-full border-b border-border bg-background/85 backdrop-blur-md">
         <PageContainer width="wide" className="flex h-14 items-center justify-between gap-4">
@@ -212,6 +215,7 @@ const Index = () => {
         </PageContainer>
       </footer>
     </div>
+    </>
   );
 };
 
