@@ -322,10 +322,11 @@ const CourtScrollAnimation = () => {
         >
           <defs>
             <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="hsl(199 48% 91%)" />
-              <stop offset="45%" stopColor="hsl(202 56% 84%)" />
-              <stop offset="80%" stopColor="hsl(196 46% 89%)" />
-              <stop offset="100%" stopColor="hsl(44 46% 90%)" />
+              <stop offset="0%" stopColor="hsl(214 52% 82%)" />
+              <stop offset="34%" stopColor="hsl(272 42% 85%)" />
+              <stop offset="62%" stopColor="hsl(20 78% 87%)" />
+              <stop offset="84%" stopColor="hsl(30 92% 84%)" />
+              <stop offset="100%" stopColor="hsl(42 96% 82%)" />
             </linearGradient>
             <linearGradient id="courtSurface" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="hsl(162 22% 46%)" />
@@ -337,23 +338,31 @@ const CourtScrollAnimation = () => {
               <stop offset="100%" stopColor="hsl(36 20% 70%)" />
             </linearGradient>
             <linearGradient id="trees" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="hsl(140 20% 62%)" />
-              <stop offset="100%" stopColor="hsl(146 22% 44%)" />
+              <stop offset="0%" stopColor="hsl(120 16% 55%)" />
+              <stop offset="100%" stopColor="hsl(140 20% 38%)" />
             </linearGradient>
             <linearGradient id="sunWash" x1="0" y1="0" x2="1" y2="0.4">
-              <stop offset="0%" stopColor="hsl(44 90% 78%)" stopOpacity="0.34" />
-              <stop offset={`${sunSweep}%`} stopColor="hsl(44 88% 82%)" stopOpacity="0.16" />
-              <stop offset="100%" stopColor="hsl(204 40% 60%)" stopOpacity="0.12" />
+              <stop offset="0%" stopColor="hsl(28 94% 70%)" stopOpacity="0.40" />
+              <stop offset={`${sunSweep}%`} stopColor="hsl(40 92% 78%)" stopOpacity="0.20" />
+              <stop offset="100%" stopColor="hsl(268 38% 58%)" stopOpacity="0.16" />
             </linearGradient>
             <linearGradient id="netMesh" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="hsl(200 10% 24%)" stopOpacity="0.42" />
               <stop offset="100%" stopColor="hsl(200 10% 20%)" stopOpacity="0.24" />
             </linearGradient>
-            <radialGradient id="ballBody" cx="32%" cy="28%" r="76%">
-              <stop offset="0%" stopColor="hsl(70 96% 80%)" />
-              <stop offset="52%" stopColor="hsl(74 82% 58%)" />
-              <stop offset="100%" stopColor="hsl(92 46% 34%)" />
+            <radialGradient id="ballBody" cx="34%" cy="30%" r="78%">
+              <stop offset="0%" stopColor="hsl(66 98% 82%)" />
+              <stop offset="42%" stopColor="hsl(70 88% 64%)" />
+              <stop offset="78%" stopColor="hsl(80 62% 44%)" />
+              <stop offset="100%" stopColor="hsl(96 44% 27%)" />
             </radialGradient>
+            <radialGradient id="ballWarm" cx="26%" cy="22%" r="60%">
+              <stop offset="0%" stopColor="hsl(38 100% 88%)" stopOpacity="0.55" />
+              <stop offset="100%" stopColor="hsl(38 100% 80%)" stopOpacity="0" />
+            </radialGradient>
+            <clipPath id="ballClip">
+              <circle r={ballR} />
+            </clipPath>
             <filter id="shadowSoft" x="-120%" y="-300%" width="340%" height="700%">
               <feGaussianBlur stdDeviation={Math.max(0.6, lift * 2.6)} />
             </filter>
