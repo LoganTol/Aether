@@ -44,8 +44,10 @@ type Cam = {
 
 const seat = (c: Omit<Cam, "cx">): Cam => ({
   ...c,
-  // keep the rally optically centred in the frame
-  cx: 480 + (c.f * c.camX) / (c.rallyZ + c.dist),
+  // centre the net midpoint in the frame; the net is the dominant visual
+  // anchor, so the viewport should be balanced around it rather than the
+  // ball's travel lane.
+  cx: c.vbW / 2 + (c.f * c.camX) / (MID_Z + c.dist),
 });
 
 const DESKTOP_CAM: Cam = seat({
