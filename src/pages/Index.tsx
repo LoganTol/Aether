@@ -9,6 +9,7 @@ import {
   MatchCardPreview,
 } from "@/components/marketing/ProductPreview";
 import CourtScrollAnimation from "@/components/marketing/CourtScrollAnimation";
+import Seo from "@/components/Seo";
 
 const pillars = [
   {

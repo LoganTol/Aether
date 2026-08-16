@@ -1,10 +1,13 @@
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
+import Seo from "@/components/Seo";
 
 const PrivacyPolicy = () => {
   const navigate = useNavigate();
   return (
-  <div className="min-h-screen bg-background text-foreground">
+  <>
+    <Seo title="Privacy Policy — Aether Tennis" description="How Aether Tennis collects, uses, and protects your account and season data." path="/privacy" />
+    <div className="min-h-screen bg-background text-foreground">
     <header className="sticky top-0 w-full py-4 md:py-8 z-50 bg-background/80 backdrop-blur-md">
       <div className="container flex justify-between items-center">
         <div className="flex items-center gap-3">
