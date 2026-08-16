@@ -52,7 +52,7 @@ const seat = (c: Omit<Cam, "cx">): Cam => ({
 
 const DESKTOP_CAM: Cam = seat({
   dist: 6.0,
-  camX: -2.4,
+  camX: 0,
   height: 2.05,
   f: 520,
   horizon: 150,
@@ -63,7 +63,7 @@ const DESKTOP_CAM: Cam = seat({
 });
 const MOBILE_CAM: Cam = seat({
   dist: 7.0,
-  camX: -1.8,
+  camX: 0,
   height: 2.7,
   f: 520,
   horizon: 148,
