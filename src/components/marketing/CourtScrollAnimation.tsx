@@ -185,7 +185,9 @@ const CourtScrollAnimation = () => {
       .join(" ");
 
   const vbW = cam.vbW;
-  const vbX = cam.cx - vbW / 2;
+  // centre the net horizontally in its section, not the vanishing point
+  const netMid = project(0, MID_Z, 0);
+  const vbX = netMid.x - vbW / 2;
   const vbTop = cam.horizon - (isMobile ? 108 : 96);
   const yFront = project(0, -cam.dist + 1.4, 0).y;
   const vbH = Math.min(yFront, cam.horizon + (isMobile ? 215 : 245)) - vbTop;
