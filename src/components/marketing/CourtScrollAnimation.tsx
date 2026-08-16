@@ -84,14 +84,14 @@ const SUN = { x: 0.82, z: -0.42 };
 
 // ------------------------------------------------------------- trajectory --
 const HEIGHT_KEYS: [number, number][] = [
-  [0.0, 0.34],
-  [0.12, 1.62],
-  [0.3, 2.42],
-  [0.5, 2.18],
-  [0.62, 1.15],
+  [0.0, 0.3],
+  [0.12, 1.05],
+  [0.3, 1.5],
+  [0.5, 1.32],
+  [0.62, 0.78],
   [0.73, 0.05],
-  [0.86, 1.02],
-  [1.0, 0.42],
+  [0.86, 0.72],
+  [1.0, 0.34],
 ];
 
 const smooth = (t: number) => t * t * (3 - 2 * t);
@@ -479,7 +479,7 @@ const CourtScrollAnimation = () => {
           <g transform={`translate(${f1(ball.x)} ${f1(ball.y)})`}>
             <g transform={`scale(${(2 - squash).toFixed(3)} ${squash.toFixed(3)})`}>
               <circle r={ballR} fill="url(#ballBody)" />
-              <circle r={ballR} fill="none" stroke="hsl(78 60% 42%)" strokeOpacity="0.35" strokeWidth={Math.max(0.4, ballR * 0.08)} />
+              <circle r={ballR} fill="none" stroke="hsl(78 60% 42%)" strokeOpacity="0.18" strokeWidth={Math.max(0.3, ballR * 0.05)} />
               <g transform={`rotate(${spin.toFixed(2)})`}>
                 <path
                   d={`M${f1(-ballR)} 0 q${f1(ballR * 0.95)} ${f1(ballR * 0.95)} ${f1(ballR * 2)} 0`}
