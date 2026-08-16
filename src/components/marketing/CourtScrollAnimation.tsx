@@ -163,10 +163,10 @@ const CourtScrollAnimation = () => {
       })
       .join(" ");
 
-  const yNear = project(0, -HALF_LEN * 1.18, 0).y;
-  const yFar = project(0, HALF_LEN * 1.22, 0).y;
-  const vbTop = yFar - 34;
-  const vbH = yNear - yFar + 52;
+  const yNear = project(0, -HALF_LEN * 1.05, 0).y;
+  const yFar = project(0, HALF_LEN * 1.12, 0).y;
+  const vbTop = yFar - 26;
+  const vbH = yNear - yFar + 46;
   const viewBox = `0 ${f1(vbTop)} 640 ${f1(vbH)}`;
 
   // ------------------------------------------------------------- the ball --
