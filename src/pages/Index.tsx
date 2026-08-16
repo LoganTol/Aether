@@ -53,15 +53,15 @@ const Index = () => {
           <div className="flex items-center gap-1 sm:gap-2">
             <Link
               to="/auth"
-              className="rounded-lg px-3 py-1.5 text-sm text-[hsl(var(--text-muted))] transition-colors hover:text-foreground"
-            >
-              Log In
-            </Link>
-            <Link
-              to="/auth"
               className="inline-flex items-center rounded-lg bg-primary px-3.5 py-1.5 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
             >
               Get Started
+            </Link>
+            <Link
+              to="/auth"
+              className="rounded-lg px-3 py-1.5 text-sm text-[hsl(var(--text-muted))] transition-colors hover:text-foreground"
+            >
+              Log In
             </Link>
           </div>
         </PageContainer>
