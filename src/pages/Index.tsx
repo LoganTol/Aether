@@ -46,9 +46,6 @@ const audiences = [
 ];
 
 const Index = () => {
-  const { user } = useAuth();
-  const target = user ? "/app" : "/auth";
-
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-50 w-full border-b border-border bg-background/85 backdrop-blur-md">
@@ -56,16 +53,16 @@ const Index = () => {
           <AetherLogo to="/" className="text-xl sm:text-2xl" />
           <div className="flex items-center gap-1 sm:gap-2">
             <Link
-              to={target}
+              to="/auth"
               className="rounded-lg px-3 py-1.5 text-sm text-[hsl(var(--text-muted))] transition-colors hover:text-foreground"
             >
-              {user ? "Dashboard" : "Log In"}
+              Log In
             </Link>
             <Link
-              to={target}
+              to="/auth"
               className="inline-flex items-center rounded-lg bg-primary px-3.5 py-1.5 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
             >
-              {user ? "Open app" : "Get Started"}
+              Get Started
             </Link>
           </div>
         </PageContainer>
