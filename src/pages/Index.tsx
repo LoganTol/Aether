@@ -73,15 +73,13 @@ const Index = () => {
           <PageContainer width="wide">
             <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] lg:gap-16">
               <div className="animate-fade-up">
-                <p className="text-eyebrow">Social tennis seasons</p>
+                <p className="text-eyebrow">Tennis Seasons Made Simple.</p>
                 <h1 className="text-display mt-5">
-                  Your Season. Your Players.{" "}
-                  <span className="text-primary">Your Way.</span>
+                  Your Season. Your Players. <span className="text-primary">Your Way.</span>
                 </h1>
                 <p className="text-body mt-6 max-w-xl text-base">
-                  Aether Tennis turns a group of players into a real round-robin season:
-                  generated fixtures, rotating scheduling captains, hard deadlines and
-                  standings that keep themselves current.
+                  Aether Tennis turns a group of players into a real round-robin season: generated fixtures, rotating
+                  scheduling captains, hard deadlines and standings that keep themselves current.
                 </p>
                 <div className="mt-8 flex flex-wrap items-center gap-3">
                   <Link
@@ -112,17 +110,13 @@ const Index = () => {
           <PageContainer width="wide">
             <div className="max-w-2xl">
               <p className="text-eyebrow">The accountability engine</p>
-              <h2 className="text-section mt-4">
-                Every screen answers who owes what, by when, and what happens next.
-              </h2>
+              <h2 className="text-section mt-4">Every screen answers who owes what, by when, and what happens next.</h2>
             </div>
             <div className="mt-10 grid gap-px overflow-hidden rounded-xl border border-border bg-border sm:grid-cols-2">
               {pillars.map((p) => (
                 <div key={p.title} className="surface-1 p-6 sm:p-8">
                   <p.icon className="text-primary" size={20} aria-hidden />
-                  <h3 className="mt-4 font-heading text-lg font-semibold tracking-tight">
-                    {p.title}
-                  </h3>
+                  <h3 className="mt-4 font-heading text-lg font-semibold tracking-tight">{p.title}</h3>
                   <p className="text-body mt-2">{p.desc}</p>
                 </div>
               ))}
@@ -142,13 +136,10 @@ const Index = () => {
               </div>
               <div className="order-1 lg:order-2">
                 <p className="text-eyebrow">Scores and standings</p>
-                <h2 className="text-section mt-4">
-                  One box score, and the table takes care of itself.
-                </h2>
+                <h2 className="text-section mt-4">One box score, and the table takes care of itself.</h2>
                 <p className="text-body mt-5 max-w-lg text-base">
-                  Any member of the season can enter a result. Sets, games and win
-                  records propagate to the standings immediately — and the creator can
-                  correct a score if something was entered wrong.
+                  Any member of the season can enter a result. Sets, games and win records propagate to the standings
+                  immediately — and the creator can correct a score if something was entered wrong.
                 </p>
                 <ul className="mt-7 space-y-3 border-t border-border pt-6">
                   {[
@@ -171,9 +162,7 @@ const Index = () => {
         <section className="border-b border-border py-16 sm:py-20">
           <PageContainer width="wide">
             <p className="text-eyebrow">Built for</p>
-            <h2 className="text-section mt-4 max-w-2xl">
-              Groups that want to actually finish their season.
-            </h2>
+            <h2 className="text-section mt-4 max-w-2xl">Groups that want to actually finish their season.</h2>
             <div className="mt-8 flex flex-wrap gap-2">
               {audiences.map((a) => (
                 <span
@@ -192,12 +181,11 @@ const Index = () => {
           <PageContainer width="wide">
             <Surface level={1} padded="lg" className="text-center">
               <h2 className="text-section mx-auto max-w-2xl">
-                Your next season starts in{" "}
-                <span className="text-primary">under a minute</span>.
+                Your next season starts in <span className="text-primary">under a minute</span>.
               </h2>
               <p className="text-body mx-auto mt-4 max-w-xl">
-                Name it, pick singles or doubles, invite your players. Aether builds the
-                schedule and rotates the captain so the season finishes.
+                Name it, pick singles or doubles, invite your players. Aether builds the schedule and rotates the
+                captain so the season finishes.
               </p>
               <Link
                 to="/auth"
