@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import ballAsset from "@/assets/tennis-ball.png.asset.json";
 
 /**
  * Scroll is the rally — daylight edition.
