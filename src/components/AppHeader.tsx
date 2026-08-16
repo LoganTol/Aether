@@ -15,7 +15,7 @@ export default function AppHeader() {
   const { pathname } = useLocation();
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/85 backdrop-blur-md transition-colors duration-300 hover:border-primary/25 hover:bg-primary/15">
+    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/85 backdrop-blur-md transition-colors duration-300 hover:border-primary/30 hover:bg-primary/25">
       <div className="mx-auto flex h-[4.5rem] w-full max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
         <AetherLogo to={user ? "/app/home" : "/"} className="text-2xl sm:text-3xl" />
 
