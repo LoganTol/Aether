@@ -23,14 +23,24 @@ const NET_H_POST = 1.07;
 const NET_H_MID = 0.914;
 
 type Pt = { x: number; y: number };
-type Cam = { dist: number; height: number; f: number; cx: number; horizon: number };
+type Cam = {
+  dist: number;
+  height: number;
+  f: number;
+  cx: number;
+  horizon: number;
+  squash: number; // gentle anamorphic squeeze -> wide, architectural framing
+};
 
-const DESKTOP_CAM: Cam = { dist: 26, height: 14, f: 700, cx: 320, horizon: 62 };
-const MOBILE_CAM: Cam = { dist: 31, height: 20.5, f: 700, cx: 320, horizon: 62 };
+const DESKTOP_CAM: Cam = { dist: 26, height: 14, f: 700, cx: 320, horizon: 62, squash: 0.5 };
+const MOBILE_CAM: Cam = { dist: 30, height: 19, f: 700, cx: 320, horizon: 62, squash: 0.66 };
 
 const makeProject = (cam: Cam) => (X: number, Z: number, Y = 0): Pt => {
   const d = Z + cam.dist;
-  return { x: cam.cx + (cam.f * X) / d, y: cam.horizon + (cam.f * (cam.height - Y)) / d };
+  return {
+    x: cam.cx + (cam.f * X) / d,
+    y: (cam.horizon + (cam.f * (cam.height - Y)) / d) * cam.squash,
+  };
 };
 
 const f1 = (n: number) => n.toFixed(1);
@@ -153,9 +163,11 @@ const CourtScrollAnimation = () => {
       })
       .join(" ");
 
-  const yNear = project(0, -HALF_LEN * 1.35, 0).y;
-  const yFar = project(0, HALF_LEN * 1.3, 0).y;
-  const viewBox = `0 ${f1(yFar - 74)} 640 ${f1(yNear - yFar + 96)}`;
+  const yNear = project(0, -HALF_LEN * 1.18, 0).y;
+  const yFar = project(0, HALF_LEN * 1.22, 0).y;
+  const vbTop = yFar - 34;
+  const vbH = yNear - yFar + 52;
+  const viewBox = `0 ${f1(vbTop)} 640 ${f1(vbH)}`;
 
   // ------------------------------------------------------------- the ball --
   const u = reduced ? 0.5 : progress;
@@ -165,7 +177,7 @@ const CourtScrollAnimation = () => {
   const ball = project(0, ballZ, ballY);
   const ground = project(0, ballZ, 0);
   const depth = ballZ + cam.dist;
-  const ballR = (cam.f * 0.115) / depth;
+  const ballR = (cam.f * (isMobile ? 0.16 : 0.125)) / depth;
 
   // rotation follows distance travelled; reverses with scroll direction
   const spin = (u * 2 * travelZ * 360) / (2 * Math.PI * 0.0335) * 0.012;
@@ -477,9 +489,9 @@ const CourtScrollAnimation = () => {
               {/* atmospheric falloff */}
               <rect
                 x="0"
-                y={yFar - 74}
+                y={vbTop}
                 width="640"
-                height={yNear - yFar + 96}
+                height={vbH}
                 fill="url(#edgeFade)"
                 pointerEvents="none"
               />
