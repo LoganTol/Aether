@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import { Repeat, CalendarCheck, Trophy, ShieldCheck } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
 import AetherLogo from "@/components/AetherLogo";
 import { PageContainer, Surface } from "@/components/ui-system";
 import {
@@ -46,9 +45,6 @@ const audiences = [
 ];
 
 const Index = () => {
-  const { user } = useAuth();
-  const target = user ? "/app" : "/auth";
-
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-50 w-full border-b border-border bg-background/85 backdrop-blur-md">
@@ -56,16 +52,16 @@ const Index = () => {
           <AetherLogo to="/" className="text-xl sm:text-2xl" />
           <div className="flex items-center gap-1 sm:gap-2">
             <Link
-              to={target}
+              to="/auth"
               className="rounded-lg px-3 py-1.5 text-sm text-[hsl(var(--text-muted))] transition-colors hover:text-foreground"
             >
-              {user ? "Dashboard" : "Log In"}
+              Log In
             </Link>
             <Link
-              to={target}
+              to="/auth"
               className="inline-flex items-center rounded-lg bg-primary px-3.5 py-1.5 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
             >
-              {user ? "Open app" : "Get Started"}
+              Get Started
             </Link>
           </div>
         </PageContainer>
@@ -88,7 +84,7 @@ const Index = () => {
                 </p>
                 <div className="mt-8 flex flex-wrap items-center gap-3">
                   <Link
-                    to={target}
+                    to="/auth"
                     className="inline-flex items-center rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
                   >
                     Get Started
@@ -203,10 +199,10 @@ const Index = () => {
                 schedule and rotates the captain so the season finishes.
               </p>
               <Link
-                to={target}
+                to="/auth"
                 className="mt-8 inline-flex items-center rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
               >
-                {user ? "Open dashboard" : "Get started free"}
+                Get started free
               </Link>
             </Surface>
           </PageContainer>
