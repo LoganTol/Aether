@@ -322,11 +322,11 @@ const CourtScrollAnimation = () => {
         >
           <defs>
             <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="hsl(214 52% 82%)" />
-              <stop offset="34%" stopColor="hsl(272 42% 85%)" />
-              <stop offset="62%" stopColor="hsl(20 78% 87%)" />
-              <stop offset="84%" stopColor="hsl(30 92% 84%)" />
-              <stop offset="100%" stopColor="hsl(42 96% 82%)" />
+              <stop offset="0%" stopColor="hsl(218 58% 74%)" />
+              <stop offset="32%" stopColor="hsl(282 46% 79%)" />
+              <stop offset="58%" stopColor="hsl(14 82% 80%)" />
+              <stop offset="80%" stopColor="hsl(26 94% 76%)" />
+              <stop offset="100%" stopColor="hsl(40 98% 78%)" />
             </linearGradient>
             <linearGradient id="courtSurface" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="hsl(162 22% 46%)" />
