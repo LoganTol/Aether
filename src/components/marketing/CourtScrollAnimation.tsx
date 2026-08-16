@@ -48,23 +48,23 @@ const seat = (c: Omit<Cam, "cx">): Cam => ({
 });
 
 const DESKTOP_CAM: Cam = seat({
-  dist: 6.4,
-  camX: -4.2,
-  height: 2.5,
+  dist: 6.0,
+  camX: -2.4,
+  height: 2.3,
   f: 520,
   horizon: 150,
   travel: 9.6,
-  ballScale: 0.15,
+  ballScale: 0.26,
   vbW: 960,
 });
 const MOBILE_CAM: Cam = seat({
-  dist: 8.2,
-  camX: -3.6,
-  height: 3.3,
+  dist: 7.4,
+  camX: -2.0,
+  height: 3.1,
   f: 520,
   horizon: 148,
-  travel: 5.6,
-  ballScale: 0.24,
+  travel: 5.8,
+  ballScale: 0.34,
   vbW: 540,
 });
 
@@ -183,14 +183,14 @@ const CourtScrollAnimation = () => {
   const vbX = cam.cx - vbW / 2;
   const vbTop = cam.horizon - (isMobile ? 108 : 96);
   const yFront = project(0, -cam.dist + 1.4, 0).y;
-  const vbH = Math.min(yFront, cam.horizon + 340) - vbTop;
+  const vbH = Math.min(yFront, cam.horizon + (isMobile ? 250 : 285)) - vbTop;
   const viewBox = `${f1(vbX)} ${f1(vbTop)} ${f1(vbW)} ${f1(vbH)}`;
 
   // ------------------------------------------------------------- the ball --
   const u = reduced ? 0.42 : progress;
   const ballX = -cam.travel + 2 * cam.travel * u;
   // gentle depth drift so the rally reads three-dimensional
-  const ballZ = MID_Z + Math.sin(u * Math.PI) * 1.1 - 0.4;
+  const ballZ = 4.0 + Math.sin(u * Math.PI) * 1.4;
   const ballY = reduced ? 1.6 : heightAt(u);
   const ball = project(ballX, ballZ, ballY);
   const depth = ballZ + cam.dist;
