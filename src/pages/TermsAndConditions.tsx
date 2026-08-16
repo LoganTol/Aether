@@ -74,6 +74,7 @@ const TermsAndConditions = () => {
       <p className="text-muted-foreground text-sm pt-4 border-t border-border">© 2026 Aether Tennis. All Rights Reserved.</p>
     </main>
   </div>
+  </>
 );
 };
 
