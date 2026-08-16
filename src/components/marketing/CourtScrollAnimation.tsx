@@ -497,19 +497,32 @@ const CourtScrollAnimation = () => {
             <g transform={`scale(${(2 - squash).toFixed(3)} ${squash.toFixed(3)})`}>
               <circle r={ballR} fill="url(#ballBody)" />
               <g clipPath="url(#ballClip)">
-                {/* felt seams: the classic two-arc curve, drawn pole to pole */}
+                {/* felt seams: two mirrored pole-to-pole curves, as on a real ball */}
                 <g transform={`rotate(${spin.toFixed(2)})`}>
-                  {[-1, 1].map((s) => (
-                    <path
-                      key={s}
-                      d={`M${f1(-ballR * 1.02)} 0 C${f1(-ballR * 0.55)} ${f1(s * ballR * 0.66)} ${f1(ballR * 0.55)} ${f1(s * ballR * 0.66)} ${f1(ballR * 1.02)} 0`}
-                      fill="none"
-                      stroke="hsl(56 42% 97%)"
-                      strokeOpacity={s === -1 ? 0.92 : 0.72}
-                      strokeLinecap="round"
-                      strokeWidth={Math.max(0.45, ballR * 0.11)}
-                    />
-                  ))}
+                  {[-1, 1].map((s) => {
+                    const d = `M0 ${f1(-ballR * 1.04)} C${f1(s * ballR * 1.02)} ${f1(-ballR * 0.5)} ${f1(s * ballR * 1.02)} ${f1(ballR * 0.5)} 0 ${f1(ballR * 1.04)}`;
+                    return (
+                      <g key={s}>
+                        {/* soft shading under the seam so it reads as a groove */}
+                        <path
+                          d={d}
+                          fill="none"
+                          stroke="hsl(88 46% 34%)"
+                          strokeOpacity={s === -1 ? 0.35 : 0.25}
+                          strokeLinecap="round"
+                          strokeWidth={Math.max(0.9, ballR * 0.24)}
+                        />
+                        <path
+                          d={d}
+                          fill="none"
+                          stroke="hsl(58 78% 96%)"
+                          strokeOpacity={s === -1 ? 0.95 : 0.78}
+                          strokeLinecap="round"
+                          strokeWidth={Math.max(0.5, ballR * 0.13)}
+                        />
+                      </g>
+                    );
+                  })}
                 </g>
                 {/* warm sunset bounce + core shading */}
                 <circle r={ballR} fill="url(#ballWarm)" />
