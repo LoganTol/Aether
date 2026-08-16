@@ -51,7 +51,7 @@ const Index = () => {
     <Seo title="Aether Tennis — Tennis Seasons Made Simple" description="Aether Tennis turns a group of players into a real round-robin season with generated fixtures, rotating captains, and automated standings." path="/" />
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-50 w-full border-b border-border bg-background/85 backdrop-blur-md">
-        <PageContainer width="wide" className="flex h-16 items-center justify-between gap-4">
+        <PageContainer width="wide" className="flex h-[4.5rem] items-center justify-between gap-4">
           <AetherLogo to="/" className="text-2xl sm:text-3xl" />
           <div className="flex items-center gap-1 sm:gap-2">
             <Link
