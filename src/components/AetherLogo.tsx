@@ -9,7 +9,7 @@ export default function AetherLogo({ to = "/", className = "text-4xl" }: AetherL
   return (
     <Link
       to={to}
-      className={`group inline-flex flex-col leading-none py-1.5 ${className}`}
+      className={`group inline-flex flex-col leading-none pt-3 pb-2 ${className}`}
       aria-label="Aether Tennis home"
     >
       <span className="font-heading font-bold tracking-wide">
