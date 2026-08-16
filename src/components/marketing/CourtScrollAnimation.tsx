@@ -496,30 +496,39 @@ const CourtScrollAnimation = () => {
           <g transform={`translate(${f1(ball.x)} ${f1(ball.y)})`}>
             <g transform={`scale(${(2 - squash).toFixed(3)} ${squash.toFixed(3)})`}>
               <circle r={ballR} fill="url(#ballBody)" />
-              <circle r={ballR} fill="none" stroke="hsl(78 60% 42%)" strokeOpacity="0.18" strokeWidth={Math.max(0.3, ballR * 0.05)} />
-              <g transform={`rotate(${spin.toFixed(2)})`}>
-                <path
-                  d={`M${f1(-ballR)} 0 q${f1(ballR * 0.95)} ${f1(ballR * 0.95)} ${f1(ballR * 2)} 0`}
-                  fill="none"
-                  stroke="hsl(60 40% 98%)"
-                  strokeOpacity="0.8"
-                  strokeWidth={Math.max(0.5, ballR * 0.13)}
-                />
-                <path
-                  d={`M${f1(-ballR)} 0 q${f1(ballR * 0.95)} ${f1(-ballR * 0.95)} ${f1(ballR * 2)} 0`}
-                  fill="none"
-                  stroke="hsl(60 40% 98%)"
-                  strokeOpacity="0.42"
-                  strokeWidth={Math.max(0.4, ballR * 0.1)}
+              <g clipPath="url(#ballClip)">
+                {/* felt seams: the classic two-arc curve, drawn pole to pole */}
+                <g transform={`rotate(${spin.toFixed(2)})`}>
+                  {[-1, 1].map((s) => (
+                    <path
+                      key={s}
+                      d={`M${f1(-ballR * 1.02)} 0 C${f1(-ballR * 0.55)} ${f1(s * ballR * 0.66)} ${f1(ballR * 0.55)} ${f1(s * ballR * 0.66)} ${f1(ballR * 1.02)} 0`}
+                      fill="none"
+                      stroke="hsl(56 42% 97%)"
+                      strokeOpacity={s === -1 ? 0.92 : 0.72}
+                      strokeLinecap="round"
+                      strokeWidth={Math.max(0.45, ballR * 0.11)}
+                    />
+                  ))}
+                </g>
+                {/* warm sunset bounce + core shading */}
+                <circle r={ballR} fill="url(#ballWarm)" />
+                <ellipse
+                  cx={-ballR * 0.32}
+                  cy={-ballR * 0.36}
+                  rx={ballR * 0.26}
+                  ry={ballR * 0.18}
+                  fill="hsl(50 100% 98%)"
+                  opacity="0.5"
+                  transform={`rotate(-24 ${f1(-ballR * 0.32)} ${f1(-ballR * 0.36)})`}
                 />
               </g>
-              <ellipse
-                cx={-ballR * 0.34}
-                cy={-ballR * 0.4}
-                rx={ballR * 0.32}
-                ry={ballR * 0.22}
-                fill="hsl(56 96% 96%)"
-                opacity="0.55"
+              <circle
+                r={ballR}
+                fill="none"
+                stroke="hsl(96 44% 24%)"
+                strokeOpacity="0.3"
+                strokeWidth={Math.max(0.3, ballR * 0.07)}
               />
             </g>
           </g>
