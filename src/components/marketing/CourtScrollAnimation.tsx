@@ -179,7 +179,7 @@ const CourtScrollAnimation = () => {
   const ball = project(0, ballZ, ballY);
   const ground = project(0, ballZ, 0);
   const depth = ballZ + cam.dist;
-  const ballR = (cam.f * (isMobile ? 0.3 : 0.23)) / depth;
+  const ballR = (cam.f * (isMobile ? 0.25 : 0.23)) / depth;
 
   // rotation follows distance travelled; reverses with scroll direction
   const spin = (u * 2 * travelZ * 360) / (2 * Math.PI * 0.0335) * 0.012;
