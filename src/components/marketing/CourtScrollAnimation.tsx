@@ -495,54 +495,20 @@ const CourtScrollAnimation = () => {
           {/* ball */}
           <g transform={`translate(${f1(ball.x)} ${f1(ball.y)})`}>
             <g transform={`scale(${(2 - squash).toFixed(3)} ${squash.toFixed(3)})`}>
-              <circle r={ballR} fill="url(#ballBody)" />
-              <g clipPath="url(#ballClip)">
-                {/* felt seams: two mirrored pole-to-pole curves, as on a real ball */}
-                <g transform={`rotate(${spin.toFixed(2)})`}>
-                  {[-1, 1].map((s) => {
-                    const d = `M0 ${f1(-ballR * 1.04)} C${f1(s * ballR * 1.02)} ${f1(-ballR * 0.5)} ${f1(s * ballR * 1.02)} ${f1(ballR * 0.5)} 0 ${f1(ballR * 1.04)}`;
-                    return (
-                      <g key={s}>
-                        {/* soft shading under the seam so it reads as a groove */}
-                        <path
-                          d={d}
-                          fill="none"
-                          stroke="hsl(88 46% 34%)"
-                          strokeOpacity={s === -1 ? 0.35 : 0.25}
-                          strokeLinecap="round"
-                          strokeWidth={Math.max(0.9, ballR * 0.24)}
-                        />
-                        <path
-                          d={d}
-                          fill="none"
-                          stroke="hsl(58 78% 96%)"
-                          strokeOpacity={s === -1 ? 0.95 : 0.78}
-                          strokeLinecap="round"
-                          strokeWidth={Math.max(0.5, ballR * 0.13)}
-                        />
-                      </g>
-                    );
-                  })}
-                </g>
-                {/* warm sunset bounce + core shading */}
-                <circle r={ballR} fill="url(#ballWarm)" />
-                <ellipse
-                  cx={-ballR * 0.32}
-                  cy={-ballR * 0.36}
-                  rx={ballR * 0.26}
-                  ry={ballR * 0.18}
-                  fill="hsl(50 100% 98%)"
-                  opacity="0.5"
-                  transform={`rotate(-24 ${f1(-ballR * 0.32)} ${f1(-ballR * 0.36)})`}
+              <g transform={`rotate(${spin.toFixed(2)})`}>
+                <image
+                  href={ballAsset.url}
+                  x={-ballR}
+                  y={-ballR}
+                  width={ballR * 2}
+                  height={ballR * 2}
+                  preserveAspectRatio="xMidYMid meet"
                 />
               </g>
-              <circle
-                r={ballR}
-                fill="none"
-                stroke="hsl(96 44% 24%)"
-                strokeOpacity="0.3"
-                strokeWidth={Math.max(0.3, ballR * 0.07)}
-              />
+              {/* warm sunset light wrap so the ball sits in the scene */}
+              <g clipPath="url(#ballClip)">
+                <circle r={ballR} fill="url(#ballWarm)" />
+              </g>
             </g>
           </g>
         </svg>
