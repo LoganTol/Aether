@@ -186,7 +186,7 @@ const CourtScrollAnimation = () => {
   const vbX = cam.cx - vbW / 2;
   const vbTop = cam.horizon - (isMobile ? 108 : 96);
   const yFront = project(0, -cam.dist + 1.4, 0).y;
-  const vbH = Math.min(yFront, cam.horizon + (isMobile ? 250 : 285)) - vbTop;
+  const vbH = Math.min(yFront, cam.horizon + (isMobile ? 215 : 245)) - vbTop;
   const viewBox = `${f1(vbX)} ${f1(vbTop)} ${f1(vbW)} ${f1(vbH)}`;
 
   // ------------------------------------------------------------- the ball --
@@ -318,8 +318,9 @@ const CourtScrollAnimation = () => {
         >
           <defs>
             <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="hsl(206 58% 78%)" />
-              <stop offset="60%" stopColor="hsl(198 52% 87%)" />
+              <stop offset="0%" stopColor="hsl(199 48% 91%)" />
+              <stop offset="45%" stopColor="hsl(202 56% 84%)" />
+              <stop offset="80%" stopColor="hsl(196 46% 89%)" />
               <stop offset="100%" stopColor="hsl(44 46% 90%)" />
             </linearGradient>
             <linearGradient id="courtSurface" x1="0" y1="0" x2="0" y2="1">
