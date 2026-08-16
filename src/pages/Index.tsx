@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, Repeat, CalendarCheck, Trophy, ShieldCheck } from "lucide-react";
+import { Repeat, CalendarCheck, Trophy, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import AetherLogo from "@/components/AetherLogo";
-import { PageContainer, Surface, StatBlock } from "@/components/ui-system";
+import { PageContainer, Surface } from "@/components/ui-system";
 import {
   CaptainPreview,
   ScheduledPreview,
