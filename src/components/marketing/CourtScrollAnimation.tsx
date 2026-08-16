@@ -298,11 +298,9 @@ const CourtScrollAnimation = () => {
     >
       <div className="mx-auto w-full max-w-6xl px-5 pt-14 sm:px-8 sm:pt-20">
         <div className="max-w-xl">
-          <p className="text-eyebrow">On court</p>
-          <h2 className="text-section mt-3">Scroll is the rally.</h2>
+          <h2 className="text-section">Keep the season in motion.</h2>
           <p className="text-body mt-3 max-w-md text-base">
-            Aether keeps the admin off the court. Fixtures, captains and deadlines run in
-            the background — you just show up and rally.
+            Aether coordinates schedules, results, standings, and shared responsibilities so the season never depends on one person to keep it going.
           </p>
         </div>
       </div>
