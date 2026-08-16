@@ -324,7 +324,7 @@ const CourtScrollAnimation = () => {
             className="relative overflow-hidden rounded-2xl"
             style={{
               background:
-                "radial-gradient(120% 90% at 50% 42%, hsl(158 22% 11%) 0%, hsl(158 24% 6%) 48%, hsl(160 28% 3%) 100%)",
+                "radial-gradient(110% 85% at 50% 40%, hsl(158 22% 9%) 0%, hsl(158 26% 5%) 45%, hsl(160 30% 2.5%) 100%)",
               boxShadow: "0 30px 70px -40px hsl(160 40% 6% / 0.8)",
               opacity: revealed || reduced ? 1 : 0,
               transition: "opacity 700ms cubic-bezier(0.22,1,0.36,1)",
@@ -343,11 +343,11 @@ const CourtScrollAnimation = () => {
                   <stop offset="100%" stopColor="hsl(168 26% 9%)" />
                 </linearGradient>
                 <linearGradient id="apron" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="hsl(160 22% 7%)" />
-                  <stop offset="100%" stopColor="hsl(160 24% 5%)" />
+                  <stop offset="0%" stopColor="hsl(160 22% 6%)" />
+                  <stop offset="100%" stopColor="hsl(160 24% 4%)" />
                 </linearGradient>
                 <radialGradient id="pool" cx="50%" cy="38%" r="62%">
-                  <stop offset="0%" stopColor="hsl(90 40% 78%)" stopOpacity="0.2" />
+                  <stop offset="0%" stopColor="hsl(90 40% 78%)" stopOpacity="0.15" />
                   <stop offset="60%" stopColor="hsl(120 30% 60%)" stopOpacity="0.05" />
                   <stop offset="100%" stopColor="hsl(160 30% 10%)" stopOpacity="0" />
                 </radialGradient>
