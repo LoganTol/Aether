@@ -77,22 +77,19 @@ export default function Auth() {
       <main className="flex-1 flex items-center justify-center px-4">
         <Surface level={2} padded="lg" className="w-full max-w-md space-y-6">
           <div className="text-center space-y-2">
-            <h1 className="text-page-title">
-              {mode === "signup" ? "Create your account" : "Welcome back"}
-            </h1>
+            <h1 className="text-page-title">{mode === "signup" ? "Create your account" : "Welcome back"}</h1>
             <p className="text-body">
-              {mode === "signup"
-                ? "Start a season in under a minute."
-                : "Sign in to manage your seasons."}
+              {mode === "signup" ? "Start a season in under a minute." : "Sign in to manage your seasons."}
             </p>
           </div>
 
-          <button
-            onClick={google}
-            disabled={busy}
-            className="btn-secondary w-full py-3"
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden><path fill="#fff" d="M21.35 11.1h-9.18v2.92h5.27c-.23 1.36-1.6 4-5.27 4-3.17 0-5.76-2.62-5.76-5.85S8.99 6.31 12.17 6.31c1.8 0 3.01.77 3.7 1.43l2.52-2.43C16.76 3.86 14.7 3 12.17 3 6.93 3 2.7 7.23 2.7 12.17S6.93 21.33 12.17 21.33c7 0 9.27-4.92 9.27-7.45 0-.5-.05-.88-.09-1.78z"/></svg>
+          <button onClick={google} disabled={busy} className="btn-secondary w-full py-3">
+            <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden>
+              <path
+                fill="#fff"
+                d="M21.35 11.1h-9.18v2.92h5.27c-.23 1.36-1.6 4-5.27 4-3.17 0-5.76-2.62-5.76-5.85S8.99 6.31 12.17 6.31c1.8 0 3.01.77 3.7 1.43l2.52-2.43C16.76 3.86 14.7 3 12.17 3 6.93 3 2.7 7.23 2.7 12.17S6.93 21.33 12.17 21.33c7 0 9.27-4.92 9.27-7.45 0-.5-.05-.88-.09-1.78z"
+              />
+            </svg>
             Continue with Google
           </button>
 
@@ -135,11 +132,7 @@ export default function Auth() {
                 placeholder="••••••••"
               />
             </div>
-            <button
-              type="submit"
-              disabled={busy}
-              className="btn-primary w-full py-3"
-            >
+            <button type="submit" disabled={busy} className="btn-primary w-full py-3">
               {busy && <Loader2 className="animate-spin" size={16} aria-hidden />}
               {mode === "signup" ? "Create account" : "Sign in"}
             </button>
@@ -151,7 +144,7 @@ export default function Auth() {
               onClick={() => setMode(mode === "signup" ? "signin" : "signup")}
               className="text-primary hover:underline"
             >
-              {mode === "signup" ? "Sign in" : "Create one"}
+              {mode === "signup" ? "Sign in" : "Sign Up"}
             </button>
           </p>
         </Surface>
