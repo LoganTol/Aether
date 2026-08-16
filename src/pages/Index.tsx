@@ -199,10 +199,10 @@ const Index = () => {
                 schedule and rotates the captain so the season finishes.
               </p>
               <Link
-                to={target}
+                to="/auth"
                 className="mt-8 inline-flex items-center rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
               >
-                {user ? "Open dashboard" : "Get started free"}
+                Get started free
               </Link>
             </Surface>
           </PageContainer>
