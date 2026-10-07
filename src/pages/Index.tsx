@@ -203,7 +203,20 @@ const Index = () => {
 
       <footer className="border-t border-border">
         <PageContainer width="wide" className="flex flex-col items-center justify-between gap-4 py-8 sm:flex-row">
-          <p className="text-meta">© 2026 Aether Tennis. All rights reserved.</p>
+          <p className="text-meta">
+            © 2026 Aether Tennis. All rights reserved.{" "}
+            <span>
+              Powered by{" "}
+              <a
+                href="https://Wintagen.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="transition-colors hover:text-foreground underline underline-offset-2"
+              >
+                Wintagen
+              </a>
+            </span>
+          </p>
           <div className="flex items-center gap-6">
             <Link to="/terms" className="text-meta transition-colors hover:text-foreground">
               Terms &amp; Conditions
