@@ -1,0 +1,16 @@
+import { describe, expect, it } from "vitest";
+import { parseInviteEmails, rosterReady, validateBasics } from "@/components/season-wizard/lib/creationV2";
+import { generateRoundRobin } from "@/lib/fixtures";
+describe("Season Creation V2 rules",()=>{
+ it("allows creation with no invitations",()=>expect(parseInviteEmails("")).toEqual([]));
+ it("accepts multiple addresses and removes duplicate invitations",()=>expect(parseInviteEmails("alex@example.com, SAM@example.com\nalex@example.com")).toEqual(["alex@example.com","sam@example.com"]));
+ it("rejects malformed email invitations",()=>expect(()=>parseInviteEmails("not-an-email")).toThrow());
+ it("requires end date after start date",()=>expect(validateBasics({name:"Season",format:"singles",start:"2026-10-20",end:"2026-10-20"})).not.toBeNull());
+ it("does not count invited players toward confirmed singles roster",()=>expect(rosterReady("singles",[{id:"a",status:"active",user_id:"1"},{id:"b",status:"invited",user_id:null}],[])).toBe(false));
+ it("supports a two-person singles season",()=>expect(rosterReady("singles",[{id:"a",status:"active",user_id:"1"},{id:"b",status:"active",user_id:"2"}],[])).toBe(true));
+ it("requires complete fixed doubles teams",()=>expect(rosterReady("doubles",["a","b","c","d"].map(id=>({id,status:"active",user_id:id})),[{player_a_id:"a",player_b_id:"b"}])).toBe(false));
+ it("rejects duplicate doubles partners",()=>expect(rosterReady("doubles",["a","b","c","d"].map(id=>({id,status:"active",user_id:id})),[{player_a_id:"a",player_b_id:"b"},{player_a_id:"a",player_b_id:"d"}])).toBe(false));
+ it("accepts a four-person fixed-pair doubles roster",()=>expect(rosterReady("doubles",["a","b","c","d"].map(id=>({id,status:"active",user_id:id})),[{player_a_id:"a",player_b_id:"b"},{player_a_id:"c",player_b_id:"d"}])).toBe(true));
+ it("generates odd singles round robins with byes and no repeated fixtures",()=>{const fixtures=generateRoundRobin(["a","b","c","d","e"]).flat().filter(([a,b])=>a&&b);expect(fixtures).toHaveLength(10);expect(new Set(fixtures.map(p=>p.slice().sort().join(":"))).size).toBe(10);});
+ it("generates one fixture for two players",()=>expect(generateRoundRobin(["a","b"]).flat()).toEqual([["a","b"]]));
+});
