@@ -5,9 +5,9 @@
 export type Pairing = [string | null, string | null];
 
 export function generateRoundRobin(ids: string[]): Pairing[][] {
-  const list = [...ids];
+  const list: (string | null)[] = [...ids];
   if (list.length < 2) return [];
-  if (list.length % 2 === 1) list.push(null as unknown as string); // BYE
+  if (list.length % 2 === 1) list.push(null); // BYE
   const n = list.length;
   const rounds: Pairing[][] = [];
   const arr = [...list];
@@ -22,7 +22,8 @@ export function generateRoundRobin(ids: string[]): Pairing[][] {
     // rotate: keep first, move last to position 1
     const fixed = arr[0];
     const rest = arr.slice(1);
-    rest.unshift(rest.pop()!);
+    const last = rest.pop();
+    if (last !== undefined) rest.unshift(last);
     arr.splice(0, arr.length, fixed, ...rest);
   }
   return rounds;

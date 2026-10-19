@@ -13,7 +13,11 @@ import MatchHistoryTab from "@/components/season/MatchHistoryTab";
 import type { Season, Participant, Team, Match, CaptainSlot, StandingRow } from "@/components/season/types";
 import { PageContainer, Surface, StatusPill, SectionHeading, EmptyState } from "@/components/ui-system";
 
-type Tab = "overview" | "schedule" | "standings" | "history" | "members" | "admin";
+import DraftSeasonHome from "@/components/season/DraftSeasonHome";
+import SeasonSettings from "@/components/season/SeasonSettings";
+import SeasonInvitations from "@/components/season/SeasonInvitations";
+
+type Tab = "overview" | "schedule" | "standings" | "history" | "members" | "admin" | "settings";
 
 export default function SeasonDetail() {
   const { id } = useParams<{ id: string }>();
@@ -26,20 +30,23 @@ export default function SeasonDetail() {
   const [teams, setTeams] = useState<Team[]>([]);
   const [matches, setMatches] = useState<Match[]>([]);
   const [rotation, setRotation] = useState<CaptainSlot[]>([]);
+  const [schedulingMode, setSchedulingMode] = useState<string | null>(null);
   const [standings, setStandings] = useState<StandingRow[]>([]);
 
   const refresh = useCallback(async () => {
     if (!id) return;
     setLoading(true);
-    const [s, p, t, m, r, st] = await Promise.all([
+    const [s, p, t, m, r, st, cfg] = await Promise.all([
       supabase.from("seasons").select("*").eq("id", id).maybeSingle(),
       supabase.from("season_participants").select("*").eq("season_id", id),
       supabase.from("doubles_teams").select("*").eq("season_id", id),
       supabase.from("matches").select("*").eq("season_id", id).order("round").order("created_at"),
       supabase.from("captain_rotation").select("*").eq("season_id", id).order("position"),
       supabase.from("season_standings" as never).select("*").eq("season_id", id),
+      supabase.from("season_settings").select("scheduling_mode").eq("season_id", id).maybeSingle(),
     ]);
-    if (s.data) setSeason(s.data as Season);
+    setSeason((s.data as Season) || null);
+    setSchedulingMode(cfg.data?.scheduling_mode || null);
     setParticipants((p.data as Participant[]) || []);
     setTeams((t.data as Team[]) || []);
     setMatches((m.data as Match[]) || []);
@@ -122,7 +129,7 @@ export default function SeasonDetail() {
     { id: "standings", label: "Standings", icon: Trophy },
     { id: "history", label: "History", icon: History },
     { id: "members", label: "Members", icon: UserCircle },
-    ...(isCreator ? [{ id: "admin" as Tab, label: "Admin", icon: Settings }] : []),
+    ...(isCreator ? [{ id: "settings" as Tab, label: "Settings", icon: Settings }, { id: "admin" as Tab, label: "Admin", icon: Settings }] : []),
   ];
 
   const selectTab = (id: Tab) => {
@@ -179,9 +186,11 @@ export default function SeasonDetail() {
           </div>
         </div>
 
-        {tab === "overview" && (
+        {tab === "overview" && season.status === "draft" && schedulingMode && <DraftSeasonHome season={season} participants={participants} teams={teams} isCreator={isCreator} onChange={refresh} />}
+        {tab === "overview" && !(season.status === "draft" && schedulingMode) && (
           <OverviewTab
             season={season}
+            schedulingMode={schedulingMode}
             participants={participants}
             teams={teams}
             matches={matches}
@@ -222,7 +231,8 @@ export default function SeasonDetail() {
 
         {tab === "members" && (
           <div className="space-y-3">
-            {isCreator && (
+            {isCreator && schedulingMode && season.status === "draft" && <SeasonInvitations seasonId={season.id} onChange={refresh}/>}
+            {isCreator && !schedulingMode && (
               <div className="flex justify-end">
                 <AddMemberDialog seasonId={season.id} onAdded={refresh} />
               </div>
@@ -274,8 +284,11 @@ export default function SeasonDetail() {
           </div>
         )}
 
+        {tab === "settings" && isCreator && <SeasonSettings seasonId={season.id} locked={matches.length > 0} onChange={refresh}/>}
         {tab === "admin" && isCreator && (
           <div className="space-y-4">
+            {rotation.length === 0 && <p className="text-body">No captain rotation assigned. Match disputes can be reviewed from their match pages.</p>}
+            {rotation.length > 0 && <>
             <Surface level={1}>
               <SectionHeading title="Rotate captain" hint="Commissioner override" />
               <p className="text-body mb-4">
@@ -299,6 +312,7 @@ export default function SeasonDetail() {
                 })}
               </ol>
             </Surface>
+            </>}
           </div>
         )}
         </PageContainer>
