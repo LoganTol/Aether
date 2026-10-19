@@ -55,7 +55,7 @@ export default function MatchDetail() {
     if (!matchId) return;
     setLoading(true);
     const { data: m } = await supabase.from("matches").select("*").eq("id", matchId).maybeSingle();
-    if (!m) { setLoading(false); return; }
+    if (!m) { setMatch(null); setLoading(false); return; }
     setMatch(m as Match);
     const [s, p, t, sc, res] = await Promise.all([
       supabase.from("seasons").select("*").eq("id", m.season_id).maybeSingle(),
@@ -120,9 +120,11 @@ export default function MatchDetail() {
     if (!confirmed) return;
     setLoading(true);
     try {
-      await supabase.from("match_scores").delete().eq("match_id", match.id);
-      await supabase.from("match_results").delete().eq("match_id", match.id);
-      await supabase.from("match_time_proposals").delete().eq("match_id", match.id);
+      if (!schedulingMode) {
+        await supabase.from("match_scores").delete().eq("match_id", match.id);
+        await supabase.from("match_results").delete().eq("match_id", match.id);
+        await supabase.from("match_time_proposals").delete().eq("match_id", match.id);
+      }
       const { error } = await supabase.from("matches").delete().eq("id", match.id);
       if (error) throw error;
       toast({ title: "Match deleted" });
@@ -284,6 +286,7 @@ function ScoreEntrySection({ match, sideLabel, myParticipantId, myInvolved, v2, 
   const [busy, setBusy] = useState(false);
 
   const submit = async () => {
+    if (busy) return;
     const valid = sets
       .map((s) => ({ a: parseInt(s.a), b: parseInt(s.b) }))
       .filter((s) => !isNaN(s.a) && !isNaN(s.b));
@@ -322,7 +325,7 @@ function ScoreEntrySection({ match, sideLabel, myParticipantId, myInvolved, v2, 
       setOpen(false);
       onChange();
     } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : "Could not save score";
+      const msg = e instanceof Error ? e.message : (e as {message?:string}).message || "Could not save score";
       toast({ title: "Error", description: msg, variant: "destructive" });
     } finally {
       setBusy(false);

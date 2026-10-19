@@ -31,6 +31,8 @@ export default function OverviewTab({ season, schedulingMode, participants, team
   const iAmCaptain = !!current && current.participant_id === myParticipantId;
 
   const needsScheduling = matches.filter((m) => m.status === "pending" || m.status === "proposed").length;
+  const overdue = matches.filter(m=>!["completed","forfeited"].includes(m.status)&&Date.parse(m.deadline_at)<Date.now()).length;
+  const recent = matches.filter(m=>m.status==="completed").sort((a,b)=>(b.completed_at||b.updated_at).localeCompare(a.completed_at||a.updated_at)).slice(0,3);
   const upcoming = matches
     .filter((m) => m.status === "scheduled" || m.status === "pending" || m.status === "proposed")
     .sort((a, b) => {
@@ -62,7 +64,7 @@ export default function OverviewTab({ season, schedulingMode, participants, team
           <StatBlock label="Players" value={participants.filter((p) => p.status !== "withdrawn").length} />
           <StatBlock label="Matches" value={total} />
           <StatBlock label="Completed" value={completed} />
-          <StatBlock label="Captain" value={schedulingMode === "player_led" ? "Players" : captain?.display_name?.split(" ")[0] || "—"} />
+          <StatBlock label={schedulingMode ? "Scheduling" : "Captain"} value={schedulingMode === "organizer_managed" ? "Organizer" : schedulingMode === "player_led" ? "Players" : captain?.display_name?.split(" ")[0] || "—"} />
         </div>
         <div className="text-eyebrow mb-2 flex items-center justify-between">
           <span>Season progress</span>
@@ -108,7 +110,9 @@ export default function OverviewTab({ season, schedulingMode, participants, team
         </div>
       </Surface>
 
-      : <div className="flex flex-wrap items-center justify-between gap-4 border-y border-border py-5"><div><h2 className="text-ui-title">{schedulingMode === "organizer_managed" ? "Organizer-managed scheduling" : "Player-led scheduling"}</h2><p className="text-body mt-1">{needsScheduling} matches need a time · {matches.filter(m=>m.status === "disputed").length} disputed results</p></div><button className="btn-secondary" onClick={onGoToSchedule}>View matches</button></div>}
+      : <div className="flex flex-wrap items-center justify-between gap-4 border-y border-border py-5"><div><h2 className="text-ui-title">{schedulingMode === "organizer_managed" ? "Organizer-managed scheduling" : "Player-led scheduling"}</h2><p className="text-body mt-1">{needsScheduling} matches need a time · {matches.filter(m=>m.status === "disputed").length} disputed results · {overdue} overdue</p></div><button className="btn-secondary" onClick={onGoToSchedule}>View matches</button></div>}
+
+      {schedulingMode && <div><SectionHeading title="Recent results"/>{recent.length ? recent.map(m=><Link key={m.id} to={`/app/matches/${m.id}/results`} className="block border-b border-border py-3 text-sm font-medium">{sideLabel(m.side_kind,m.side_a_id)} vs {sideLabel(m.side_kind,m.side_b_id)}</Link>) : <p className="text-meta">No confirmed results yet.</p>}</div>}
 
       {/* Upcoming */}
       <div>
