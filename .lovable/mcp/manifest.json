@@ -124,6 +124,8 @@
           "properties": {
             "match_id": {
               "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
               "description": "The match id."
             },
             "scheduled_at": {
@@ -132,7 +134,8 @@
             },
             "location": {
               "description": "Optional court or venue name.",
-              "type": "string"
+              "type": "string",
+              "maxLength": 200
             }
           },
           "required": [
@@ -158,6 +161,8 @@
           "properties": {
             "match_id": {
               "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
               "description": "The match id."
             },
             "sets": {
@@ -167,13 +172,13 @@
                 "properties": {
                   "side_a_games": {
                     "type": "integer",
-                    "minimum": -9007199254740991,
-                    "maximum": 9007199254740991
+                    "minimum": 0,
+                    "maximum": 20
                   },
                   "side_b_games": {
                     "type": "integer",
-                    "minimum": -9007199254740991,
-                    "maximum": 9007199254740991
+                    "minimum": 0,
+                    "maximum": 20
                   }
                 },
                 "required": [
