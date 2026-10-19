@@ -8,6 +8,34 @@
       "when": 1791415268423,
       "tag": "0000_restrict_profiles_select_to_owner",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1792451749865,
+      "tag": "0001_v2_drafts_and_rosters",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792451793619,
+      "tag": "0002_v2_match_agreements",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1792452080842,
+      "tag": "0003_protect_v2_lifecycle_and_roster",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1792452143151,
+      "tag": "0004_tighten_v2_validation_and_invite_compatibility",
+      "breakpoints": true
     }
   ]
 }

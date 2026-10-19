@@ -1,120 +1,14 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { Loader2, Trophy, CheckCircle2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
-import { Surface } from "@/components/ui-system";
-
-interface Participant { id: string; season_id: string; display_name: string; user_id: string | null; status: string }
-interface Season { id: string; name: string; format: string }
-
-export default function JoinSeason() {
-  const { token } = useParams<{ token: string }>();
-  const { user, loading: authLoading } = useAuth();
-  const navigate = useNavigate();
-  const [participant, setParticipant] = useState<Participant | null>(null);
-  const [season, setSeason] = useState<Season | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [joining, setJoining] = useState(false);
-
-  useEffect(() => {
-    if (!token) return;
-    (async () => {
-      const { data: p } = await supabase
-        .from("season_participants")
-        .select("id,season_id,display_name,user_id,status")
-        .eq("join_token", token)
-        .maybeSingle();
-      if (!p) { setError("Invite link is invalid or expired."); return; }
-      setParticipant(p as Participant);
-      const { data: s } = await supabase.from("seasons").select("id,name,format").eq("id", p.season_id).maybeSingle();
-      setSeason(s as Season);
-    })();
-  }, [token]);
-
-  const join = async () => {
-    if (!user || !participant) return;
-    setJoining(true);
-    const { error } = await supabase
-      .from("season_participants")
-      .update({ user_id: user.id, status: "active", joined_at: new Date().toISOString() })
-      .eq("id", participant.id);
-    if (error) {
-      toast({ title: "Could not join", description: error.message, variant: "destructive" });
-      setJoining(false);
-    } else {
-      toast({ title: `Welcome to ${season?.name}` });
-      navigate(`/app/seasons/${participant.season_id}`);
-    }
-  };
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center px-4">
-        <Surface level={2} padded="lg" className="max-w-md text-center">
-          <h1 className="text-page-title mb-2">Invite not found</h1>
-          <p className="text-body mb-4">{error}</p>
-          <Link to="/" className="text-primary hover:underline">Back to home</Link>
-        </Surface>
-      </div>
-    );
-  }
-
-  if (!participant || authLoading) {
-    return <div className="min-h-screen flex items-center justify-center text-body">Loading…</div>;
-  }
-
-  if (participant.user_id && participant.user_id !== user?.id) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center px-4">
-        <Surface level={2} padded="lg" className="max-w-md text-center">
-          <p className="text-body">This invite was already claimed by another account.</p>
-        </Surface>
-      </div>
-    );
-  }
-
-  if (participant.status === "active" && participant.user_id === user?.id) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center px-4">
-        <Surface level={2} padded="lg" className="max-w-md text-center">
-          <CheckCircle2 className="text-primary mx-auto mb-3" aria-hidden />
-          <p className="text-body mb-4">You're already in this season.</p>
-          <Link to={`/app/seasons/${participant.season_id}`} className="btn-primary">
-            Open season
-          </Link>
-        </Surface>
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4">
-      <Surface level={2} padded="lg" className="max-w-md text-center">
-        <Trophy className="text-primary mx-auto mb-4" size={36} aria-hidden />
-        <h1 className="text-page-title mb-2">Join {season?.name}</h1>
-        <p className="text-body mb-6">
-          You've been invited to play as <span className="text-foreground font-medium">{participant.display_name}</span> in this {season?.format} season.
-        </p>
-        {!user ? (
-          <Link
-            to="/auth"
-            state={{ from: `/join/${token}` }}
-            className="btn-primary"
-          >
-            Sign in to accept
-          </Link>
-        ) : (
-          <button
-            onClick={join}
-            disabled={joining}
-            className="btn-primary"
-          >
-            {joining && <Loader2 className="animate-spin" size={16} aria-hidden />} Accept invite
-          </button>
-        )}
-      </Surface>
-    </div>
-  );
+import { Button } from "@/components/ui/button";
+interface Invite {id:string;name:string;format:string;targeted:boolean;display_name?:string}
+export default function JoinSeason(){
+ const {token}=useParams();const {user,loading}=useAuth();const navigate=useNavigate();const [invite,setInvite]=useState<Invite|null>(null);const [error,setError]=useState("");const [busy,setBusy]=useState(false);const [declined,setDeclined]=useState(false);
+ useEffect(()=>{if(!token)return;supabase.rpc("inspect_season_invite_v2",{_token:token}).then(({data,error})=>{if(error||!data)setError("This invitation is expired, revoked, already claimed, or the roster has been finalized.");else setInvite(data as unknown as Invite);});},[token]);
+ const respond=async(decline:boolean)=>{if(!token||busy)return;setBusy(true);const {data,error}=await supabase.rpc("accept_season_invite_v2",{_token:token,_decline:decline});setBusy(false);if(error)toast({title:error.message,variant:"destructive"});else if(decline)setDeclined(true);else navigate(`/app/seasons/${data}`);};
+ return <main className="flex min-h-screen items-center justify-center bg-background px-5"><div className="w-full max-w-md space-y-5 text-center">{error?<><h1 className="text-page-title">Invite unavailable</h1><p className="text-body">{error}</p><Link to="/" className="text-primary">Back to home</Link></>:declined?<><h1 className="text-page-title">Invitation declined</h1><Link to="/app" className="text-primary">Your seasons</Link></>:!invite||loading?<Loader2 className="mx-auto animate-spin text-primary" aria-label="Loading invitation"/>:<><p className="text-eyebrow">Aether Tennis</p><h1 className="text-page-title">Join {invite.name}</h1><p className="text-body">You've been invited to this {invite.format} season{invite.display_name?` as ${invite.display_name}`:""}.</p>{!user?<Button asChild><Link to={`/auth?next=${encodeURIComponent(`/join/${token}`)}`}>Sign in to accept</Link></Button>:<div className="flex justify-center gap-3"><Button disabled={busy} onClick={()=>respond(false)}>{busy&&<Loader2 className="animate-spin"/>}Accept invitation</Button>{invite.targeted&&<Button variant="ghost" disabled={busy} onClick={()=>respond(true)}>Decline</Button>}</div>}</>}</div></main>;
 }

@@ -1,228 +1,54 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Copy, Check, Loader2 } from "lucide-react";
+import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
-import WizardShell from "./WizardShell";
-import Step1Basics from "./steps/Step1Basics";
-import Step2Participants from "./steps/Step2Participants";
-import Step3FormatReview from "./steps/Step3FormatReview";
-import Step4DoublesTeams from "./steps/Step4DoublesTeams";
-import Step5RulesAndRotation from "./steps/Step5RulesAndRotation";
-import Step6Notifications from "./steps/Step6Notifications";
-import Step7ReviewLaunch from "./steps/Step7ReviewLaunch";
-import { useWizardState, validateStep } from "./hooks/useWizardState";
+import { Button } from "@/components/ui/button";
+import { parseInviteEmails, validateBasics } from "./lib/creationV2";
 
-const STEP_LABELS = [
-  "Basics",
-  "Participants",
-  "Review",
-  "Teams",
-  "Rules",
-  "Notifications",
-  "Launch",
-];
-
-const STEP_TITLES: Record<number, { title: string; subtitle: string }> = {
-  1: { title: "Season basics", subtitle: "Name it, pick a format, set the dates." },
-  2: { title: "Add your players", subtitle: "Invite by email — you can also share a link." },
-  3: { title: "Format review", subtitle: "Confirm the season shape before the next steps." },
-  4: { title: "Doubles teams", subtitle: "Pair players into fixed teams." },
-  5: { title: "Rules & rotation", subtitle: "How matches score and how the captain rotates." },
-  6: { title: "Notifications", subtitle: "Choose what reminders go out." },
-  7: { title: "Review & launch", subtitle: "One last look before the season goes live." },
-};
-
+interface Draft { key: string; id?: string; token?: string; name: string; format: "singles" | "doubles"; start: string; end: string; emails: string; step: number }
+const freshDraft = (): Draft => ({ key: crypto.randomUUID(), name: "", format: "singles", start: new Date().toISOString().slice(0,10), end: new Date(Date.now()+56*86400000).toISOString().slice(0,10), emails: "", step: 1 });
+const storedDraft = z.object({key:z.string().uuid(),id:z.string().uuid().optional(),token:z.string().optional(),name:z.string(),format:z.enum(["singles","doubles"]),start:z.string(),end:z.string(),emails:z.string(),step:z.number().min(1).max(3)});
 export default function SeasonWizard() {
-  const { user } = useAuth();
-  const navigate = useNavigate();
-  const [state, dispatch] = useWizardState();
-  const [launching, setLaunching] = useState(false);
-
-  const creatorName =
-    (user?.user_metadata as { display_name?: string; full_name?: string } | null)?.display_name ||
-    (user?.user_metadata as { display_name?: string; full_name?: string } | null)?.full_name ||
-    user?.email?.split("@")[0] ||
-    "Host";
-
-  const isDoubles = state.basics.format === "doubles";
-
-  const goNext = () => {
-    const err = validateStep(state, state.step);
-    if (err) {
-      toast({ title: "Hold on", description: err, variant: "destructive" });
-      return;
-    }
-    // skip step 4 if not doubles
-    if (state.step === 3 && !isDoubles) {
-      dispatch({ type: "SET_STEP", step: 5 });
-      return;
-    }
-    dispatch({ type: "NEXT" });
-  };
-
-  const goBack = () => {
-    if (state.step === 5 && !isDoubles) {
-      dispatch({ type: "SET_STEP", step: 3 });
-      return;
-    }
-    dispatch({ type: "PREV" });
-  };
-
-  const launch = async () => {
-    if (!user) return;
-    // final validation pass
-    for (const s of [1, 2, 4]) {
-      const err = validateStep(state, s);
-      if (err) {
-        toast({ title: "Fix step " + s, description: err, variant: "destructive" });
-        dispatch({ type: "SET_STEP", step: s });
-        return;
-      }
-    }
-
-    setLaunching(true);
-    try {
-      // 1. Season
-      const { data: season, error: sErr } = await supabase
-        .from("seasons")
-        .insert({
-          creator_id: user.id,
-          name: state.basics.name.trim(),
-          format: state.basics.format,
-          start_date: state.basics.startDate,
-          end_date: state.basics.endDate,
-          status: "active",
-          visibility: state.rules.visibility,
-          lifecycle_status: "active",
-        })
-        .select()
-        .single();
-      if (sErr) throw sErr;
-
-      // 2. Settings
-      const { error: setErr } = await supabase.from("season_settings").insert({
-        season_id: season.id,
-        captain_window_days: state.basics.captainWindowDays,
-        match_deadline_days: state.basics.matchDeadlineDays,
-        score_format: state.rules.scoreFormat,
-        dispute_resolution: state.rules.disputeResolution,
-        forfeit_handling: state.rules.forfeitHandling,
-        captain_rotation_mode: state.rules.rotationMode,
-        captain_reminders: state.notifications.captainReminders,
-        deadline_reminders: state.notifications.deadlineReminders,
-        weekly_digest: state.notifications.weeklyDigest,
-        digest_frequency_days: state.notifications.digestFrequencyDays,
-      });
-      if (setErr) throw setErr;
-
-      // 3. Participants (creator first, then invitees)
-      const valid = state.participants.filter((p) => p.display_name.trim());
-      const rows = [
-        {
-          season_id: season.id,
-          display_name: creatorName,
-          invited_email: user.email || null,
-          user_id: user.id,
-          status: "active" as const,
-          joined_at: new Date().toISOString(),
-        },
-        ...valid.map((p) => ({
-          season_id: season.id,
-          display_name: p.display_name.trim(),
-          invited_email: p.email.trim() || null,
-          user_id: null,
-          status: "invited" as const,
-          joined_at: null,
-        })),
-      ];
-      const { data: insertedParticipants, error: pErr } = await supabase
-        .from("season_participants")
-        .insert(rows)
-        .select();
-      if (pErr) throw pErr;
-
-      // 4. Doubles teams (map wizard indexes -> participant ids)
-      if (isDoubles && insertedParticipants) {
-        const teamRows = state.doublesTeams
-          .filter((t) => t.playerAIdx !== null && t.playerBIdx !== null)
-          .map((t) => ({
-            season_id: season.id,
-            name: t.name.trim() || "Team",
-            player_a_id: insertedParticipants[t.playerAIdx as number].id,
-            player_b_id: insertedParticipants[t.playerBIdx as number].id,
-          }));
-        if (teamRows.length) {
-          const { error: tErr } = await supabase.from("doubles_teams").insert(teamRows);
-          if (tErr) throw tErr;
-        }
-      }
-
-      // 5. Generate fixtures
-      const { error: fErr } = await supabase.functions.invoke("generate-fixtures", {
-        body: { season_id: season.id },
-      });
-      if (fErr) throw fErr;
-
-      toast({ title: "Season launched", description: "Schedule generated." });
-      navigate(`/app/seasons/${season.id}/launched`);
-    } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : "Could not launch season";
-      toast({ title: "Error", description: msg, variant: "destructive" });
-    } finally {
-      setLaunching(false);
-    }
-  };
-
-  const meta = STEP_TITLES[state.step];
-
-  return (
-    <WizardShell
-      step={state.step}
-      totalSteps={7}
-      title={meta.title}
-      subtitle={meta.subtitle}
-      stepLabels={STEP_LABELS}
-      onBack={goBack}
-      onNext={goNext}
-      onLaunch={launch}
-      launching={launching}
-    >
-      {state.step === 1 && (
-        <Step1Basics
-          state={state}
-          patch={(p) => dispatch({ type: "PATCH_BASICS", patch: p })}
-        />
-      )}
-      {state.step === 2 && (
-        <Step2Participants
-          state={state}
-          creatorName={creatorName}
-          setParticipants={(p) => dispatch({ type: "SET_PARTICIPANTS", participants: p })}
-        />
-      )}
-      {state.step === 3 && <Step3FormatReview state={state} creatorName={creatorName} />}
-      {state.step === 4 && isDoubles && (
-        <Step4DoublesTeams
-          state={state}
-          creatorName={creatorName}
-          setTeams={(t) => dispatch({ type: "SET_DOUBLES_TEAMS", teams: t })}
-        />
-      )}
-      {state.step === 5 && (
-        <Step5RulesAndRotation
-          state={state}
-          creatorName={creatorName}
-          patchRules={(p) => dispatch({ type: "PATCH_RULES", patch: p })}
-        />
-      )}
-      {state.step === 6 && (
-        <Step6Notifications
-          state={state}
-          patch={(p) => dispatch({ type: "PATCH_NOTIFICATIONS", patch: p })}
-        />
-      )}
-      {state.step === 7 && <Step7ReviewLaunch state={state} creatorName={creatorName} />}
-    </WizardShell>
-  );
+ const { user } = useAuth(); const navigate = useNavigate();
+ const storageKey = `aether-season-setup-${user?.id}`;
+ const [draft,setDraft] = useState<Draft>(() => { try { const parsed=storedDraft.safeParse(JSON.parse(localStorage.getItem(storageKey)||"null")); return parsed.success ? parsed.data : freshDraft(); } catch { return freshDraft(); } });
+ const [busy,setBusy]=useState(false); const locked=useRef(false); const [copied,setCopied]=useState(false);
+ const patch=(v:Partial<Draft>)=>setDraft(d=>({...d,...v}));
+ useEffect(()=>{localStorage.setItem(storageKey,JSON.stringify(draft));},[draft,storageKey]);
+ const save=async (finish=false)=>{
+  if(locked.current) return;
+  const error=validateBasics(draft); if(error){toast({title:error,variant:"destructive"});return;}
+  let emails:string[]; try{emails=parseInviteEmails(draft.emails);}catch(e){toast({title:e instanceof Error?e.message:"Invalid emails",variant:"destructive"});return;}
+  locked.current=true;setBusy(true);
+  try {
+   const {data,error}=await supabase.rpc("save_season_draft_v2",{_key:draft.key,_name:draft.name,_format:draft.format,_start:draft.start,_end:draft.end,_emails:emails});
+   if(error)throw error;
+   const result=data as {id:string;token:string};
+   if(finish){ localStorage.removeItem(storageKey); navigate(`/app/seasons/${result.id}`); }
+   else patch({id:result.id,token:result.token,step:draft.step+1});
+  }catch(e){toast({title:"Could not save season",description:e instanceof Error?e.message:(e as {message?:string}).message,variant:"destructive"});}
+  finally{locked.current=false;setBusy(false);}
+ };
+ const copy=async()=>{if(!draft.token)return;try{await navigator.clipboard.writeText(`${window.location.origin}/join/${draft.token}`);setCopied(true);setTimeout(()=>setCopied(false),2000);}catch{toast({title:"Could not copy invite",variant:"destructive"});}};
+ let count=0;try{count=parseInviteEmails(draft.emails).length;}catch{ /* validation occurs on continue */ }
+ return <div className="space-y-8 pb-8">
+  <ol className="flex items-center gap-4 border-b border-border pb-5 text-sm" aria-label="Season setup progress">{["Basics","Invite players","Review"].map((label,i)=><li key={label} className={`flex min-w-0 flex-1 items-center gap-2 ${draft.step===i+1?"font-semibold text-foreground":"text-muted-foreground"}`}><span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${draft.step>=i+1?"bg-primary/10 text-primary":"bg-muted"}`}>{i+1}</span><span>{label}</span></li>)}</ol>
+  <div><p className="text-meta mb-2">Step {draft.step} of 3</p><h1 className="text-page-title">{draft.step===1?"Season basics":draft.step===2?"Invite your players":"Review & create"}</h1></div>
+  {draft.step===1 && <div className="space-y-6">
+   <div><label htmlFor="season-name" className="mb-2 block text-sm font-medium">Season name</label><input id="season-name" className="field" value={draft.name} onChange={e=>patch({name:e.target.value})} placeholder="Spring Neighborhood Tennis" maxLength={80}/></div>
+   <fieldset><legend className="mb-2 text-sm font-medium">Match format</legend><div className="inline-flex gap-1 rounded-lg border border-border p-1">{(["singles","doubles"] as const).map(f=><Button key={f} variant={draft.format===f?"default":"ghost"} aria-pressed={draft.format===f} onClick={()=>patch({format:f})} className="capitalize">{f}</Button>)}</div></fieldset>
+   <div className="grid gap-4 sm:grid-cols-2"><div><label htmlFor="season-start" className="mb-2 block text-sm font-medium">Start date</label><input id="season-start" type="date" className="field" value={draft.start} onChange={e=>patch({start:e.target.value})}/></div><div><label htmlFor="season-end" className="mb-2 block text-sm font-medium">End date</label><input id="season-end" type="date" className="field" value={draft.end} onChange={e=>patch({end:e.target.value})}/></div></div>
+  </div>}
+  {draft.step===2 && <div className="space-y-6">
+   <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-5"><span className="text-sm font-medium">Season invitation link</span><Button variant="outline" onClick={copy} disabled={!draft.token}>{copied?<Check/>:<Copy/>}{copied?"Copied":"Copy invite link"}</Button></div>
+   <div><label htmlFor="invite-emails" className="mb-2 block text-sm font-medium">Email invitations (optional)</label><textarea id="invite-emails" rows={4} maxLength={13000} className="field" placeholder="alex@example.com, sam@example.com" value={draft.emails} onChange={e=>patch({emails:e.target.value})}/><p className="text-meta mt-2">Separate addresses with commas or new lines. Invitations are prepared with personal links; email delivery awaits sender setup.</p></div>
+   <div className="flex justify-between border-t border-border pt-4 text-sm"><span>Confirmed participants</span><span className="font-semibold">1 · You</span></div>
+   <div className="flex justify-between text-sm"><span>Prepared invitations</span><span className="font-semibold">{count}</span></div>
+  </div>}
+  {draft.step===3 && <dl className="divide-y divide-border">{[["Season",draft.name],["Format",draft.format],["Dates",`${draft.start} – ${draft.end}`],["Prepared invitations",String(count)],["Scheduling","Player-led"],["Competition","Round robin"],["Initial status","Draft"]].map(([label,value])=><div key={label} className="flex justify-between gap-5 py-4 text-sm"><dt className="shrink-0 text-muted-foreground">{label}</dt><dd className="break-words text-right font-medium capitalize">{value}</dd></div>)}</dl>}
+  <div className="flex justify-between gap-3 border-t border-border pt-5"><Button variant="ghost" disabled={busy} onClick={()=>draft.step>1?patch({step:draft.step-1}):navigate("/app")}>{draft.step===1?"Cancel":"Back"}</Button><Button disabled={busy} onClick={()=>save(draft.step===3)}>{busy&&<Loader2 className="animate-spin"/>}{draft.step===3?"Create Season":draft.step===2&&count===0?"Continue without invites":"Continue"}</Button></div>
+ </div>;
 }

@@ -1,0 +1,10 @@
+# Season Creation V2
+- [x] Audit and preserve existing season behavior; legacy captain display verified.
+- [x] Three-step creation, reusable draft, secure link invitations.
+- [x] Confirmed roster, fixed doubles teams, atomic preview/generation implementation.
+- [x] Player-led proposals and opposing-side result confirmation implementation.
+- [x] Advanced settings and lifecycle-aware Season Home.
+- [x] Eleven rule tests; authenticated draft creation/resume/settings and invitation-permission checks; desktop/mobile inspection.
+- [ ] Email invitation delivery — blocked on owned sender-domain setup.
+- [ ] Multi-player activation, availability, score agreement and standings end-to-end checks — blocked on a second confirmed account; only one existing authenticated user is available.
+- [ ] MCP live validation — next explicit publish deploys the updated MCP function.

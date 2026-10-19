@@ -7,9 +7,9 @@ export default defineTool({
   title: "Schedule a match",
   description: "Set the date/time and location for an existing match in a season.",
   inputSchema: {
-    match_id: z.string().describe("The match id."),
+    match_id: z.string().uuid().describe("The match id."),
     scheduled_at: z.string().describe("ISO 8601 date-time for the match."),
-    location: z.string().optional().describe("Optional court or venue name."),
+    location: z.string().max(200).optional().describe("Optional court or venue name."),
   },
   annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
   handler: async ({ match_id, scheduled_at, location }, ctx) => {
@@ -19,6 +19,17 @@ export default defineTool({
       return { content: [{ type: "text", text: "scheduled_at must be a valid ISO 8601 date-time." }], isError: true };
     }
     const supabase = supabaseForUser(ctx);
+    const { data: match, error: accessError } = await supabase.from("matches").select("season_id").eq("id", match_id).maybeSingle();
+    if (accessError || !match) return { content: [{ type: "text", text: accessError?.message || "Match not found." }], isError: true };
+    const { data: cfg, error: cfgError } = await supabase.from("season_settings").select("scheduling_mode").eq("season_id", match.season_id).single();
+    if (cfgError) return { content: [{ type: "text", text: cfgError.message }], isError: true };
+    if (cfg?.scheduling_mode) {
+      const { data: season } = await supabase.from("seasons").select("creator_id").eq("id",match.season_id).single();
+      const { error } = await supabase.rpc("match_action_v2", { _match: match_id, _action: season?.creator_id === ctx.getUserId() ? "override_time" : "propose", _time: when.toISOString(), _location: location });
+      if (error) return { content: [{ type: "text", text: error.message }], isError: true };
+      return { content: [{ type: "text", text: "Time saved; player proposals await availability agreement." }] };
+    }
+
     const { data, error } = await supabase
       .from("matches")
       .update({
