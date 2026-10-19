@@ -245,9 +245,11 @@ export type Database = {
       match_time_proposals: {
         Row: {
           accepted_slot: string | null
+          confirmed_participant_ids: string[]
           created_at: string
           expires_at: string
           id: string
+          location: string | null
           match_id: string
           proposed_by: string
           responded_at: string | null
@@ -257,9 +259,11 @@ export type Database = {
         }
         Insert: {
           accepted_slot?: string | null
+          confirmed_participant_ids?: string[]
           created_at?: string
           expires_at: string
           id?: string
+          location?: string | null
           match_id: string
           proposed_by: string
           responded_at?: string | null
@@ -269,9 +273,11 @@ export type Database = {
         }
         Update: {
           accepted_slot?: string | null
+          confirmed_participant_ids?: string[]
           created_at?: string
           expires_at?: string
           id?: string
+          location?: string | null
           match_id?: string
           proposed_by?: string
           responded_at?: string | null
@@ -439,6 +445,47 @@ export type Database = {
         }
         Relationships: []
       }
+      season_invites: {
+        Row: {
+          accepted_by: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          recipient_email: string | null
+          season_id: string
+          status: string
+          token: string
+        }
+        Insert: {
+          accepted_by?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          recipient_email?: string | null
+          season_id: string
+          status?: string
+          token?: string
+        }
+        Update: {
+          accepted_by?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          recipient_email?: string | null
+          season_id?: string
+          status?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "season_invites_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "seasons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       season_participants: {
         Row: {
           created_at: string
@@ -500,6 +547,8 @@ export type Database = {
           forfeit_handling: Database["public"]["Enums"]["forfeit_handling"]
           match_deadline_days: number
           reminder_frequency_hours: number
+          result_confirmation: boolean
+          scheduling_mode: string | null
           score_format: Database["public"]["Enums"]["score_format"]
           season_id: string
           tiebreaker_order: string[]
@@ -519,6 +568,8 @@ export type Database = {
           forfeit_handling?: Database["public"]["Enums"]["forfeit_handling"]
           match_deadline_days?: number
           reminder_frequency_hours?: number
+          result_confirmation?: boolean
+          scheduling_mode?: string | null
           score_format?: Database["public"]["Enums"]["score_format"]
           season_id: string
           tiebreaker_order?: string[]
@@ -538,6 +589,8 @@ export type Database = {
           forfeit_handling?: Database["public"]["Enums"]["forfeit_handling"]
           match_deadline_days?: number
           reminder_frequency_hours?: number
+          result_confirmation?: boolean
+          scheduling_mode?: string | null
           score_format?: Database["public"]["Enums"]["score_format"]
           season_id?: string
           tiebreaker_order?: string[]
@@ -563,6 +616,8 @@ export type Database = {
           id: string
           lifecycle_status: string
           name: string
+          roster_finalized: boolean
+          setup_key: string | null
           start_date: string
           status: Database["public"]["Enums"]["season_status"]
           updated_at: string
@@ -576,6 +631,8 @@ export type Database = {
           id?: string
           lifecycle_status?: string
           name: string
+          roster_finalized?: boolean
+          setup_key?: string | null
           start_date: string
           status?: Database["public"]["Enums"]["season_status"]
           updated_at?: string
@@ -589,6 +646,8 @@ export type Database = {
           id?: string
           lifecycle_status?: string
           name?: string
+          roster_finalized?: boolean
+          setup_key?: string | null
           start_date?: string
           status?: Database["public"]["Enums"]["season_status"]
           updated_at?: string
@@ -628,6 +687,11 @@ export type Database = {
       }
     }
     Functions: {
+      accept_season_invite_v2: {
+        Args: { _decline?: boolean; _token: string }
+        Returns: string
+      }
+      inspect_season_invite_v2: { Args: { _token: string }; Returns: Json }
       is_season_creator: {
         Args: { _season_id: string; _user_id: string }
         Returns: boolean
@@ -635,6 +699,30 @@ export type Database = {
       is_season_member: {
         Args: { _season_id: string; _user_id: string }
         Returns: boolean
+      }
+      is_v2_season: { Args: { _id: string }; Returns: boolean }
+      manage_season_invite_v2: {
+        Args: { _email?: string; _revoke?: string; _season: string }
+        Returns: string
+      }
+      save_doubles_teams_v2: {
+        Args: { _season: string; _teams: Json }
+        Returns: undefined
+      }
+      save_season_draft_v2: {
+        Args: {
+          _emails?: string[]
+          _end: string
+          _format: string
+          _key: string
+          _name: string
+          _start: string
+        }
+        Returns: Json
+      }
+      season_fixtures_v2: {
+        Args: { _activate?: boolean; _season: string }
+        Returns: Json
       }
     }
     Enums: {
