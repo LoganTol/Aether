@@ -32,7 +32,7 @@ export default function OverviewTab({ season, schedulingMode, participants, team
 
   const needsScheduling = matches.filter((m) => m.status === "pending" || m.status === "proposed").length;
   const overdue = matches.filter(m=>!["completed","forfeited"].includes(m.status)&&Date.parse(m.deadline_at)<Date.now()).length;
-  const recent = matches.filter(m=>m.status==="completed").sort((a,b)=>(b.completed_at||b.updated_at).localeCompare(a.completed_at||a.updated_at)).slice(0,3);
+  const recent = matches.filter(m=>m.status==="completed").sort((a,b)=>(b.completed_at||b.updated_at||"").localeCompare(a.completed_at||a.updated_at||"")).slice(0,3);
   const upcoming = matches
     .filter((m) => m.status === "scheduled" || m.status === "pending" || m.status === "proposed")
     .sort((a, b) => {

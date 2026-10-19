@@ -332,7 +332,7 @@ function ScoreEntrySection({ match, sideLabel, myParticipantId, myInvolved, v2, 
     }
   };
 
-  if (v2 && (result || !canSubmit)) return null;
+  if (v2 && (result || !canSubmit || match.status !== "scheduled")) return null;
 
   if (result) {
     const isOpponent = myParticipantId && result.entered_by && myParticipantId !== result.entered_by && myInvolved;

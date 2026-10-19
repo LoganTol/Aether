@@ -58,6 +58,9 @@ export default function SeasonDetail() {
   useEffect(() => { refresh(); }, [refresh]);
 
   const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  useEffect(() => {
+    if (!loading) tabRefs.current[tab]?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+  }, [loading, tab]);
 
   if (loading) {
     return (
