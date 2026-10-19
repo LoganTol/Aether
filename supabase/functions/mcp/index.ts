@@ -170,9 +170,9 @@ var schedule_match_default = defineTool5({
   title: "Schedule a match",
   description: "Set the date/time and location for an existing match in a season.",
   inputSchema: {
-    match_id: z4.string().describe("The match id."),
+    match_id: z4.string().uuid().describe("The match id."),
     scheduled_at: z4.string().describe("ISO 8601 date-time for the match."),
-    location: z4.string().optional().describe("Optional court or venue name.")
+    location: z4.string().max(200).optional().describe("Optional court or venue name.")
   },
   annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
   handler: async ({ match_id, scheduled_at, location }, ctx) => {
@@ -182,6 +182,16 @@ var schedule_match_default = defineTool5({
       return { content: [{ type: "text", text: "scheduled_at must be a valid ISO 8601 date-time." }], isError: true };
     }
     const supabase = supabaseForUser(ctx);
+    const { data: match, error: accessError } = await supabase.from("matches").select("season_id").eq("id", match_id).maybeSingle();
+    if (accessError || !match) return { content: [{ type: "text", text: accessError?.message || "Match not found." }], isError: true };
+    const { data: cfg, error: cfgError } = await supabase.from("season_settings").select("scheduling_mode").eq("season_id", match.season_id).single();
+    if (cfgError) return { content: [{ type: "text", text: cfgError.message }], isError: true };
+    if (cfg?.scheduling_mode) {
+      const { data: season } = await supabase.from("seasons").select("creator_id").eq("id", match.season_id).single();
+      const { error: error2 } = await supabase.rpc("match_action_v2", { _match: match_id, _action: season?.creator_id === ctx.getUserId() ? "override_time" : "propose", _time: when.toISOString(), _location: location });
+      if (error2) return { content: [{ type: "text", text: error2.message }], isError: true };
+      return { content: [{ type: "text", text: "Time saved; player proposals await availability agreement." }] };
+    }
     const { data, error } = await supabase.from("matches").update({
       scheduled_at: when.toISOString(),
       location: location ?? null,
@@ -205,8 +215,8 @@ var record_score_default = defineTool6({
   title: "Record match score",
   description: "Record the set-by-set box score for a match and mark it completed.",
   inputSchema: {
-    match_id: z5.string().describe("The match id."),
-    sets: z5.array(z5.object({ side_a_games: z5.number().int(), side_b_games: z5.number().int() })).describe("Sets in order, each with games won by side A and side B. Provide 1 to 5 sets.")
+    match_id: z5.string().uuid().describe("The match id."),
+    sets: z5.array(z5.object({ side_a_games: z5.number().int().min(0).max(20), side_b_games: z5.number().int().min(0).max(20) })).describe("Sets in order, each with games won by side A and side B. Provide 1 to 5 sets.")
   },
   annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: false, openWorldHint: false },
   handler: async ({ match_id, sets }, ctx) => {
@@ -215,6 +225,15 @@ var record_score_default = defineTool6({
       return { content: [{ type: "text", text: "Provide between 1 and 5 sets." }], isError: true };
     }
     const supabase = supabaseForUser(ctx);
+    const { data: match, error: accessError } = await supabase.from("matches").select("season_id").eq("id", match_id).maybeSingle();
+    if (accessError || !match) return { content: [{ type: "text", text: accessError?.message || "Match not found." }], isError: true };
+    const { data: cfg, error: cfgError } = await supabase.from("season_settings").select("scheduling_mode").eq("season_id", match.season_id).single();
+    if (cfgError) return { content: [{ type: "text", text: cfgError.message }], isError: true };
+    if (cfg?.scheduling_mode) {
+      const { error } = await supabase.rpc("match_action_v2", { _match: match_id, _action: "submit_score", _scores: sets.map((s) => ({ a: s.side_a_games, b: s.side_b_games })) });
+      if (error) return { content: [{ type: "text", text: error.message }], isError: true };
+      return { content: [{ type: "text", text: "Score submitted; opposing-side confirmation applies." }] };
+    }
     let aSets = 0;
     let bSets = 0;
     for (const s of sets) {

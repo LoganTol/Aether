@@ -7,9 +7,9 @@ export default defineTool({
   title: "Record match score",
   description: "Record the set-by-set box score for a match and mark it completed.",
   inputSchema: {
-    match_id: z.string().describe("The match id."),
+    match_id: z.string().uuid().describe("The match id."),
     sets: z
-      .array(z.object({ side_a_games: z.number().int(), side_b_games: z.number().int() }))
+      .array(z.object({ side_a_games: z.number().int().min(0).max(20), side_b_games: z.number().int().min(0).max(20) }))
       .describe("Sets in order, each with games won by side A and side B. Provide 1 to 5 sets."),
   },
   annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: false, openWorldHint: false },
@@ -19,6 +19,16 @@ export default defineTool({
       return { content: [{ type: "text", text: "Provide between 1 and 5 sets." }], isError: true };
     }
     const supabase = supabaseForUser(ctx);
+    const { data: match, error: accessError } = await supabase.from("matches").select("season_id").eq("id", match_id).maybeSingle();
+    if (accessError || !match) return { content: [{ type: "text", text: accessError?.message || "Match not found." }], isError: true };
+    const { data: cfg, error: cfgError } = await supabase.from("season_settings").select("scheduling_mode").eq("season_id", match.season_id).single();
+    if (cfgError) return { content: [{ type: "text", text: cfgError.message }], isError: true };
+    if (cfg?.scheduling_mode) {
+      const { error } = await supabase.rpc("match_action_v2", { _match: match_id, _action: "submit_score", _scores: sets.map(s=>({a:s.side_a_games,b:s.side_b_games})) });
+      if (error) return { content: [{ type: "text", text: error.message }], isError: true };
+      return { content: [{ type: "text", text: "Score submitted; opposing-side confirmation applies." }] };
+    }
+
     let aSets = 0;
     let bSets = 0;
     for (const s of sets) {

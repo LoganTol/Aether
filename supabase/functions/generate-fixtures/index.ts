@@ -21,7 +21,8 @@ function generateRoundRobin<T>(ids: T[]): [T | null, T | null][][] {
     rounds.push(pairings);
     const fixed = arr[0];
     const rest = arr.slice(1);
-    rest.unshift(rest.pop()!);
+    const last = rest.pop();
+    if (last !== undefined) rest.unshift(last);
     arr.splice(0, arr.length, fixed, ...rest);
   }
   return rounds;
@@ -55,6 +56,11 @@ Deno.serve(async (req) => {
     if (season.creator_id !== user.id) throw new Error("only creator can generate fixtures");
 
     const { data: settings } = await supabase.from("season_settings").select("*").eq("season_id", season_id).maybeSingle();
+    if (settings?.scheduling_mode) {
+      const { data, error } = await userClient.rpc("season_fixtures_v2", { _season: season_id, _activate: true });
+      if (error) throw error;
+      return new Response(JSON.stringify(data), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
     const captainWindowDays = settings?.captain_window_days ?? 7;
     const matchDeadlineDays = settings?.match_deadline_days ?? 14;
 
