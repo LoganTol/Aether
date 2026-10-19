@@ -742,6 +742,10 @@ export type Database = {
         Args: { _activate?: boolean; _season: string }
         Returns: Json
       }
+      withdraw_season_player_v2: {
+        Args: { _participant: string }
+        Returns: undefined
+      }
     }
     Enums: {
       captain_rotation_mode:
