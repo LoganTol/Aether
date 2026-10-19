@@ -112,7 +112,9 @@ export default function SeasonDetail() {
     if (!isCreator) return;
     const confirmed = window.confirm(`Remove ${p.display_name} from this season?`);
     if (!confirmed) return;
-    const { error } = p.status === "invited"
+    const { error } = schedulingMode
+      ? await supabase.rpc("withdraw_season_player_v2", { _participant: p.id })
+      : p.status === "invited"
       ? await supabase.from("season_participants").delete().eq("id", p.id)
       : await supabase.from("season_participants").update({ status: "withdrawn" }).eq("id", p.id);
     if (error) {
