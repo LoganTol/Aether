@@ -7,6 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
 import type { Season } from "@/components/season/types";
 import { PageContainer, Surface, StatusPill, SectionHeading, EmptyState } from "@/components/ui-system";
+import PlayerMatchActions from "@/components/season/PlayerMatchActions";
 import { deriveStatus } from "@/components/season/MatchStatusBadge";
 
 interface Match {
@@ -47,6 +48,7 @@ export default function MatchDetail() {
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
   const [scores, setScores] = useState<ScoreRow[]>([]);
+  const [schedulingMode,setSchedulingMode] = useState<string | null>(null);
   const [result, setResult] = useState<Result | null>(null);
 
   const refresh = useCallback(async () => {
@@ -62,6 +64,8 @@ export default function MatchDetail() {
       supabase.from("match_scores").select("*").eq("match_id", matchId).order("set_number"),
       supabase.from("match_results").select("*").eq("match_id", matchId).maybeSingle(),
     ]);
+    const { data: cfg } = await supabase.from("season_settings").select("scheduling_mode").eq("season_id",m.season_id).maybeSingle();
+    setSchedulingMode(cfg?.scheduling_mode || null);
     setSeason((s.data as Season) || null);
     setParticipants((p.data as Participant[]) || []);
     setTeams((t.data as Team[]) || []);
@@ -186,11 +190,13 @@ export default function MatchDetail() {
             </dl>
           </Surface>
 
+          {schedulingMode && <PlayerMatchActions match={match} participants={participants} teams={teams} myId={myId} isCreator={isCreator} mode={schedulingMode} result={result} onChange={refresh}/>}
+
           {(match.status === "scheduled" || match.status === "pending" || match.status === "proposed") && (
-            <ScoreEntrySection match={match} sideLabel={sideLabel} myParticipantId={myId} myInvolved={!!myInvolved} scores={scores} result={result} onChange={refresh} />
+            <ScoreEntrySection match={match} sideLabel={sideLabel} myParticipantId={myId} myInvolved={!!myInvolved} v2={!!schedulingMode} canSubmit={!schedulingMode || !!myInvolved || isCreator} scores={scores} result={result} onChange={refresh} />
           )}
 
-          {match.status === "completed" && (
+          {(match.status === "completed" || (schedulingMode && result)) && (
             <BoxScore match={match} scores={scores} result={result} sideLabel={sideLabel} />
           )}
         </PageContainer>
@@ -265,9 +271,9 @@ function BoxScore({ match, scores, result, sideLabel }: {
   );
 }
 
-function ScoreEntrySection({ match, sideLabel, myParticipantId, myInvolved, scores, result, onChange }: {
+function ScoreEntrySection({ match, sideLabel, myParticipantId, myInvolved, v2, canSubmit, scores, result, onChange }: {
   match: Match; sideLabel: (id: string) => string; myParticipantId?: string; myInvolved: boolean;
-  scores: ScoreRow[]; result: Result | null; onChange: () => void;
+  v2: boolean; canSubmit: boolean; scores: ScoreRow[]; result: Result | null; onChange: () => void;
 }) {
   const [open, setOpen] = useState(false);
   const [sets, setSets] = useState<{ a: string; b: string }[]>(
@@ -287,6 +293,13 @@ function ScoreEntrySection({ match, sideLabel, myParticipantId, myInvolved, scor
     }
     setBusy(true);
     try {
+      if (v2) {
+        if (sets.some(s => (s.a === "") !== (s.b === ""))) throw new Error("Fill both sides of each set.");
+        const { error } = await supabase.rpc("match_action_v2", { _match: match.id, _action: "submit_score", _scores: valid });
+        if (error) throw error;
+        toast({ title: "Score saved", description: "Awaiting opposing side confirmation." });
+        setOpen(false); onChange(); return;
+      }
       // wipe & re-insert scores
       await supabase.from("match_scores").delete().eq("match_id", match.id);
       const { error: scoresErr } = await supabase.from("match_scores").insert(valid.map((v, i) => ({
@@ -315,6 +328,8 @@ function ScoreEntrySection({ match, sideLabel, myParticipantId, myInvolved, scor
       setBusy(false);
     }
   };
+
+  if (v2 && (result || !canSubmit)) return null;
 
   if (result) {
     const isOpponent = myParticipantId && result.entered_by && myParticipantId !== result.entered_by && myInvolved;
