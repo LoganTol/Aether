@@ -705,6 +705,20 @@ export type Database = {
         Args: { _email?: string; _revoke?: string; _season: string }
         Returns: string
       }
+      match_action_v2: {
+        Args: {
+          _action: string
+          _location?: string
+          _match: string
+          _scores?: Json
+          _time?: string
+        }
+        Returns: undefined
+      }
+      match_side_v2: {
+        Args: { _match: string; _participant: string }
+        Returns: string
+      }
       save_doubles_teams_v2: {
         Args: { _season: string; _teams: Json }
         Returns: undefined
@@ -719,6 +733,10 @@ export type Database = {
           _start: string
         }
         Returns: Json
+      }
+      save_season_settings_v2: {
+        Args: { _season: string; _settings: Json }
+        Returns: undefined
       }
       season_fixtures_v2: {
         Args: { _activate?: boolean; _season: string }
