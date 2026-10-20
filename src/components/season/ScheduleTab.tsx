@@ -3,18 +3,25 @@ import { MapPin, Trash2 } from "lucide-react";
 import MatchStatusBadge from "./MatchStatusBadge";
 import type { Match, SideLabel } from "./types";
 import { Surface, SectionHeading, EmptyState } from "@/components/ui-system";
+import PlanningSchedule from "./PlanningSchedule";
+import type { PreviewFixture } from "@/components/season-wizard/lib/creationV2";
 
 export default function ScheduleTab({
   matches,
   sideLabel,
   isCreator,
   onDelete,
+  preview,
+  onOverview,
 }: {
   matches: Match[];
   sideLabel: SideLabel;
   isCreator?: boolean;
   onDelete?: (matchId: string) => void;
+  preview?: PreviewFixture[] | null;
+  onOverview?: () => void;
 }) {
+  if (matches.length === 0 && preview && onOverview) return <PlanningSchedule fixtures={preview} onOverview={onOverview} />;
   if (matches.length === 0) {
     return (
       <Surface level={1} padded={false}>
