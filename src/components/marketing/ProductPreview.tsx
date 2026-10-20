@@ -19,21 +19,21 @@ function PreviewFrame({ label, children }: { label: string; children: React.Reac
   );
 }
 
-export function CaptainPreview() {
+export function SeasonPreview() {
   return (
-    <PreviewFrame label="This week">
+    <PreviewFrame label="Season overview">
       <div className="p-5">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <div className="text-eyebrow">Scheduling captain</div>
-            <p className="mt-1.5 font-heading text-2xl font-bold tracking-tight">Maya R.</p>
+            <div className="text-eyebrow">Singles · Round Robin</div>
+            <p className="mt-1.5 font-heading text-2xl font-bold">Riverside Friends</p>
           </div>
-          <StatusPill tone="active">On the clock</StatusPill>
+          <StatusPill tone="active">Active</StatusPill>
         </div>
         <div className="mt-5 grid grid-cols-3 gap-4 border-t border-border pt-4">
-          <StatBlock label="Rotates in" value="3d" emphasis />
-          <StatBlock label="To book" value="2" />
-          <StatBlock label="Overdue" value="0" />
+          <StatBlock label="Players" value="6" emphasis />
+          <StatBlock label="Matches" value="15" />
+          <StatBlock label="Rounds" value="5" />
         </div>
       </div>
     </PreviewFrame>
@@ -46,8 +46,8 @@ export function ScheduledPreview() {
       <DataList>
         <DataRow
           title="Maya R. vs. Dev P."
-          subtitle="Sat 9:00 AM · Court 3"
-          trailing={<StatusPill tone="active">Confirmed</StatusPill>}
+          subtitle="Sat 9:00 AM · Riverside Courts"
+          trailing={<StatusPill tone="active">Scheduled</StatusPill>}
         />
         <DataRow
           title="Leah K. vs. Tom B."
@@ -56,8 +56,8 @@ export function ScheduledPreview() {
         />
         <DataRow
           title="Chris O. vs. Ana W."
-          subtitle="Needs a time · due in 2 days"
-          trailing={<StatusPill tone="warning">Action</StatusPill>}
+          subtitle="Date & time not set"
+          trailing={<StatusPill>Pending</StatusPill>}
         />
       </DataList>
     </PreviewFrame>
@@ -114,18 +114,18 @@ export function MatchCardPreview() {
           <StatusPill tone="success">Final</StatusPill>
         </div>
         <div className="nums grid grid-cols-[1fr_2.2rem_2.2rem_2.2rem] gap-2 text-sm">
-          <span className="text-eyebrow self-end">Set</span>
+          <span className="text-eyebrow self-end">Player</span>
           <span className="text-eyebrow text-right">1</span>
           <span className="text-eyebrow text-right">2</span>
           <span className="text-eyebrow text-right">3</span>
           <span className="text-foreground">Maya R.</span>
           <span className="text-right text-foreground">6</span>
           <span className="text-right text-[hsl(var(--text-muted))]">4</span>
-          <span className="text-right text-foreground">7</span>
+          <span className="text-right font-semibold text-primary">10</span>
           <span className="text-[hsl(var(--text-muted))]">Dev P.</span>
           <span className="text-right text-[hsl(var(--text-muted))]">3</span>
           <span className="text-right text-foreground">6</span>
-          <span className="text-right text-[hsl(var(--text-muted))]">5</span>
+          <span className="text-right text-[hsl(var(--text-muted))]">8</span>
         </div>
         <div className="text-meta flex flex-wrap items-center gap-4 border-t border-border pt-3">
           <span className="inline-flex items-center gap-1.5"><Clock size={13} /> Sat 9:00 AM</span>
