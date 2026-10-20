@@ -49,6 +49,7 @@ export default function MatchDetail() {
   const [teams, setTeams] = useState<Team[]>([]);
   const [scores, setScores] = useState<ScoreRow[]>([]);
   const [schedulingMode,setSchedulingMode] = useState<string | null>(null);
+  const [directScheduling,setDirectScheduling] = useState(false);
   const [result, setResult] = useState<Result | null>(null);
 
   const refresh = useCallback(async () => {
@@ -64,8 +65,9 @@ export default function MatchDetail() {
       supabase.from("match_scores").select("*").eq("match_id", matchId).order("set_number"),
       supabase.from("match_results").select("*").eq("match_id", matchId).maybeSingle(),
     ]);
-    const { data: cfg } = await supabase.from("season_settings").select("scheduling_mode").eq("season_id",m.season_id).maybeSingle();
+    const { data: cfg } = await supabase.from("season_settings").select("scheduling_mode,direct_match_scheduling").eq("season_id",m.season_id).maybeSingle();
     setSchedulingMode(cfg?.scheduling_mode || null);
+    setDirectScheduling(cfg?.direct_match_scheduling || false);
     setSeason((s.data as Season) || null);
     setParticipants((p.data as Participant[]) || []);
     setTeams((t.data as Team[]) || []);
@@ -144,7 +146,7 @@ export default function MatchDetail() {
       <main>
         <PageContainer width="narrow" className="space-y-6 py-8">
           <button
-            onClick={() => navigate(`/app/seasons/${match.season_id}`)}
+            onClick={() => navigate(`/app/seasons/${match.season_id}?tab=schedule`)}
             className="text-meta inline-flex items-center gap-2 transition-colors hover:text-foreground"
           >
             <ArrowLeft size={14} aria-hidden /> Back to season
@@ -192,10 +194,10 @@ export default function MatchDetail() {
             </dl>
           </Surface>
 
-          {schedulingMode && <PlayerMatchActions match={match} participants={participants} teams={teams} myId={myId} isCreator={isCreator} mode={schedulingMode} result={result} onChange={refresh}/>}
+          {schedulingMode && <PlayerMatchActions match={match} participants={participants} teams={teams} myId={myId} isCreator={isCreator} mode={schedulingMode} result={result} onChange={refresh} direct={directScheduling}/>}
 
           {(match.status === "scheduled" || match.status === "pending" || match.status === "proposed") && (
-            <ScoreEntrySection match={match} sideLabel={sideLabel} myParticipantId={myId} myInvolved={!!myInvolved} v2={!!schedulingMode} canSubmit={!schedulingMode || !!myInvolved || isCreator} scores={scores} result={result} onChange={refresh} />
+            <ScoreEntrySection match={match} sideLabel={sideLabel} myParticipantId={myId} myInvolved={!!myInvolved} v2={!!schedulingMode} direct={directScheduling} canSubmit={!schedulingMode || !!myInvolved || isCreator} scores={scores} result={result} onChange={refresh} />
           )}
 
           {(match.status === "completed" || (schedulingMode && result)) && (
@@ -273,9 +275,9 @@ function BoxScore({ match, scores, result, sideLabel }: {
   );
 }
 
-function ScoreEntrySection({ match, sideLabel, myParticipantId, myInvolved, v2, canSubmit, scores, result, onChange }: {
+function ScoreEntrySection({ match, sideLabel, myParticipantId, myInvolved, v2, direct, canSubmit, scores, result, onChange }: {
   match: Match; sideLabel: (id: string) => string; myParticipantId?: string; myInvolved: boolean;
-  v2: boolean; canSubmit: boolean; scores: ScoreRow[]; result: Result | null; onChange: () => void;
+  v2: boolean; direct: boolean; canSubmit: boolean; scores: ScoreRow[]; result: Result | null; onChange: () => void;
 }) {
   const [open, setOpen] = useState(false);
   const [sets, setSets] = useState<{ a: string; b: string }[]>(
@@ -332,7 +334,7 @@ function ScoreEntrySection({ match, sideLabel, myParticipantId, myInvolved, v2, 
     }
   };
 
-  if (v2 && (result || !canSubmit || match.status !== "scheduled")) return null;
+  if (v2 && (result || !canSubmit || (!direct && match.status !== "scheduled"))) return null;
 
   if (result) {
     const isOpponent = myParticipantId && result.entered_by && myParticipantId !== result.entered_by && myInvolved;

@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { parseInviteEmails, rosterReady, validateBasics, validateInvitePlayers, buildPreviewRoster, previewSchedule } from "@/components/season-wizard/lib/creationV2";
 import { generateRoundRobin } from "@/lib/fixtures";
+import { isOwnMatch } from "@/lib/match-access";
 describe("Season Creation V2 rules",()=>{
+ it("identifies either singles player as a match owner",()=>{const match={side_kind:"player",side_a_id:"a",side_b_id:"b"};expect(isOwnMatch(match,"a",[])).toBe(true);expect(isOwnMatch(match,"b",[])).toBe(true);expect(isOwnMatch(match,"c",[])).toBe(false);expect(isOwnMatch(match,undefined,[])).toBe(false);});
+ it("identifies all four fixed doubles players without granting other members ownership",()=>{const match={side_kind:"team",side_a_id:"t1",side_b_id:"t2"};const teams=[{id:"t1",player_a_id:"a",player_b_id:"b"},{id:"t2",player_a_id:"c",player_b_id:"d"}];for(const id of ["a","b","c","d"])expect(isOwnMatch(match,id,teams)).toBe(true);expect(isOwnMatch(match,"e",teams)).toBe(false);});
+ it("builds the complete five-player round-robin schedule with invited players",()=>{const players=["a","b","c","d","e"].map((id,index)=>({id,display_name:id,user_id:index===0?"u1":null,status:index===0?"active":"invited",invited_email:null}));const fixtures=previewSchedule("singles",players,[]);expect(fixtures).toHaveLength(10);expect(new Set(fixtures?.map(f=>f.round)).size).toBe(5);expect(new Set(fixtures?.map(f=>[f.a,f.b].sort().join(":"))).size).toBe(10);});
  it("previews one singles match before an invited player accepts",()=>{
   const roster=buildPreviewRoster([{id:"organizer",display_name:"Organizer",status:"active",user_id:"u1",invited_email:null}],[{id:"i1",recipient_name:"Alex Morgan",recipient_email:"alex@example.com",status:"pending",expires_at:"2026-11-20T00:00:00Z"}],Date.parse("2026-10-20T00:00:00Z"));
   expect(previewSchedule("singles",roster,[])).toEqual([{round:1,a:"organizer",b:"invite:i1",aName:"Organizer",bName:"Alex Morgan"}]);

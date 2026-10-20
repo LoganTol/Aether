@@ -546,6 +546,7 @@ export type Database = {
           creator_can_override: boolean
           deadline_reminders: boolean
           digest_frequency_days: number
+          direct_match_scheduling: boolean
           dispute_resolution: Database["public"]["Enums"]["dispute_resolution"]
           forfeit_handling: Database["public"]["Enums"]["forfeit_handling"]
           match_deadline_days: number
@@ -567,6 +568,7 @@ export type Database = {
           creator_can_override?: boolean
           deadline_reminders?: boolean
           digest_frequency_days?: number
+          direct_match_scheduling?: boolean
           dispute_resolution?: Database["public"]["Enums"]["dispute_resolution"]
           forfeit_handling?: Database["public"]["Enums"]["forfeit_handling"]
           match_deadline_days?: number
@@ -588,6 +590,7 @@ export type Database = {
           creator_can_override?: boolean
           deadline_reminders?: boolean
           digest_frequency_days?: number
+          direct_match_scheduling?: boolean
           dispute_resolution?: Database["public"]["Enums"]["dispute_resolution"]
           forfeit_handling?: Database["public"]["Enums"]["forfeit_handling"]
           match_deadline_days?: number
@@ -693,6 +696,14 @@ export type Database = {
       accept_season_invite_v2: {
         Args: { _decline?: boolean; _token: string }
         Returns: string
+      }
+      claim_launched_roster_invite_v2: {
+        Args: { _decline: boolean; _token: string }
+        Returns: string
+      }
+      finalize_season_schedule_v2: {
+        Args: { _season: string; _teams?: Json }
+        Returns: Json
       }
       inspect_season_invite_v2: { Args: { _token: string }; Returns: Json }
       is_season_creator: {
