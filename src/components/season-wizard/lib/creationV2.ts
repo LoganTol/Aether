@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { generateRoundRobin } from "@/lib/fixtures";
 export interface PreviewPlayer { id: string; display_name: string; invited_email: string | null; status: string; user_id: string | null }
+export interface PreviewFixture { round: number; a: string; b: string; aName: string; bName: string }
 export function buildPreviewRoster(players: PreviewPlayer[], invites: {id:string;recipient_name:string|null;recipient_email:string|null;status:string;expires_at:string}[], now:number): PreviewPlayer[] {
  const roster=players.filter(p=>p.status==="active"||p.status==="invited");
  const emails=new Set(roster.map(p=>p.invited_email?.toLowerCase()).filter(Boolean));

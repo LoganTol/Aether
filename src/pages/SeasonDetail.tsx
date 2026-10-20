@@ -16,6 +16,7 @@ import { PageContainer, Surface, StatusPill, SectionHeading, EmptyState } from "
 import DraftSeasonHome from "@/components/season/DraftSeasonHome";
 import SeasonSettings from "@/components/season/SeasonSettings";
 import SeasonInvitations from "@/components/season/SeasonInvitations";
+import type { PreviewFixture } from "@/components/season-wizard/lib/creationV2";
 
 type Tab = "overview" | "schedule" | "standings" | "history" | "members" | "admin" | "settings";
 
@@ -29,6 +30,7 @@ export default function SeasonDetail() {
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
   const [matches, setMatches] = useState<Match[]>([]);
+  const [schedulePreview, setSchedulePreview] = useState<PreviewFixture[] | null>(null);
   const [rotation, setRotation] = useState<CaptainSlot[]>([]);
   const [schedulingMode, setSchedulingMode] = useState<string | null>(null);
   const [standings, setStandings] = useState<StandingRow[]>([]);
@@ -36,6 +38,7 @@ export default function SeasonDetail() {
   const refresh = useCallback(async () => {
     if (!id) return;
     setLoading(true);
+    setSchedulePreview(null);
     const [s, p, t, m, r, st, cfg] = await Promise.all([
       supabase.from("seasons").select("*").eq("id", id).maybeSingle(),
       supabase.from("season_participants").select("*").eq("season_id", id),
@@ -191,7 +194,7 @@ export default function SeasonDetail() {
           </div>
         </div>
 
-        {tab === "overview" && season.status === "draft" && schedulingMode && <DraftSeasonHome season={season} participants={participants} teams={teams} isCreator={isCreator} onChange={refresh} />}
+        {tab === "overview" && season.status === "draft" && schedulingMode && <DraftSeasonHome season={season} participants={participants} teams={teams} isCreator={isCreator} onChange={refresh} previewed={!!schedulePreview} onPreview={(fixtures) => { setSchedulePreview(fixtures); selectTab("schedule"); }} />}
         {tab === "overview" && !(season.status === "draft" && schedulingMode) && (
           <OverviewTab
             season={season}
@@ -210,6 +213,8 @@ export default function SeasonDetail() {
         {tab === "schedule" && (
           <ScheduleTab
             matches={matches}
+            preview={season.status === "draft" && schedulingMode ? schedulePreview : null}
+            onOverview={() => selectTab("overview")}
             sideLabel={sideLabel}
             isCreator={isCreator}
             onDelete={async (matchId) => {
