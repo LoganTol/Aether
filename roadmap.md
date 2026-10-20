@@ -1,5 +1,5 @@
 # Season Creation V2
-- [ ] Update landing-page copy and product previews to the player-led schedule and flexible box-score journey; verify presentation.
+- [x] Landing-page copy, metadata and previews reflect player-led matches, full Schedule/Bracket views and flexible box scores; wide/narrow layouts and section link verified without overflow or runtime errors.
 - [x] Flexible set scoring and player-row box-score entry; short sets and deciding tiebreak saved and read back through match/schedule, tied/decimal scores rejected, mobile overflow absent; 38 tests pass.
 - [x] Shared calendar/time controls and authenticated Google Places venue/full-address search deployed; manual address/date/time saves verified after reload with no mobile overflow; 27 tests pass. Live Google Places search remains unverified because sandbox Maps testing is unsupported; validate on deployed site.
 - [x] Single-action launch includes invited players without confirming membership; verified active state, retry idempotency and continued invitation inspection. Default-false setting preserves started seasons.
