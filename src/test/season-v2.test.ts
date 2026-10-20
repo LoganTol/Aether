@@ -3,6 +3,7 @@ import { parseInviteEmails, rosterReady, validateBasics, validateInvitePlayers }
 import { generateRoundRobin } from "@/lib/fixtures";
 describe("Season Creation V2 rules",()=>{
  it("preserves names and emails for each invited player",()=>expect(validateInvitePlayers([{name:" Alex Smith ",email:"ALEX@example.com"},{name:"Sam",email:"sam@example.com"}])).toEqual([{name:"Alex Smith",email:"alex@example.com"},{name:"Sam",email:"sam@example.com"}]));
+ it("keeps first and last names intact for overview invitations",()=>expect(validateInvitePlayers([{name:"Alex Morgan",email:"alex@example.com"},{name:"Sam Taylor",email:"sam@example.com"}]).map(p=>p.name)).toEqual(["Alex Morgan","Sam Taylor"]));
  it("requires a name for an entered invitation",()=>expect(()=>validateInvitePlayers([{name:"",email:"alex@example.com"}])).toThrow());
  it("requires an email for an entered player",()=>expect(()=>validateInvitePlayers([{name:"Alex",email:""}])).toThrow());
  it("allows blank invitation rows without registering players",()=>expect(validateInvitePlayers([{name:"",email:""}])).toEqual([]));
