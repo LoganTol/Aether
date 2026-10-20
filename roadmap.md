@@ -1,4 +1,5 @@
 # Season Creation V2
+- [ ] Improve date/time controls and connect real venue/address search; verify non-Maps scheduling and document live Maps verification limitation.
 - [x] Single-action launch includes invited players without confirming membership; verified active state, retry idempotency and continued invitation inspection. Default-false setting preserves started seasons.
 - [x] Clickable schedule/bracket cards, date/time/location saves and score summaries verified after reload; 10 matches/5 bracket rounds, no mobile overflow, 24 rule tests pass. Temporary test seasons removed.
 - [x] Full planning preview opens in Schedule with brand-green round groups; button/heading capitalization verified; 10 matchups across 5 rounds, protected activation, no mobile overflow, 21 rule tests passing.

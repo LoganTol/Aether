@@ -1,4 +1,5 @@
 # Architecture
+- Share calendar/time and venue-search controls between match editing and creation; authenticated Google Places gateway lookups supply venue names/full addresses saved through existing match writes, keeping provider credentials server-only.
 - Finalize new draft schedules through the atomic single-action launch RPC; materialize invitation placeholders without confirming membership, then claim those same participant IDs on acceptance to preserve fixtures.
 - Version direct match scheduling with a default-false season setting so existing agreements remain unchanged; list and round-robin bracket views share persisted match cards and the same protected editor. Use presentation-only capitalization so stored names and input values remain unchanged.
 - Save named creation and overview invitations atomically through wrappers around existing draft/invite operations; acceptance uses the invited name even through a shared link without confirming membership early.
