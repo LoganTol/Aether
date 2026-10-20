@@ -34,8 +34,8 @@ export default function PlayLocationField({ value, onChange }: { value: string; 
     return data;
   };
   useEffect(() => {
-    const current = ++version.current;
     if (!focused || !typed || value.trim().length < 3) { setBusy(false); setPlaces([]); return; }
+    const current = ++version.current;
     const key = `${value}:${coordinates?.latitude}:${coordinates?.longitude}`;
     const cached = cache.current.get(key);
     if (cached) { setPlaces(cached); return; }
