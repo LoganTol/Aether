@@ -12,7 +12,7 @@ export default function MatchDateTimeField({ value, onChange }: { value: string;
   const [day, setDay] = useState<Date | undefined>(() => matchDate(value));
   const [time, setTime] = useState(value.slice(11, 16));
   useEffect(() => { if (value) { setDay(matchDate(value)); setTime(value.slice(11, 16)); } }, [value]);
-  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone.replaceAll("_", " ");
+  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone.replace(/_/g, " ");
   return <div className="space-y-2">
     <div className="grid grid-cols-[minmax(0,1fr)_minmax(120px,0.65fr)] gap-3">
       <div className="min-w-0"><label className="mb-2 block text-sm font-medium">Date</label>
