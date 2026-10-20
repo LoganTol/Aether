@@ -452,6 +452,7 @@ export type Database = {
           expires_at: string
           id: string
           recipient_email: string | null
+          recipient_name: string | null
           season_id: string
           status: string
           token: string
@@ -462,6 +463,7 @@ export type Database = {
           expires_at?: string
           id?: string
           recipient_email?: string | null
+          recipient_name?: string | null
           season_id: string
           status?: string
           token?: string
@@ -472,6 +474,7 @@ export type Database = {
           expires_at?: string
           id?: string
           recipient_email?: string | null
+          recipient_name?: string | null
           season_id?: string
           status?: string
           token?: string
@@ -722,6 +725,17 @@ export type Database = {
       save_doubles_teams_v2: {
         Args: { _season: string; _teams: Json }
         Returns: undefined
+      }
+      save_named_season_draft_v2: {
+        Args: {
+          _end: string
+          _format: string
+          _key: string
+          _name: string
+          _players?: Json
+          _start: string
+        }
+        Returns: Json
       }
       save_season_draft_v2: {
         Args: {

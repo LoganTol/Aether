@@ -36,6 +36,13 @@
       "when": 1792452143151,
       "tag": "0004_tighten_v2_validation_and_invite_compatibility",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1792501033417,
+      "tag": "0005_named_creation_invitations",
+      "breakpoints": true
     }
   ]
 }
