@@ -1,4 +1,5 @@
 # Season Creation V2
+- [ ] Enable schedule preview with invited players, keeping activation confirmation requirements unchanged.
 - [x] Named overview invitation rows; saved full names verified in confirmed roster after shared-link acceptance and reload.
 - [x] Separate creation invitation name/email rows with Add player below, saved names, and stacked review dates.
 - [x] Audit and preserve existing season behavior; legacy captain display verified.
