@@ -173,12 +173,12 @@
                   "side_a_games": {
                     "type": "integer",
                     "minimum": 0,
-                    "maximum": 20
+                    "maximum": 99
                   },
                   "side_b_games": {
                     "type": "integer",
                     "minimum": 0,
-                    "maximum": 20
+                    "maximum": 99
                   }
                 },
                 "required": [
