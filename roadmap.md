@@ -1,6 +1,6 @@
 # Season Creation V2
-- [ ] Single-action schedule generation/activation including invited players, preserving acceptance and older seasons.
-- [ ] Clickable schedule/bracket cards, participant date/time/location editing, saved score summaries, and live verification.
+- [x] Single-action launch includes invited players without confirming membership; verified active state, retry idempotency and continued invitation inspection. Default-false setting preserves started seasons.
+- [x] Clickable schedule/bracket cards, date/time/location saves and score summaries verified after reload; 10 matches/5 bracket rounds, no mobile overflow, 24 rule tests pass. Temporary test seasons removed.
 - [x] Full planning preview opens in Schedule with brand-green round groups; button/heading capitalization verified; 10 matchups across 5 rounds, protected activation, no mobile overflow, 21 rule tests passing.
 - [x] Schedule preview includes invited players; verified six matchups with one confirmed player, with activation still protected.
 - [x] Named overview invitation rows; saved full names verified in confirmed roster after shared-link acceptance and reload.
@@ -12,5 +12,5 @@
 - [x] Advanced settings and lifecycle-aware Season Home.
 - [x] Eleven rule tests; authenticated draft creation/resume/settings and invitation-permission checks; desktop/mobile inspection.
 - [ ] Email invitation delivery — blocked on owned sender-domain setup.
-- [ ] Multi-player activation, availability, score agreement and standings end-to-end checks — blocked on a second confirmed account; only one existing authenticated user is available.
+- [ ] Second-account post-launch invitation claim, non-organizer match editing, opposing-side score confirmation and standings end-to-end checks — blocked on a second confirmed account; only one existing authenticated user is available.
 - [ ] MCP live validation — next explicit publish deploys the updated MCP function.
