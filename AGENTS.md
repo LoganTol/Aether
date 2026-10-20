@@ -1,4 +1,5 @@
 # Architecture
+- Parse manual match scores through the shared score-entry validator; the protected V2 RPC independently enforces the same numeric and winner checks without imposing tournament set formats, while preserving result-confirmation permissions.
 - Share calendar/time and venue-search controls between match editing and creation; authenticated Google Places gateway lookups supply venue names/full addresses saved through existing match writes, keeping provider credentials server-only.
 - Finalize new draft schedules through the atomic single-action launch RPC; materialize invitation placeholders without confirming membership, then claim those same participant IDs on acceptance to preserve fixtures.
 - Version direct match scheduling with a default-false season setting so existing agreements remain unchanged; list and round-robin bracket views share persisted match cards and the same protected editor. Use presentation-only capitalization so stored names and input values remain unchanged.

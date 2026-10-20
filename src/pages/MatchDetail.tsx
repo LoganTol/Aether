@@ -9,6 +9,8 @@ import type { Season } from "@/components/season/types";
 import { PageContainer, Surface, StatusPill, SectionHeading, EmptyState } from "@/components/ui-system";
 import PlayerMatchActions from "@/components/season/PlayerMatchActions";
 import { deriveStatus } from "@/components/season/MatchStatusBadge";
+import { Button } from "@/components/ui/button";
+import { MAX_SCORE_SETS, MAX_SET_SCORE, parseScoreEntry } from "@/lib/score-entry";
 
 interface Match {
   id: string;
@@ -289,17 +291,10 @@ function ScoreEntrySection({ match, sideLabel, myParticipantId, myInvolved, v2, 
 
   const submit = async () => {
     if (busy) return;
-    const valid = sets
-      .map((s) => ({ a: parseInt(s.a), b: parseInt(s.b) }))
-      .filter((s) => !isNaN(s.a) && !isNaN(s.b));
-    if (valid.length === 0) {
-      toast({ title: "Enter at least one set", variant: "destructive" });
-      return;
-    }
     setBusy(true);
     try {
+      const { scores: valid, winner } = parseScoreEntry(sets);
       if (v2) {
-        if (sets.some(s => (s.a === "") !== (s.b === ""))) throw new Error("Fill both sides of each set.");
         const { error } = await supabase.rpc("match_action_v2", { _match: match.id, _action: "submit_score", _scores: valid });
         if (error) throw error;
         toast({ title: "Score saved", description: "Awaiting opposing side confirmation." });
@@ -311,9 +306,6 @@ function ScoreEntrySection({ match, sideLabel, myParticipantId, myInvolved, v2, 
         match_id: match.id, set_number: i + 1, side_a_games: v.a, side_b_games: v.b,
       })));
       if (scoresErr) throw scoresErr;
-      const setsA = valid.filter((s) => s.a > s.b).length;
-      const setsB = valid.filter((s) => s.b > s.a).length;
-      const winner: "a" | "b" = setsA > setsB ? "a" : "b";
       const { error: resErr } = await supabase.from("match_results").upsert({
         match_id: match.id, winner_side: winner, entered_by: myParticipantId ?? null, disputed: false,
       }, { onConflict: "match_id" });
@@ -414,43 +406,67 @@ function ScoreEntrySection({ match, sideLabel, myParticipantId, myInvolved, v2, 
 
   return (
     <Surface level={1}>
-      <SectionHeading title="Box score" hint="Games won in each set" />
-      <div className="mb-2 grid grid-cols-[1fr_auto_1fr] gap-3 text-meta">
-        <span className="truncate">{sideLabel(match.side_a_id)}</span>
-        <span />
-        <span className="truncate text-right">{sideLabel(match.side_b_id)}</span>
-      </div>
-      <div className="mb-5 space-y-2">
-        {sets.map((s, i) => (
-          <div key={i} className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
-            <input
-              type="number" min={0} max={20} inputMode="numeric"
-              aria-label={`${sideLabel(match.side_a_id)} games in set ${i + 1}`}
-              value={s.a}
-              onChange={(e) => setSets((arr) => arr.map((r, idx) => idx === i ? { ...r, a: e.target.value } : r))}
-              className="field nums text-center"
-            />
-            <span className="text-meta w-14 text-center">Set {i + 1}</span>
-            <input
-              type="number" min={0} max={20} inputMode="numeric"
-              aria-label={`${sideLabel(match.side_b_id)} games in set ${i + 1}`}
-              value={s.b}
-              onChange={(e) => setSets((arr) => arr.map((r, idx) => idx === i ? { ...r, b: e.target.value } : r))}
-              className="field nums text-center"
-            />
-          </div>
-        ))}
+      <SectionHeading title="Box score" />
+      <div className="scrollbar-dark mb-5 overflow-x-auto">
+        <table className="w-full table-fixed border-collapse text-sm" style={undefined}>
+          <colgroup>
+            <col className="w-36 sm:w-48" />
+            {sets.map((_, i) => <col key={i} className="w-20" />)}
+            <col className="w-14" />
+          </colgroup>
+          <thead>
+            <tr className="bg-muted/50">
+              <th scope="col" className="text-eyebrow px-3 py-3 text-left">Player</th>
+              {sets.map((_, i) => <th key={i} scope="col" className="text-eyebrow px-1 py-3 text-center">Set {i + 1}</th>)}
+              <th scope="col" className="text-eyebrow px-1 py-3 text-center">Sets</th>
+            </tr>
+          </thead>
+          <tbody>
+            {(["a", "b"] as const).map(side => (
+              <tr key={side} className="border-t border-border">
+                <th scope="row" className="break-words px-3 py-4 text-left font-semibold text-foreground">
+                  {sideLabel(side === "a" ? match.side_a_id : match.side_b_id)}
+                </th>
+                {sets.map((s, i) => (
+                  <td key={i} className="px-1 py-3">
+                    <input
+                      type="number" min={0} max={MAX_SET_SCORE} step={1} inputMode="numeric"
+                      aria-label={`${sideLabel(side === "a" ? match.side_a_id : match.side_b_id)} games in set ${i + 1}`}
+                      value={s[side]}
+                      onChange={(e) => setSets(arr => arr.map((r, idx) => idx === i ? { ...r, [side]: e.target.value } : r))}
+                      className="field nums h-11 w-full min-w-0 px-1 text-center text-base [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                    />
+                  </td>
+                ))}
+                <td className="nums px-1 py-3 text-center font-bold text-primary">
+                  {sets.filter(s => s.a !== "" && s.b !== "" && Number(s[side]) > Number(s[side === "a" ? "b" : "a"])).length}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+          <tfoot>
+            <tr className="border-t border-border">
+              <td />
+              {sets.map((_, i) => <td key={i} className="py-1 text-center">
+                <Button variant="ghost" size="icon" disabled={sets.length === 1 || busy} aria-label={`Remove Set ${i + 1}`} title={`Remove Set ${i + 1}`} onClick={() => setSets(arr => arr.filter((_, idx) => idx !== i))}>
+                  <Trash2 className="text-muted-foreground" />
+                </Button>
+              </td>)}
+              <td />
+            </tr>
+          </tfoot>
+        </table>
       </div>
       <div className="flex flex-wrap items-center gap-2">
-        <button onClick={() => setSets((s) => [...s, { a: "", b: "" }])} className="btn-secondary">
-          Add set
-        </button>
-        <button onClick={() => setOpen(false)} className="btn-ghost">
+        <Button variant="secondary" disabled={sets.length >= MAX_SCORE_SETS || busy} onClick={() => setSets(s => [...s, { a: "", b: "" }])}>
+          <Plus /> Add set
+        </Button>
+        <Button variant="ghost" disabled={busy} onClick={() => setOpen(false)}>
           Cancel
-        </button>
-        <button onClick={submit} disabled={busy} className="btn-primary ml-auto">
+        </Button>
+        <Button onClick={submit} disabled={busy} className="ml-auto">
           {busy && <Loader2 className="animate-spin" size={14} aria-hidden />} Save score
-        </button>
+        </Button>
       </div>
     </Surface>
   );
