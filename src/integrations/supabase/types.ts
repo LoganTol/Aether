@@ -722,6 +722,10 @@ export type Database = {
         Args: { _match: string; _participant: string }
         Returns: string
       }
+      prepare_named_season_invites_v2: {
+        Args: { _players: Json; _season: string }
+        Returns: undefined
+      }
       save_doubles_teams_v2: {
         Args: { _season: string; _teams: Json }
         Returns: undefined
