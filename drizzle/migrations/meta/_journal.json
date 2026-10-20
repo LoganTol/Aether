@@ -50,6 +50,13 @@
       "when": 1792501246915,
       "tag": "0006_named_overview_invitations",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1792502360993,
+      "tag": "0007_single_action_season_schedule",
+      "breakpoints": true
     }
   ]
 }
