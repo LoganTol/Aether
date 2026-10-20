@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { parseInviteEmails, rosterReady, validateBasics } from "@/components/season-wizard/lib/creationV2";
+import { parseInviteEmails, rosterReady, validateBasics, validateInvitePlayers } from "@/components/season-wizard/lib/creationV2";
 import { generateRoundRobin } from "@/lib/fixtures";
 describe("Season Creation V2 rules",()=>{
+ it("preserves names and emails for each invited player",()=>expect(validateInvitePlayers([{name:" Alex Smith ",email:"ALEX@example.com"},{name:"Sam",email:"sam@example.com"}])).toEqual([{name:"Alex Smith",email:"alex@example.com"},{name:"Sam",email:"sam@example.com"}]));
+ it("requires a name for an entered invitation",()=>expect(()=>validateInvitePlayers([{name:"",email:"alex@example.com"}])).toThrow());
+ it("requires an email for an entered player",()=>expect(()=>validateInvitePlayers([{name:"Alex",email:""}])).toThrow());
+ it("allows blank invitation rows without registering players",()=>expect(validateInvitePlayers([{name:"",email:""}])).toEqual([]));
+ it("prevents duplicate player emails",()=>expect(()=>validateInvitePlayers([{name:"Alex",email:"alex@example.com"},{name:"Sam",email:"ALEX@example.com"}])).toThrow());
  it("allows creation with no invitations",()=>expect(parseInviteEmails("")).toEqual([]));
  it("accepts multiple addresses and removes duplicate invitations",()=>expect(parseInviteEmails("alex@example.com, SAM@example.com\nalex@example.com")).toEqual(["alex@example.com","sam@example.com"]));
  it("rejects malformed email invitations",()=>expect(()=>parseInviteEmails("not-an-email")).toThrow());

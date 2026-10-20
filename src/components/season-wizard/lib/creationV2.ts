@@ -1,4 +1,19 @@
 import { z } from "zod";
+export interface InvitePlayer { name: string; email: string }
+export function validateInvitePlayers(players: InvitePlayer[]): InvitePlayer[] {
+ const filled=players.filter(p=>p.name.trim()||p.email.trim());
+ const emails=parseInviteEmails(filled.map(p=>p.email).join(","));
+ for(const p of filled){
+  if(!p.name.trim()||p.name.trim().length>60)throw new Error("Enter a player name (up to 60 characters).");
+  if(!z.string().email().max(254).safeParse(p.email.trim()).success)throw new Error("Enter one valid email for each player.");
+ }
+ if(emails.length!==filled.length)throw new Error("Use a different email for each player.");
+ return filled.map(p=>({name:p.name.trim(),email:p.email.trim().toLowerCase()}));
+}
+export function formatSeasonDate(value: string): string {
+ const [year,month,day]=value.split("-");
+ return `${month}/${day}/${year}`;
+}
 export function parseInviteEmails(value: string): string[] {
  const emails=[...new Set(value.split(/[\s,;]+/).map(e=>e.trim().toLowerCase()).filter(Boolean))];
  if(emails.length>50) throw new Error("Prepare at most 50 invitations at a time.");
