@@ -1,4 +1,5 @@
 # Architecture
+- Keep pre-confirmation schedule previews as read-only planning projections using the shared round-robin generator and pending invites; only the protected fixture operation creates actual matches and activates seasons.
 - Save named creation and overview invitations atomically through wrappers around existing draft/invite operations; acceptance uses the invited name even through a shared link without confirming membership early.
 - Version new season workflows through nullable scheduling settings; null means legacy captain behavior, so existing competitions are never silently migrated.
 - Use permission-checked, atomic database functions for V2 lifecycle, invitation, fixture and match mutations; keep client controls thin to prevent partial writes and bypassed agreements.
