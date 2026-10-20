@@ -1,4 +1,5 @@
 # Season Creation V2
+- [ ] Extend named invitation rows to overview and preserve full names in confirmed rosters.
 - [x] Separate creation invitation name/email rows with Add player below, saved names, and stacked review dates.
 - [x] Audit and preserve existing season behavior; legacy captain display verified.
 - [x] Three-step creation, reusable draft, secure link invitations.
