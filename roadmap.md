@@ -1,4 +1,6 @@
 # Season Creation V2
+- [ ] Single-action schedule generation/activation including invited players, preserving acceptance and older seasons.
+- [ ] Clickable schedule/bracket cards, participant date/time/location editing, saved score summaries, and live verification.
 - [x] Full planning preview opens in Schedule with brand-green round groups; button/heading capitalization verified; 10 matchups across 5 rounds, protected activation, no mobile overflow, 21 rule tests passing.
 - [x] Schedule preview includes invited players; verified six matchups with one confirmed player, with activation still protected.
 - [x] Named overview invitation rows; saved full names verified in confirmed roster after shared-link acceptance and reload.
