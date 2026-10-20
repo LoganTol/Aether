@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { Crown, Calendar, ArrowRight, Clock, Plus, Loader2, UserPlus, CalendarCheck, MapPin } from "lucide-react";
+import MatchDateTimeField from "./MatchDateTimeField";
+import PlayLocationField from "./PlayLocationField";
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
@@ -282,28 +284,8 @@ function CreateMatchDialog({
               {sides.filter((s) => s.id !== sideA).map((s) => <option key={s.id} value={s.id}>{s.label}</option>)}
             </select>
           </div>
-          <div>
-            <label className="text-eyebrow">Date & time</label>
-            <input
-              type="datetime-local"
-              value={scheduledAt}
-              onChange={(e) => setScheduledAt(e.target.value)}
-              min={new Date(Date.now() - new Date().getTimezoneOffset() * 60_000).toISOString().slice(0, 16)}
-              className="field mt-1.5"
-            />
-          </div>
-          <div>
-            <label className="text-eyebrow inline-flex items-center gap-1">
-              <MapPin size={12} /> Location
-            </label>
-            <input
-              type="text"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              placeholder="e.g. Riverside Park · Court 3"
-              className="field mt-1.5"
-            />
-          </div>
+          <MatchDateTimeField value={scheduledAt} onChange={setScheduledAt}/>
+          <PlayLocationField value={location} onChange={setLocation}/>
           <p className="text-meta">
             Skip the time to add a "to be scheduled" placeholder — players can propose times from the match page.
           </p>

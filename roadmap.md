@@ -1,4 +1,5 @@
 # Season Creation V2
+- [x] Shared calendar/time controls and authenticated Google Places venue/full-address search deployed; manual address/date/time saves verified after reload with no mobile overflow; 27 tests pass. Live Google Places search remains unverified because sandbox Maps testing is unsupported; validate on deployed site.
 - [x] Single-action launch includes invited players without confirming membership; verified active state, retry idempotency and continued invitation inspection. Default-false setting preserves started seasons.
 - [x] Clickable schedule/bracket cards, date/time/location saves and score summaries verified after reload; 10 matches/5 bracket rounds, no mobile overflow, 24 rule tests pass. Temporary test seasons removed.
 - [x] Full planning preview opens in Schedule with brand-green round groups; button/heading capitalization verified; 10 matchups across 5 rounds, protected activation, no mobile overflow, 21 rule tests passing.
