@@ -1,4 +1,29 @@
 import { z } from "zod";
+import { generateRoundRobin } from "@/lib/fixtures";
+export interface PreviewPlayer { id: string; display_name: string; invited_email: string | null; status: string; user_id: string | null }
+export function buildPreviewRoster(players: PreviewPlayer[], invites: {id:string;recipient_name:string|null;recipient_email:string|null;status:string;expires_at:string}[], now:number): PreviewPlayer[] {
+ const roster=players.filter(p=>p.status==="active"||p.status==="invited");
+ const emails=new Set(roster.map(p=>p.invited_email?.toLowerCase()).filter(Boolean));
+ for(const invite of invites){
+  const email=invite.recipient_email?.toLowerCase();
+  if(!email||emails.has(email)||invite.status!=="pending"||Date.parse(invite.expires_at)<=now)continue;
+  emails.add(email);roster.push({id:`invite:${invite.id}`,display_name:invite.recipient_name||invite.recipient_email||"Invited player",invited_email:email,status:"invited",user_id:null});
+ }
+ return roster;
+}
+export function previewSchedule(format:string,players:PreviewPlayer[],pairs:{name:string;a:string;b:string}[]) {
+ let sides=players.map(p=>({id:p.id,name:p.display_name}));
+ if(format==="doubles"){
+  const ids=pairs.flatMap(p=>[p.a,p.b]);
+  if(players.length<4||players.length%2!==0||ids.length!==players.length||new Set(ids).size!==players.length||!players.every(p=>ids.includes(p.id)))return null;
+  sides=pairs.map((p,i)=>({id:`team:${i}`,name:p.name.trim()||`Team ${i+1}`}));
+ }
+ if(sides.length<2||sides.length*(sides.length-1)/2>1000)return null;
+ return generateRoundRobin(sides.map(p=>p.id)).flatMap((round,i)=>round.flatMap(([a,b])=>{
+  if(!a||!b)return [];
+  return [{round:i+1,a,b,aName:sides.find(p=>p.id===a)?.name||"Player",bName:sides.find(p=>p.id===b)?.name||"Player"}];
+ }));
+}
 export interface InvitePlayer { name: string; email: string }
 export function validateInvitePlayers(players: InvitePlayer[]): InvitePlayer[] {
  const filled=players.filter(p=>p.name.trim()||p.email.trim());
