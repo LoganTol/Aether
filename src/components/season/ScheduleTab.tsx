@@ -2,8 +2,6 @@ import { useState } from "react";
 import { CalendarDays, GitBranch } from "lucide-react";
 import type { Match, SideLabel, Team } from "./types";
 import { Surface, SectionHeading, EmptyState } from "@/components/ui-system";
-import PlanningSchedule from "./PlanningSchedule";
-import type { PreviewFixture } from "@/components/season-wizard/lib/creationV2";
 import { Button } from "@/components/ui/button";
 import SeasonMatchCard, { type ScheduleScore } from "./SeasonMatchCard";
 import { isOwnMatch } from "@/lib/match-access";
@@ -13,8 +11,6 @@ export default function ScheduleTab({
   sideLabel,
   isCreator,
   onDelete,
-  preview,
-  onOverview,
   scores = [],
   myParticipantId,
   teams = [],
@@ -23,14 +19,11 @@ export default function ScheduleTab({
   sideLabel: SideLabel;
   isCreator?: boolean;
   onDelete?: (matchId: string) => void;
-  preview?: PreviewFixture[] | null;
-  onOverview?: () => void;
   scores?: ScheduleScore[];
   myParticipantId?: string;
   teams?: Team[];
 }) {
   const [view, setView] = useState<"schedule" | "bracket">("schedule");
-  if (matches.length === 0 && preview && onOverview) return <PlanningSchedule fixtures={preview} onOverview={onOverview} />;
   if (matches.length === 0) {
     return (
       <Surface level={1} padded={false}>
@@ -45,7 +38,7 @@ export default function ScheduleTab({
 
   return (
     <div className="space-y-7">
-      <section className="flex flex-wrap items-end justify-between gap-4 border-b border-border pb-5"><div><h2 className="text-page-title">Season Schedule</h2><p className="text-meta mt-2">{matches.length} Matches · {rounds.length} Rounds · Round Robin</p></div><div className="inline-flex gap-1 rounded-lg border border-border bg-muted p-1" role="tablist" aria-label="Schedule View">{[{id:"schedule" as const,label:"Schedule",Icon:CalendarDays},{id:"bracket" as const,label:"Bracket",Icon:GitBranch}].map(({id,label,Icon})=><Button key={id} role="tab" aria-selected={view===id} variant={view===id?"default":"ghost"} size="sm" onClick={()=>setView(id)}><Icon/>{label}</Button>)}</div></section>
+      <section className="flex flex-wrap items-end justify-between gap-4 border-b border-border pb-5"><div><h2 className="text-page-title">Season Schedule</h2><p className="text-meta mt-2">{matches.length} {matches.length===1?"Match":"Matches"} · {rounds.length} {rounds.length===1?"Round":"Rounds"} · Round Robin</p></div><div className="inline-flex gap-1 rounded-lg border border-border bg-muted p-1" role="tablist" aria-label="Schedule View">{[{id:"schedule" as const,label:"Schedule",Icon:CalendarDays},{id:"bracket" as const,label:"Bracket",Icon:GitBranch}].map(({id,label,Icon})=><Button key={id} role="tab" aria-selected={view===id} variant={view===id?"default":"ghost"} size="sm" onClick={()=>setView(id)}><Icon/>{label}</Button>)}</div></section>
       <div className={view === "bracket" ? "flex gap-5 overflow-x-auto pb-4 scrollbar-dark" : "space-y-8"} aria-label={view === "bracket" ? "Round Robin Bracket" : "Full Schedule"}>
       {rounds.map((round) => {
         const ms = matches.filter((m) => m.round === round);
