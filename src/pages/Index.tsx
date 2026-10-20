@@ -1,9 +1,9 @@
 import { Link } from "react-router-dom";
-import { Repeat, CalendarCheck, Trophy, ShieldCheck } from "lucide-react";
+import { Users, CalendarCheck, Trophy, GitBranch } from "lucide-react";
 import AetherLogo from "@/components/AetherLogo";
 import { PageContainer, Surface } from "@/components/ui-system";
 import {
-  CaptainPreview,
+  SeasonPreview,
   ScheduledPreview,
   StandingsPreview,
   MatchCardPreview,
@@ -13,24 +13,24 @@ import Seo from "@/components/Seo";
 
 const pillars = [
   {
-    icon: Repeat,
-    title: "Rotating captains",
-    desc: "Scheduling duty passes on a fixed window. Nobody becomes the permanent organizer.",
+    icon: Users,
+    title: "Your players, your season",
+    desc: "Create a season in three simple steps. Invite players now or later, then finalize your roster to start.",
   },
   {
     icon: CalendarCheck,
-    title: "Deadlines that hold",
-    desc: "Every fixture carries a due date, so a season never quietly stalls in a group chat.",
+    title: "Players set the details",
+    desc: "Players choose the date, time and place for their matches. Saved details stay on the season schedule.",
   },
   {
     icon: Trophy,
-    title: "Standings on their own",
-    desc: "Enter a box score once. Wins, sets and games update for everyone instantly.",
+    title: "Scores that fit your game",
+    desc: "Record short sets, full sets or deciding tiebreaks in a clean box score. Keep results and standings together.",
   },
   {
-    icon: ShieldCheck,
-    title: "A commissioner when needed",
-    desc: "The season creator can reschedule, correct a score, or nudge the rotation forward.",
+    icon: GitBranch,
+    title: "The whole season in view",
+    desc: "See every round-robin matchup in Schedule or Bracket view, with match details and saved scores in one place.",
   },
 ];
 
@@ -48,7 +48,7 @@ const audiences = [
 const Index = () => {
   return (
     <>
-    <Seo title="Aether Tennis — Tennis Seasons Made Simple" description="Aether Tennis turns a group of players into a real round-robin season with generated fixtures, rotating captains, and automated standings." path="/" />
+    <Seo title="Aether Tennis — Tennis Seasons Made Simple" description="Create your tennis season, invite players and start a full round-robin schedule. Players set match dates, times and locations, record box scores and follow standings." path="/" />
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-50 w-full border-b border-border bg-background/85 backdrop-blur-md transition-colors duration-300 hover:border-primary/30 hover:bg-primary/25">
         <PageContainer width="wide" className="flex h-[4.5rem] items-center justify-between gap-4">
@@ -81,8 +81,8 @@ const Index = () => {
                   Your Season. Your Players. <span className="text-primary">Your Way.</span>
                 </h1>
                 <p className="text-body mt-6 max-w-xl text-base">
-                  Aether Tennis turns a group of players into a real round-robin season: generated fixtures, rotating
-                  scheduling captains, hard deadlines and standings that keep themselves current.
+                  Bring your players together for a singles or doubles season. Start a full round-robin schedule,
+                  let players arrange their matches, and keep every score and standing in one place.
                 </p>
                 <div className="mt-8 flex flex-wrap items-center gap-3">
                   <Link
@@ -101,7 +101,7 @@ const Index = () => {
               </div>
 
               <div className="animate-fade-up-delay-1 space-y-4">
-                <CaptainPreview />
+                <SeasonPreview />
                 <ScheduledPreview />
               </div>
             </div>
@@ -112,8 +112,8 @@ const Index = () => {
         <section id="how" className="border-b border-border py-16 sm:py-24">
           <PageContainer width="wide">
             <div className="max-w-2xl">
-              <p className="text-eyebrow">The accountability engine</p>
-              <h2 className="text-section mt-4">Every screen answers who owes what, by when, and what happens next.</h2>
+              <p className="text-eyebrow">From your first invite to your final set</p>
+              <h2 className="text-section mt-4">Create it. Schedule it. Play it.</h2>
             </div>
             <div className="mt-10 grid gap-px overflow-hidden rounded-xl border border-border bg-border sm:grid-cols-2">
               {pillars.map((p) => (
@@ -139,14 +139,15 @@ const Index = () => {
               </div>
               <div className="order-1 lg:order-2">
                 <p className="text-eyebrow">Scores and standings</p>
-                <h2 className="text-section mt-4">One box score, and the table takes care of itself.</h2>
+                <h2 className="text-section mt-4">Every set has a place. Every result stays with your season.</h2>
                 <p className="text-body mt-5 max-w-lg text-base">
-                  Any member of the season can enter a result. Sets, games and win records propagate to the standings
-                  immediately — and the creator can correct a score if something was entered wrong.
+                  Match players or the organizer can save a result in a player-by-set box score. Short sets,
+                  pro sets and deciding tiebreaks all fit, with opposing-side confirmation when enabled.
                 </p>
                 <ul className="mt-7 space-y-3 border-t border-border pt-6">
                   {[
-                    "Set-by-set entry built for a phone at courtside",
+                    "Player rows, set columns and clear set totals",
+                    "Flexible scoring for the way your group plays",
                     "Match history and scorecards kept for the whole season",
                     "Location and time stay attached to every fixture",
                   ].map((line) => (
@@ -184,11 +185,11 @@ const Index = () => {
           <PageContainer width="wide">
             <Surface level={1} padded="lg" className="text-center">
               <h2 className="text-section mx-auto max-w-2xl">
-                Your next season starts in <span className="text-primary">under a minute</span>.
+                Your next season starts with <span className="text-primary">your players</span>.
               </h2>
               <p className="text-body mx-auto mt-4 max-w-xl">
-                Name it, pick singles or doubles, invite your players. Aether builds the schedule and rotates the
-                captain so the season finishes.
+                Name your season, choose singles or doubles, and invite your players now or later.
+                Finalize your roster to start the full schedule—even before everyone accepts their invite.
               </p>
               <Link
                 to="/auth"
