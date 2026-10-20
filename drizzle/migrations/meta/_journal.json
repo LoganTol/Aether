@@ -64,6 +64,13 @@
       "when": 1792502577977,
       "tag": "0008_deduplicate_organizer_launch_invites",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1792502598393,
+      "tag": "0009_honor_launched_invitation_revocation",
+      "breakpoints": true
     }
   ]
 }
