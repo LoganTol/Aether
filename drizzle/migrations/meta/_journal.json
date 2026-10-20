@@ -43,6 +43,13 @@
       "when": 1792501033417,
       "tag": "0005_named_creation_invitations",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1792501246915,
+      "tag": "0006_named_overview_invitations",
+      "breakpoints": true
     }
   ]
 }
