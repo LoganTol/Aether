@@ -6,15 +6,17 @@ import { toast } from "@/hooks/use-toast";
 import type { Season, Participant, Team } from "./types";
 import { rosterReady, buildPreviewRoster, previewSchedule } from "@/components/season-wizard/lib/creationV2";
 import SeasonInvitations from "./SeasonInvitations";
+import { useAuth } from "@/contexts/AuthContext";
 type Fixture={round:number;a:string;b:string;aName?:string;bName?:string};
 export default function DraftSeasonHome({season,participants,teams,isCreator,onChange}:{season:Season;participants:Participant[];teams:Team[];isCreator:boolean;onChange:()=>void}){
+ const {user}=useAuth();
  const [preview,setPreview]=useState<Fixture[]|null>(null);const [busy,setBusy]=useState(false);
  const [pairs,setPairs]=useState(()=>teams.map(t=>({name:t.name,a:t.player_a_id,b:t.player_b_id})));
  const [invites,setInvites]=useState<{id:string;recipient_name:string|null;recipient_email:string|null;status:string;expires_at:string}[]>([]);
  const loadInvites=useCallback(async()=>{if(!isCreator)return;const {data,error}=await supabase.from("season_invites").select("id,recipient_name,recipient_email,status,expires_at").eq("season_id",season.id);if(error)toast({title:"Could not load roster invitations",description:error.message,variant:"destructive"});else setInvites(data||[]);},[season.id,isCreator]);
  useEffect(()=>{void loadInvites();},[loadInvites]);
  const active=participants.filter(p=>p.status==="active"&&p.user_id);const ready=rosterReady(season.format,participants,teams);
- const planningRoster=buildPreviewRoster(participants,invites,Date.now());
+ const planningRoster=buildPreviewRoster(participants.map(p=>({...p,invited_email:p.invited_email||(p.user_id===user?.id?user?.email||null:null)})),invites,Date.now());
  const plannedFixtures=previewSchedule(season.format,planningRoster,pairs);
  const pendingCount=planningRoster.filter(p=>p.status==="invited").length;
  useEffect(()=>{setPreview(null);},[participants,invites,pairs]);
