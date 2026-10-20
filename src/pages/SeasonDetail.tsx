@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Calendar, Users, Copy, Settings, AlertCircle, LayoutDashboard, CalendarDays, Trophy, History, UserCircle, UserPlus, Loader2, Trash2, Plus } from "lucide-react";
+import { ArrowLeft, Calendar, Users, Copy, Settings, AlertCircle, LayoutDashboard, CalendarDays, Trophy, History, UserCircle, UserPlus, Loader2, Trash2, Plus, CircleCheck } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import AppHeader from "@/components/AppHeader";
 import { supabase } from "@/integrations/supabase/client";
@@ -257,7 +257,10 @@ export default function SeasonDetail() {
             {participants.map((p) => (
               <div key={p.id} className="flex items-center justify-between gap-2 px-4 py-3">
                 <div className="min-w-0">
-                  <p className="text-ui-title truncate">{p.display_name}</p>
+                  <p className="flex items-center gap-2 text-ui-title">
+                    {p.status === "active" && <CircleCheck className="shrink-0 text-primary" size={15} aria-hidden />}
+                    <span className="truncate">{p.display_name}</span>
+                  </p>
                   <p className="text-meta mt-0.5 truncate">
                     {p.invited_email || "no email"} ·{" "}
                     <span className={p.status === "active" ? "text-primary" : ""}>{p.status}</span>
