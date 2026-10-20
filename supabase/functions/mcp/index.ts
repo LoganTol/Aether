@@ -216,7 +216,7 @@ var record_score_default = defineTool6({
   description: "Record the set-by-set box score for a match and mark it completed.",
   inputSchema: {
     match_id: z5.string().uuid().describe("The match id."),
-    sets: z5.array(z5.object({ side_a_games: z5.number().int().min(0).max(20), side_b_games: z5.number().int().min(0).max(20) })).describe("Sets in order, each with games won by side A and side B. Provide 1 to 5 sets.")
+    sets: z5.array(z5.object({ side_a_games: z5.number().int().min(0).max(99), side_b_games: z5.number().int().min(0).max(99) })).describe("Sets in order, each with games won by side A and side B. Provide 1 to 5 sets.")
   },
   annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: false, openWorldHint: false },
   handler: async ({ match_id, sets }, ctx) => {

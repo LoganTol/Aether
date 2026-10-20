@@ -9,7 +9,7 @@ export default defineTool({
   inputSchema: {
     match_id: z.string().uuid().describe("The match id."),
     sets: z
-      .array(z.object({ side_a_games: z.number().int().min(0).max(20), side_b_games: z.number().int().min(0).max(20) }))
+      .array(z.object({ side_a_games: z.number().int().min(0).max(99), side_b_games: z.number().int().min(0).max(99) }))
       .describe("Sets in order, each with games won by side A and side B. Provide 1 to 5 sets."),
   },
   annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: false, openWorldHint: false },

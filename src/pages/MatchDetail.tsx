@@ -408,7 +408,7 @@ function ScoreEntrySection({ match, sideLabel, myParticipantId, myInvolved, v2, 
     <Surface level={1}>
       <SectionHeading title="Box score" />
       <div className="scrollbar-dark mb-5 overflow-x-auto">
-        <table className="w-full table-fixed border-collapse text-sm" style={undefined}>
+        <table className="w-full table-fixed border-collapse text-sm">
           <colgroup>
             <col className="w-36 sm:w-48" />
             {sets.map((_, i) => <col key={i} className="w-20" />)}
