@@ -701,6 +701,7 @@ export type Database = {
         Args: { _decline: boolean; _token: string }
         Returns: string
       }
+      delete_season_v2: { Args: { _season: string }; Returns: undefined }
       finalize_season_schedule_v2: {
         Args: { _season: string; _teams?: Json }
         Returns: Json
