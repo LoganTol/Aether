@@ -15,6 +15,7 @@ import { PageContainer, Surface, StatusPill, SectionHeading, EmptyState } from "
 
 import DraftSeasonHome from "@/components/season/DraftSeasonHome";
 import SeasonSettings from "@/components/season/SeasonSettings";
+import DeleteSeason from "@/components/season/DeleteSeason";
 import SeasonInvitations from "@/components/season/SeasonInvitations";
 import type { ScheduleScore } from "@/components/season/SeasonMatchCard";
 
@@ -305,6 +306,7 @@ export default function SeasonDetail() {
         )}
 
         {tab === "settings" && isCreator && <SeasonSettings seasonId={season.id} locked={matches.length > 0} onChange={refresh}/>}
+        {tab === "settings" && isCreator && <DeleteSeason seasonId={season.id} seasonName={season.name}/>}
         {tab === "admin" && isCreator && (
           <div className="space-y-4">
             {rotation.length === 0 && <p className="text-body">No captain rotation assigned. Match disputes can be reviewed from their match pages.</p>}
