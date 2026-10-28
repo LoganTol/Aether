@@ -8,7 +8,7 @@ export interface ScheduleScore { match_id: string; set_number: number; side_a_ga
 export default function SeasonMatchCard({ match, sideLabel, scores, own, onDelete }: { match: Match; sideLabel: SideLabel; scores: ScheduleScore[]; own: boolean; onDelete?: (id: string) => void }) {
   const sets = scores.filter(score => score.match_id === match.id).sort((a, b) => a.set_number - b.set_number);
   const winner = sets.length ? (sets.filter(set => set.side_a_games > set.side_b_games).length > sets.filter(set => set.side_b_games > set.side_a_games).length ? "a" : "b") : null;
-  return <article className={`relative rounded-lg border bg-card transition-colors hover:border-primary/50 ${own ? "border-primary/40" : "border-border"}`}>
+  return <article className={`relative rounded-lg border bg-card transition-colors hover:border-primary/60 hover:bg-primary/5 ${own ? "border-primary/40" : "border-border"}`}>
     <Link to={`/app/matches/${match.id}`} aria-label={`Open ${sideLabel(match.side_kind, match.side_a_id)} vs ${sideLabel(match.side_kind, match.side_b_id)}`} className="block p-4 focus-visible:rounded-lg">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2 pr-6"><span className={`text-xs font-medium ${own ? "text-primary" : "text-muted-foreground"}`}>{own ? "Your Match" : `Round ${match.round}`}</span><MatchStatusBadge status={match.status} deadline_at={match.deadline_at}/></div>
       <div className="space-y-3">
