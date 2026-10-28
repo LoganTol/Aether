@@ -164,7 +164,7 @@ export default function MatchDetail() {
                 </div>
                 <h1 className="text-page-title mt-3">
                   {sideLabel(match.side_a_id)}{" "}
-                  <span className="text-[hsl(var(--text-muted))]">vs</span>{" "}
+                  <span className="text-primary">vs</span>{" "}
                   {sideLabel(match.side_b_id)}
                 </h1>
               </div>
