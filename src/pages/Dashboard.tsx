@@ -25,6 +25,16 @@ export default function Dashboard() {
   const { user } = useAuth();
   const [seasons, setSeasons] = useState<SeasonRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  const deleteSeason = async (s: SeasonRow) => {
+    setDeletingId(s.id);
+    const { error } = await supabase.rpc("delete_season_v2", { _season: s.id });
+    setDeletingId(null);
+    if (error) return toast({ title: error.message, variant: "destructive" });
+    toast({ title: "Season deleted" });
+    setSeasons((prev) => prev.filter((x) => x.id !== s.id));
+  };
 
   useEffect(() => {
     (async () => {
