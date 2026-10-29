@@ -90,7 +90,37 @@ export default function Dashboard() {
                     <div className="flex items-start justify-between mb-3">
                       <StatusPill tone={s.status === "active" ? "active" : "neutral"}>{s.status}</StatusPill>
                       {s.creator_id === user?.id && (
-                        <span className="text-meta">You host</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-meta">You host</span>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <button
+                                type="button"
+                                aria-label={`Delete ${s.name}`}
+                                className="text-muted-foreground hover:text-destructive transition-colors"
+                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                              >
+                                <Trash2 size={14} aria-hidden />
+                              </button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Delete "{s.name}"?</AlertDialogTitle>
+                                <AlertDialogDescription>All players, matches and scores in this season will be permanently deleted.</AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); deleteSeason(s); }}
+                                  disabled={deletingId === s.id}
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                >
+                                  Delete Season
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
                       )}
                     </div>
                     <h3 className="text-ui-title text-lg mb-2 group-hover:text-primary transition-colors">{s.name}</h3>
